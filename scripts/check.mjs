@@ -68,18 +68,49 @@ function fakeDocument() {
 
 const files = await listFiles('src');
 const sourceFiles = files.filter(file => file.endsWith('.js'));
-for (const path of [...sourceFiles, ...await listFiles('scripts'), 'dist/margonem-toolkit.user.js']) {
+for (const path of [...sourceFiles, ...await listFiles('scripts'), 'dist/installer.user.js', 'dist/margonem-toolkit.js']) {
     if (/\.(?:mjs|js)$/.test(path)) execFileSync(process.execPath, ['--check', path]);
 }
-const bundle = (await readFile('dist/margonem-toolkit.user.js', 'utf8')).replace(/\r\n/g, '\n');
-assert.ok(bundle.startsWith('// ==UserScript==\n// @name         Margonem Toolkit'));
-assert.match(bundle, /@grant\s+unsafeWindow/);
-assert.doesNotMatch(bundle, /^\s*(?:import|export)\s|\brequire\s*\(|\bimport\s*\(/m);
-assert.doesNotMatch(bundle, /@require/);
-for (const field of ['updateURL', 'downloadURL']) {
-    const value = bundle.match(new RegExp(`^// @${field}\\s+(\\S+)$`, 'm'))?.[1];
-    assert.equal(value, 'https://raw.githubusercontent.com/xquesh/quesh-addons/master/dist/margonem-toolkit.user.js');
+const bundle = (await readFile('dist/margonem-toolkit.js', 'utf8')).replace(/\r\n/g, '\n');
+const installer = (await readFile('dist/installer.user.js', 'utf8')).replace(/\r\n/g, '\n');
+assert.ok(bundle.startsWith('(() => {'));
+assert.doesNotMatch(bundle, /==UserScript==|@(?:match|grant|updateURL|downloadURL)/);
+assert.ok(installer.startsWith('// ==UserScript==\n// @name         Margonem Toolkit'));
+assert.match(installer, /@grant\s+none/);
+assert.ok(Buffer.byteLength(installer) < 2048, 'Installer powinien pozostać małym loaderem');
+assert.ok(installer.trimEnd().split('\n').length <= 50);
+assert.doesNotMatch(installer, /createAddonManager|localStorage|__MARGONEM_TOOLKIT__|createPanel|createLegendaryNotificator|createNotificationPosition/);
+assert.deepEqual((await listFiles('dist')).sort(), ['dist/installer.user.js', 'dist/margonem-toolkit.js']);
+for (const domain of ['pl', 'com']) {
+    assert.ok(installer.includes(`// @match        https://*.margonem.${domain}/*`));
+    assert.ok(installer.includes(`// @exclude      https://forum.margonem.${domain}/*`));
 }
+assert.doesNotMatch(bundle, /^\s*(?:import|export)\s|\brequire\s*\(|\bimport\s*\(/m);
+assert.doesNotMatch(installer, /@require/);
+for (const field of ['updateURL', 'downloadURL']) {
+    const value = installer.match(new RegExp(`^// @${field}\\s+(\\S+)$`, 'm'))?.[1];
+    assert.equal(value, 'https://xquesh.github.io/quesh-addons/dist/installer.user.js');
+}
+for (const hasHead of [true, false]) {
+    const appended = [];
+    const errors = [];
+    const parent = { appendChild: element => appended.push(element) };
+    vm.runInNewContext(installer, {
+        document: {
+            head: hasHead ? parent : null,
+            documentElement: parent,
+            createElement(tag) { assert.equal(tag, 'script'); return {}; }
+        },
+        console: { error: message => errors.push(message) }
+    });
+    assert.equal(appended.length, 1);
+    assert.equal(appended[0].src, 'https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js');
+    assert.equal(appended[0].async, false);
+    assert.equal(errors.length, 0);
+    appended[0].onerror();
+    assert.deepEqual(errors, ['[Margonem Toolkit] Nie udało się pobrać runtime.']);
+}
+console.log('OK: mały loader, runtime bez nagłówka, wstrzyknięcie do head/root, błąd pobierania');
 const source = (await Promise.all(sourceFiles.map(path => readFile(path, 'utf8')))).join('\n');
 assert.equal([...source.matchAll(/\.parseJSON\s*=(?!=)/g)].length, 2);
 assert.match(await readFile('src/core/game.js', 'utf8'), /communication\.parseJSON = wrapper/);
@@ -323,4 +354,4 @@ assert.equal(window.frames.size, 0);
 ctx.scheduler.destroy();
 eventBus.destroy();
 styleManager.destroy();
-console.log(`OK: scope anuluje listenery, subskrypcje i RAF. Dist: ${(await stat('dist/margonem-toolkit.user.js')).size} B`);
+console.log(`OK: scope anuluje listenery, subskrypcje i RAF. Runtime: ${(await stat('dist/margonem-toolkit.js')).size} B`);

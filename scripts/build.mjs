@@ -1,10 +1,10 @@
 import { build, context } from 'esbuild';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, rm } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 
 const options = {
     entryPoints: ['src/main.js'],
-    outfile: 'dist/margonem-toolkit.user.js',
+    outfile: 'dist/margonem-toolkit.js',
     bundle: true,
     format: 'iife',
     platform: 'browser',
@@ -12,15 +12,20 @@ const options = {
     minify: false,
     charset: 'utf8',
     legalComments: 'inline',
-    banner: { js: (await readFile('src/userscript-header.txt', 'utf8')).replace(/\r\n/g, '\n').trim() },
     logLevel: 'info',
     plugins: [{
-        name: 'syntax-check',
+        name: 'installer-and-syntax-check',
         setup(builder) {
-            builder.onEnd(result => {
+            builder.onEnd(async result => {
                 if (!result.errors.length) {
-                    execFileSync(process.execPath, ['--check', options.outfile], { stdio: 'inherit' });
-                    console.log('Userscript syntax: OK');
+                    const header = await readFile('src/userscript-header.txt', 'utf8');
+                    const loader = await readFile('src/installer.js', 'utf8');
+                    await writeFile('dist/installer.user.js', `${header.trim()}\n\n${loader.trim()}\n`.replace(/\r\n/g, '\n'));
+                    await rm('dist/margonem-toolkit.user.js', { force: true });
+                    for (const file of [options.outfile, 'dist/installer.user.js']) {
+                        execFileSync(process.execPath, ['--check', file], { stdio: 'inherit' });
+                    }
+                    console.log('Runtime and installer syntax: OK');
                 }
             });
         }

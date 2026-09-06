@@ -73,11 +73,15 @@
     };
     window.fixtureOriginalParser = Engine.communication.parseJSON;
 </script>
-<script src="../dist/margonem-toolkit.user.js"></script>
+<script src="../dist/installer.user.js"></script>
 <script>
     async function run() {
         const assert = (condition, message) => { if (!condition) throw new Error(message); };
         const wait = delay => new Promise(resolve => setTimeout(resolve, delay));
+        const startupDeadline = Date.now() + 5000;
+        while (!window.__MARGONEM_TOOLKIT__?.addons && Date.now() < startupDeadline) await wait(20);
+        assert(window.__MARGONEM_TOOLKIT__?.addons, 'Loader uruchomił runtime w kontekście strony');
+        assert(typeof unsafeWindow === 'undefined', 'Runtime działa bez API Tampermonkey');
         const manager = __MARGONEM_TOOLKIT__.addons;
         const parser = Engine.communication.parseJSON;
         const gameLayer = document.querySelector('.game-layer');
@@ -156,7 +160,7 @@
         assert(Engine.communication.parseJSON === parser, 'Brak dodatkowych hooków');
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = '../dist/margonem-toolkit.user.js?restart';
+            script.src = '../dist/margonem-toolkit.js?restart';
             script.onload = resolve;
             script.onerror = reject;
             document.body.append(script);
@@ -167,7 +171,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: synthetic browser DOM, settings, 10 presets, loc l/k, mixed rarity, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: installer → runtime, page context, synthetic browser DOM, settings, 10 presets, loc l/k, mixed rarity, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {

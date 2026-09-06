@@ -1,7 +1,6 @@
 [CmdletBinding()]
 param(
     [string]$RepositoryUrl,
-    [string]$Branch,
     [switch]$PrintUrl
 )
 
@@ -11,8 +10,8 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 try {
     if (-not $RepositoryUrl) {
         $header = Get-Content -LiteralPath (Join-Path $projectRoot 'src\userscript-header.txt') -Raw -Encoding UTF8
-        $download = [regex]::Match($header, '(?m)^//\s*@downloadURL\s+(https://raw\.githubusercontent\.com/\S+)\s*$')
-        if ($download.Success -and -not $Branch) {
+        $download = [regex]::Match($header, '(?m)^//\s*@downloadURL\s+(https://[A-Za-z0-9-]+\.github\.io/\S+)\s*$')
+        if ($download.Success) {
             $installUrl = $download.Groups[1].Value.Trim()
         } elseif ((Test-Path -LiteralPath (Join-Path $projectRoot '.git')) -and (Get-Command git -ErrorAction SilentlyContinue)) {
             $RepositoryUrl = git -C $projectRoot config --get remote.origin.url
@@ -31,21 +30,9 @@ try {
         $match = [regex]::Match($repository, '^https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$')
         if (-not $match.Success) { throw 'Podaj adres repozytorium na github.com, bez sciezki do pliku.' }
 
-        if (-not $Branch -and (Test-Path -LiteralPath (Join-Path $projectRoot '.git')) -and (Get-Command git -ErrorAction SilentlyContinue)) {
-            $Branch = git -C $projectRoot branch --show-current 2>$null
-            if ($LASTEXITCODE -ne 0) { $Branch = $null }
-        }
-        if (-not $Branch) {
-            if ($PrintUrl) { throw 'Brak nazwy galezi. Podaj -Branch.' }
-            $Branch = Read-Host 'Nazwa galezi opublikowanej na GitHubie'
-        }
-        if ($Branch -match '[\s?#\\]' -or $Branch -match '(^|/)\.{1,2}(/|$)' -or $Branch.StartsWith('-')) {
-            throw 'Niepoprawna nazwa galezi.'
-        }
         $owner = $match.Groups[1].Value
         $name = $match.Groups[2].Value
-        $encodedBranch = ($Branch.Split('/') | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/'
-        $installUrl = "https://raw.githubusercontent.com/$owner/$name/$encodedBranch/dist/margonem-toolkit.user.js"
+        $installUrl = "https://$owner.github.io/$name/dist/installer.user.js"
     }
 
     if ($PrintUrl) {
@@ -55,7 +42,7 @@ try {
 
     Write-Host 'Margonem Toolkit - instalacja w Tampermonkey'
     Write-Host ''
-    Write-Host '1. Otwieram plik userscripta w domyslnej przegladarce.'
+    Write-Host '1. Otwieram maly loader z GitHub Pages w domyslnej przegladarce.'
     Write-Host '2. W Tampermonkey kliknij Zainstaluj (lub Aktualizuj).'
     Write-Host '3. Wylacz stary Legendary Notificator i odswiez Margonem.'
     Write-Host ''

@@ -1,6 +1,6 @@
 # quesh-addons
 
-Jeden userscript Tampermonkey z dwoma niezależnymi dodatkami:
+Mały loader Tampermonkey pobiera runtime Toolkita z dwoma niezależnymi dodatkami:
 
 - **Legendary Notificator** — neonowe powiadomienie po legendarnym łupie,
   przeniesione z istniejącego Legendary Notificator 6.2.1.
@@ -15,36 +15,53 @@ Konfigurację można otworzyć także dla wyłączonego dodatku; nie uruchamia t
 
 ## Instalacja i build
 
-Potrzebny jest Node.js (zalecane 22 lub nowsze) i npm.
+| Plik | Rola |
+| --- | --- |
+| `dist/installer.user.js` | Mały loader instalowany w Tampermonkey: nagłówek i wstawienie `<script src="…">`. Bez addonów, storage i UI. |
+| `dist/margonem-toolkit.js` | Właściwy kod aplikacji pobierany z GitHub Pages: core, addon manager, UI i wszystkie addony. Zwykły bundle IIFE bez nagłówka userscripta. |
+
+[Zainstaluj loader w Tampermonkey](https://xquesh.github.io/quesh-addons/dist/installer.user.js)
+i potwierdź **Zainstaluj** lub **Aktualizuj**, a następnie odśwież Margonem.
+Runtime jest pobierany przez loader z
+[`margonem-toolkit.js`](https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js).
+Nie instaluj runtime jako osobnego userscripta.
+
+Przy przejściu ze starego pełnego userscripta zainstaluj loader ręcznie z linku
+powyżej. Zachowuje on `@name` i `@namespace`, ma wyższe `@version` (1.0.1),
+więc Tampermonkey może zastąpić dotychczasowy wpis. Jeśli zostaną dwa wpisy,
+wyłącz stary. Wyłącz też samodzielny Legendary Notificator. Ustawienia Toolkita
+pozostają pod dotychczasowym kluczem localStorage.
+
+Do lokalnego budowania potrzebny jest Node.js (zalecane 22 lub nowsze) i npm.
 
 ```sh
 npm install
 npm run build
 npm run check
-node --check dist/margonem-toolkit.user.js
+node --check dist/installer.user.js
+node --check dist/margonem-toolkit.js
 ```
 
-Wynik: **`dist/margonem-toolkit.user.js`**. Otwórz plik w Tampermonkey albo
-otwórz jego adres Raw na GitHubie i potwierdź instalację.
-Wyłącz wcześniej zainstalowany, samodzielny Legendary Notificator, aby oba
-userscripty nie uruchamiały się przy kolejnych wejściach do gry.
+`npm run build` generuje oba pliki. Stary pełny `dist/margonem-toolkit.user.js`
+jest usuwany przez build, aby nie pozostawał alternatywny plik instalacyjny.
 
 Obsługiwane domeny: `https://*.margonem.pl/*` i `https://*.margonem.com/*`,
-z zachowaniem wykluczenia forów z legacy. Skrypt korzysta z `unsafeWindow`.
+z wykluczeniem `forum.margonem.pl` i `forum.margonem.com`. Loader ma `@grant none`;
+runtime uruchamia się w kontekście strony i korzysta z jej `window` oraz `Engine`.
 
 ### Instalator Windows
 
 Uruchom `install.cmd` z pobranego repozytorium. Instalator nie potrzebuje Node.js
-ani npm: otwiera opublikowany plik `.user.js` w domyślnej przeglądarce.
+ani npm: otwiera `installer.user.js` z GitHub Pages w domyślnej przeglądarce.
 W Tampermonkey potwierdź **Zainstaluj** lub **Aktualizuj**, wyłącz stary
 Legendary Notificator i odśwież grę. Nie instaluje rozszerzenia Tampermonkey
 ani nie modyfikuje profilu przeglądarki.
 
-Adres jest odczytywany z `@downloadURL`, a gdy go nie ma — z remote `origin`.
-Możesz też przekazać rzeczywisty adres repozytorium i gałąź:
+Adres jest odczytywany z `@downloadURL`, a gdy go nie ma — wyliczany jako adres
+GitHub Pages z remote `origin`. Możesz też przekazać adres repozytorium:
 
 ```powershell
-.\install.cmd -RepositoryUrl ADRES_REPOZYTORIUM -Branch NAZWA_GALEZI
+.\install.cmd -RepositoryUrl https://github.com/xquesh/quesh-addons
 ```
 
 Opcja `-PrintUrl` wypisuje adres bez otwierania przeglądarki. W Chrome/Edge
@@ -57,20 +74,22 @@ dla tego procesu; nie zmienia systemowej polityki wykonywania skryptów.
 npm run watch
 ```
 
-Watch przebudowuje bundle po zmianach modułów. Zmiana nagłówka userscripta wymaga
-ponownego uruchomienia watch. Aktualizacja pliku dist nie przeładowuje automatycznie
-skryptu zainstalowanego w Tampermonkey.
+Watch przebudowuje runtime po zmianach jego modułów i przy każdym buildzie zapisuje
+także installer. Po zmianie samego `src/installer.js` lub nagłówka uruchom build
+albo zrestartuj watch. Lokalny build nie zmienia plików na GitHub Pages.
 
 Jedyna zależność developerska to `esbuild`. Nie ma zależności npm w runtime,
 `@require`, dynamicznych importów ani backendu. Build tworzy czytelny, nieminifikowany
-bundle IIFE z nagłówkiem na pierwszej linii. Każdy udany build, także watch,
-uruchamia `node --check`. Szczegóły: [esbuild API](https://esbuild.github.io/api/).
+runtime IIFE bez nagłówka oraz osobny installer z nagłówkiem. Każdy udany build,
+także watch, uruchamia `node --check` dla obu plików.
+Szczegóły: [esbuild API](https://esbuild.github.io/api/).
 
 ## Struktura
 
 ```text
 src/
   main.js
+  installer.js
   userscript-header.txt
   core/
     addon-manager.js
@@ -113,7 +132,8 @@ src/
       defaults.js
       settings-ui.js
 dist/
-  margonem-toolkit.user.js
+  installer.user.js
+  margonem-toolkit.js
 legacy/
   legendary-notificator-v6.2.1.txt
 scripts/
@@ -129,6 +149,7 @@ package-lock.json
 .gitignore
 README.md
 install.cmd
+.github/workflows/pages.yml
 ```
 
 ## Mapa przeniesienia legacy
@@ -264,7 +285,7 @@ Publikuje `gamePacket`, `lootOpened`, `lootClosed`, `gameReady`, `layoutChanged`
 `legendaryLoot` po swojej dotychczasowej detekcji. Ten event sygnalizuje pakiet;
 cele efektów nadal są potwierdzane przez rzeczywisty DOM `.loot-wnd`.
 
-Singleton `unsafeWindow.__MARGONEM_TOOLKIT__` udostępnia `open()`, `addons`
+Singleton `window.__MARGONEM_TOOLKIT__` w kontekście strony udostępnia `open()`, `addons`
 i `destroy()`. Ponowne wykonanie bundle niszczy poprzednią instancję.
 Hook przywraca oryginalny parser tylko jeśli nadal jest jego właścicielem;
 nie nadpisuje późniejszego wrappera innego skryptu, a stary callback zostaje
@@ -273,7 +294,8 @@ włączenia tego addonu (m.in. `test`, `preset`, `status`, `settings`).
 
 ## Weryfikacja
 
-`npm run check` sprawdza składnię wszystkich modułów i dist, nagłówek,
+`npm run check` sprawdza składnię wszystkich modułów i obu plików dist, mały loader,
+jego adresy i obsługę błędu pobierania, brak nagłówka w runtime,
 pojedynczy hook, migracje oraz cleanup obu rzeczywistych addonów w fixture Node.
 Porównuje 98 przeniesionych funkcji po podstawieniu zależności, CSS efektów,
 defaults i presety z referencją. Wykonuje również 16 632 porównania wyników
@@ -291,7 +313,10 @@ używa osobnego profilu w katalogu tymczasowym i lokalnego portu DevTools.
 Pozostawia profil tymczasowy do ewentualnej diagnostyki. Nie korzysta z Twojego
 profilu przeglądarki i nie łączy się z Margonem.
 
-Fixture przeglądarkowy obejmuje manager, zakładki, TESTUJ przez parser fixture,
+Fixture przeglądarkowy uruchamia rzeczywisty installer. Test przechwytuje jego
+żądanie do adresu GitHub Pages i podaje lokalny runtime, bez dostępu do sieci.
+Potwierdza działanie w kontekście strony bez `unsafeWindow` oraz obejmuje manager,
+zakładki, TESTUJ przez parser fixture,
 oba oznaczenia legendy, loc l/k, mieszane rarity, wszystkie presety, lokalny
 canvas, aurę, zamykanie lootu, enable/disable i ponowne wykonanie bundle.
 
@@ -300,15 +325,29 @@ rzeczywiste pakiety zwykłego lootu/kolosa, aktualny DOM i stacking innych addon
 wizualną zgodność przy danym skalowaniu UI, politykę autoplay/custom audio,
 pauzowanie po ukryciu karty oraz interakcje drag/wheel z klientem gry.
 
-## Aktualizacje przez GitHub Raw
+## Wdrożenie i aktualizacje przez GitHub Pages
 
 Repozytorium: [xquesh/quesh-addons](https://github.com/xquesh/quesh-addons).
 
-[Zainstaluj userscript](https://raw.githubusercontent.com/xquesh/quesh-addons/master/dist/margonem-toolkit.user.js).
-Nagłówek w `src/userscript-header.txt` zawiera `updateURL` i `downloadURL`
-wskazujące ten plik na gałęzi `master`. Przy aktualizacji zwiększ `@version`,
-wykonaj build i opublikuj dist razem ze źródłami. Nie trzeba tworzyć osobnego
-userscripta dla każdego addonu.
+1. W repozytorium otwórz **Settings → Pages → Build and deployment** i ustaw
+   **Source: GitHub Actions**.
+2. Wyślij zmiany na `master` lub uruchom ręcznie workflow **Deploy GitHub Pages**
+   z zakładki **Actions**.
+3. Workflow wykonuje `npm ci`, build i check, po czym publikuje wyłącznie oba
+   pliki w katalogu `dist/` artefaktu Pages. Poczekaj na pomyślne zakończenie
+   zadania `deploy`.
+4. Otwórz [installer](https://xquesh.github.io/quesh-addons/dist/installer.user.js)
+   i sprawdź dostępność [runtime](https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js).
+
+Konfiguracja workflow: [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
+Uprawnienia i mechanizm publikacji opisuje
+[dokumentacja GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
+Zmiany addonów wymagają wdrożenia nowego runtime, a następnie odświeżenia gry;
+nie wymagają ponownej instalacji loadera. Przeglądarka/CDN mogą przez pewien czas
+korzystać z cache. Loader nie dodaje parametrów omijających cache.
+Zmiany loadera wymagają podniesienia `@version` w `src/userscript-header.txt`.
+Jego `updateURL` i `downloadURL` wskazują `installer.user.js` na GitHub Pages.
 
 `dist/` pozostaje w repozytorium; `.gitignore` wyklucza m.in. `node_modules/`
 i `*.log`.

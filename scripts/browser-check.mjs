@@ -20,7 +20,9 @@ const delay = milliseconds => new Promise(resolveDelay => setTimeout(resolveDela
 const deadline = Date.now() + 35000;
 let socket;
 let command;
+let runtimeRequests = 0;
 try {
+    const runtimeBody = (await readFile('dist/margonem-toolkit.js')).toString('base64');
     let port;
     while (!port && Date.now() < deadline) {
         try { port = (await readFile(join(profile, 'DevToolsActivePort'), 'utf8')).split('\n')[0]; }
@@ -38,6 +40,16 @@ try {
     const pending = new Map();
     socket.addEventListener('message', event => {
         const response = JSON.parse(event.data);
+        if (response.method === 'Fetch.requestPaused') {
+            runtimeRequests++;
+            command('Fetch.fulfillRequest', {
+                requestId: response.params.requestId,
+                responseCode: 200,
+                responseHeaders: [{ name: 'Content-Type', value: 'application/javascript; charset=utf-8' }],
+                body: runtimeBody
+            }).catch(error => { browserError = error.message; });
+            return;
+        }
         if (!pending.has(response.id)) return;
         const handler = pending.get(response.id);
         pending.delete(response.id);
@@ -49,6 +61,10 @@ try {
         pending.set(id, { resolve: resolveCommand, reject: rejectCommand });
         socket.send(JSON.stringify({ id, method, params }));
     });
+    await command('Fetch.enable', { patterns: [{
+        urlPattern: 'https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js',
+        requestStage: 'Request'
+    }] });
     await command('Page.bringToFront');
     await command('Page.navigate', { url: pathToFileURL(resolve('scripts/browser-sanity.html')).href });
     let summary = '';
@@ -59,6 +75,7 @@ try {
         if (/^(PASS|FAIL):/.test(summary)) break;
     }
     if (!summary.startsWith('PASS:')) throw new Error(summary || 'Browser sanity timeout');
+    if (runtimeRequests !== 1) throw new Error(`Expected one runtime request from installer, got ${runtimeRequests}`);
     console.log(summary);
 } catch (error) {
     console.error(error.message);

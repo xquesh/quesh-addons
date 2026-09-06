@@ -1,18 +1,3 @@
-// ==UserScript==
-// @name         Margonem Toolkit
-// @namespace    margonem-toolkit
-// @version      1.0.0
-// @homepageURL  https://github.com/xquesh/quesh-addons
-// @updateURL    https://raw.githubusercontent.com/xquesh/quesh-addons/master/dist/margonem-toolkit.user.js
-// @downloadURL  https://raw.githubusercontent.com/xquesh/quesh-addons/master/dist/margonem-toolkit.user.js
-// @description  Modularne dodatki do Margonem: Legendary Notificator i pozycja powiadomień.
-// @match        https://*.margonem.pl/*
-// @match        https://*.margonem.com/*
-// @exclude      https://forum.margonem.pl/*
-// @exclude      https://forum.margonem.com/*
-// @grant        unsafeWindow
-// @run-at       document-idle
-// ==/UserScript==
 (() => {
   // src/core/scheduler.js
   function createScheduler(host = window) {
