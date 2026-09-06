@@ -206,12 +206,7 @@ Wyłącznie gdy nowy klucz **nie istnieje**, importer szuka kolejno:
 i v570 z tym samym sufiksem `_settings`. Niepoprawny JSON starego klucza nie
 blokuje kolejnego fallbacku.
 
-Import zachowuje dawną migrację warstw, w tym mapowanie historycznych pól
-`shacalGlow/Opacity/Width` i normalizację starszych wersji. Ustawienia v595 są
-importowane bez normalizacji starszego canvasu. Pole `enabled` trafia do stanu
-addonu. `notificationBottomEnabled` oraz `notificationBottomOffset` trafiają
-wyłącznie do osobnego addonu jako `enabled` i `settings.bottom`.
-Importowane są także stare pozycje przycisku/panelu i zakładka.
+
 
 Nowy dokument jest zapisywany od razu; następne uruchomienie nie importuje legacy
 ponownie. Stare klucze pozostają nienaruszone. Uszkodzony JSON nowego klucza lub
