@@ -75,7 +75,11 @@ const bundle = (await readFile('dist/margonem-toolkit.user.js', 'utf8')).replace
 assert.ok(bundle.startsWith('// ==UserScript==\n// @name         Margonem Toolkit'));
 assert.match(bundle, /@grant\s+unsafeWindow/);
 assert.doesNotMatch(bundle, /^\s*(?:import|export)\s|\brequire\s*\(|\bimport\s*\(/m);
-assert.doesNotMatch(bundle, /@(?:require|updateURL|downloadURL)/);
+assert.doesNotMatch(bundle, /@require/);
+for (const field of ['updateURL', 'downloadURL']) {
+    const value = bundle.match(new RegExp(`^// @${field}\\s+(\\S+)$`, 'm'))?.[1];
+    assert.equal(value, 'https://raw.githubusercontent.com/xquesh/quesh-addons/master/dist/margonem-toolkit.user.js');
+}
 const source = (await Promise.all(sourceFiles.map(path => readFile(path, 'utf8')))).join('\n');
 assert.equal([...source.matchAll(/\.parseJSON\s*=(?!=)/g)].length, 2);
 assert.match(await readFile('src/core/game.js', 'utf8'), /communication\.parseJSON = wrapper/);

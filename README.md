@@ -1,4 +1,4 @@
-# Margonem Toolkit
+# quesh-addons
 
 Jeden userscript Tampermonkey z dwoma niezależnymi dodatkami:
 
@@ -302,11 +302,13 @@ pauzowanie po ukryciu karty oraz interakcje drag/wheel z klientem gry.
 
 ## Aktualizacje przez GitHub Raw
 
-Nagłówek celowo nie zawiera `updateURL` ani `downloadURL`. Gdy wybierzesz własne
-repozytorium i gałąź, otwórz `dist/margonem-toolkit.user.js` na GitHubie i skopiuj
-rzeczywisty adres **Raw**. Dopisz do `src/userscript-header.txt` oba pola,
-używając tego adresu. Zwiększ `@version`, wykonaj build i opublikuj dist razem
-ze źródłami. Nie trzeba tworzyć osobnego userscripta dla każdego addonu.
+Repozytorium: [xquesh/quesh-addons](https://github.com/xquesh/quesh-addons).
+
+[Zainstaluj userscript](https://raw.githubusercontent.com/xquesh/quesh-addons/master/dist/margonem-toolkit.user.js).
+Nagłówek w `src/userscript-header.txt` zawiera `updateURL` i `downloadURL`
+wskazujące ten plik na gałęzi `master`. Przy aktualizacji zwiększ `@version`,
+wykonaj build i opublikuj dist razem ze źródłami. Nie trzeba tworzyć osobnego
+userscripta dla każdego addonu.
 
 `dist/` pozostaje w repozytorium; `.gitignore` wyklucza m.in. `node_modules/`
 i `*.log`.
