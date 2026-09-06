@@ -1,0 +1,12 @@
+// ==UserScript==
+// @name         Margonem Toolkit
+// @namespace    margonem-toolkit
+// @version      1.0.0
+// @description  Modularne dodatki do Margonem: Legendary Notificator i pozycja powiadomień.
+// @match        https://*.margonem.pl/*
+// @match        https://*.margonem.com/*
+// @exclude      https://forum.margonem.pl/*
+// @exclude      https://forum.margonem.com/*
+// @grant        unsafeWindow
+// @run-at       document-idle
+// ==/UserScript==

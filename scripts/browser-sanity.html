@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pl">
+<meta charset="utf-8">
+<title>Margonem Toolkit — synthetic browser sanity</title>
+<style>
+    body { background:#15202b; color:white; margin:0; }
+    .game-window-positioner { position:relative; width:1000px; height:720px; }
+    .game-layer { width:600px; height:400px; margin:100px 180px; }
+    #GAME_CANVAS { width:600px; height:400px; background:#182f26; }
+    .interface-layer { position:absolute; inset:0; pointer-events:none; }
+    .positioner.top { position:absolute; width:1000px; height:60px; }
+    .left-column { position:absolute; width:150px; height:550px; }
+    .right-column { position:absolute; right:0; width:150px; height:550px; }
+    .positioner.bottom { position:absolute; top:550px; width:1000px; height:100px; }
+    .hp-indicator-wrapper { position:absolute; left:470px; width:60px; height:60px; }
+    .loot-wnd { position:fixed; left:280px; top:200px; width:420px; height:240px; background:#20252b; z-index:100; }
+    .loot-window { margin:20px; width:380px; height:180px; }
+    .loot-item-wrapper { display:inline-block; margin:10px; width:80px; height:100px; }
+    .item { width:32px; height:32px; background:#a58626; }
+    .accept-button .button { width:80px; height:25px; }
+    .mAlert-layer .big-messages { position:fixed; top:20px; }
+</style>
+<div class="game-window-positioner">
+    <div class="game-layer"><canvas id="GAME_CANVAS"></canvas></div>
+    <div class="interface-layer">
+        <div class="positioner top"></div>
+        <div class="left-column main-column"></div>
+        <div class="right-column main-column"></div>
+        <div class="positioner bottom"><div class="bottom-panel-of-bottom-positioner"><div class="hp-indicator-wrapper"></div></div></div>
+    </div>
+</div>
+<div class="mAlert-layer"><div class="big-messages">Komunikat</div></div>
+<div class="console-layer" style="top:17px">Konsola</div>
+<pre id="result">RUNNING</pre>
+<script>
+    window.fixtureErrors = [];
+    const originalConsoleError = console.error.bind(console);
+    console.error = (...args) => {
+        fixtureErrors.push(args.map(value => value?.stack || String(value)).join(' '));
+        originalConsoleError(...args);
+    };
+    window.addEventListener('error', event => fixtureErrors.push(event.message));
+    window.addEventListener('unhandledrejection', event => fixtureErrors.push(String(event.reason)));
+    localStorage.removeItem('margonem_toolkit_settings');
+    window.Engine = {
+        ev: 1000,
+        items: { items: { bag: { id: 777, name: 'Torba podróżna', stat: 'rarity=normal' } } },
+        communication: {
+            parseJSON(packet) {
+                if (Array.isArray(packet)) { packet.forEach(value => this.parseJSON(value)); return; }
+                if (!packet.loot) return;
+                document.querySelector('.loot-wnd')?.remove();
+                if (!packet.loot.init) return;
+                const root = document.createElement('div');
+                root.className = 'c-window loot-wnd';
+                root.innerHTML = '<div class="loot-window"></div><div class="accept-button"><div class="button">Potwierdź</div></div>';
+                for (const item of Object.values(packet.item || {})) {
+                    const card = document.createElement('div');
+                    card.className = 'loot-item-wrapper';
+                    const icon = document.createElement('div');
+                    icon.className = 'item';
+                    if (/rarity=legendary/.test(item.stat)) {
+                        if (item.loc === 'k') icon.dataset.frameManiaRarity = 'legendary';
+                        else icon.dataset.itemType = 't-leg';
+                    }
+                    card.append(icon);
+                    root.querySelector('.loot-window').append(card);
+                }
+                document.body.append(root);
+                return 'parsed';
+            }
+        }
+    };
+    window.fixtureOriginalParser = Engine.communication.parseJSON;
+</script>
+<script src="../dist/margonem-toolkit.user.js"></script>
+<script>
+    async function run() {
+        const assert = (condition, message) => { if (!condition) throw new Error(message); };
+        const wait = delay => new Promise(resolve => setTimeout(resolve, delay));
+        const manager = __MARGONEM_TOOLKIT__.addons;
+        const parser = Engine.communication.parseJSON;
+        const gameLayer = document.querySelector('.game-layer');
+        const initialPosition = gameLayer.style.position;
+        const initialIsolation = gameLayer.style.isolation;
+        const packet = (loc, legend = true) => ({ loot: { init: 1, endTs: 1030 }, item: {
+            first: { loc, stat: legend ? 'rarity=legendary' : 'rarity=normal' },
+            normal: { loc, stat: 'rarity=normal' }
+        } });
+        manager.changeSettings('legendary-notificator', { mute: true });
+        __MARGONEM_TOOLKIT__.open();
+        assert(document.querySelectorAll('.mtk-addon').length === 2, 'Manager dwóch addonów');
+        document.querySelector('.mtk-addon button').click();
+        assert(document.querySelectorAll('.ln-tab-button').length === 11, '11 zakładek');
+        assert(!document.querySelector('[data-key="notificationBottomOffset"]'), 'Wydzielone ustawienia powiadomień');
+        document.querySelector('[data-tab="canvas"]').click();
+        assert(document.querySelector('[data-pane="canvas"]').classList.contains('active'), 'Zakładka CANVAS');
+        assert(document.querySelector('[data-key="canvasInnerIntensity"]'), 'Ustawienie inward intensity');
+        __MARGONEM_TOOLKIT__.open();
+        const toggle = document.querySelector('.mtk-addon input');
+        toggle.click();
+        assert(!manager.list()[0].enabled, 'Checkbox wyłącza addon');
+        document.querySelector('.mtk-addon button').click();
+        assert(document.querySelector('[data-action="test"]').disabled, 'TESTUJ wyłączone bez addonu');
+        document.querySelector('[data-addon-enabled]').click();
+        assert(manager.list()[0].enabled, 'Włączenie z ustawień');
+        document.querySelector('[data-action="test"]').click();
+        await wait(180);
+        assert(document.querySelector('.loot-wnd .item[data-item-type="t-leg"]'), 'TESTUJ używa parsera');
+        __MARGONEM_TOOLKIT__.open();
+        document.querySelectorAll('.mtk-addon button')[1].click();
+        const bottom = document.querySelector('#mtk-content input[type="range"]');
+        bottom.value = '100';
+        bottom.dispatchEvent(new Event('change', { bubbles: true }));
+        assert(getComputedStyle(document.querySelector('.big-messages')).bottom === '100px', 'Pozycja powiadomień');
+        assert(document.querySelector('.console-layer').style.top === '17px', 'Konsola bez zmian');
+        __MARGONEM_TOOLKIT__.open();
+        document.querySelector('[data-close]').click();
+
+        for (const loc of ['l', 'k']) {
+            Engine.communication.parseJSON(packet(loc));
+            await wait(180);
+            assert(document.querySelectorAll('.ln-fx[data-kind="card"]').length === 1, `Karta mieszana ${loc}: ${JSON.stringify(LegendaryNotificator.status())}, hidden=${document.hidden}`);
+            assert(document.querySelectorAll('.ln-fx[data-kind="item"]').length === 1, `Item mieszany ${loc}`);
+            assert(document.querySelector('.ln-fx[data-kind="outer"]'), `Outer ${loc}`);
+            assert(document.querySelector('.ln-local-fx'), `Lokalny canvas ${loc}`);
+            for (const preset of ['referenceCyanTube', 'referenceCyanStrong', 'referenceCyanBreathe', 'referenceCyanOrbit', 'referenceCyanScanner', 'referencePink', 'cyberViolet', 'goldenLegend', 'performance', 'minimal']) {
+                LegendaryNotificator.preset(preset);
+                await wait(40);
+                assert(document.querySelector('.ln-fx'), `Preset ${preset}`);
+            }
+            manager.setEnabled('legendary-notificator', false);
+            assert(!document.querySelector('.ln-fx'), 'Usunięcie overlayów');
+            assert(!document.querySelector('[data-mtk-style="legendary-notificator:effects"]'), 'Usunięcie styli efektów');
+            assert(gameLayer.style.position === initialPosition && gameLayer.style.isolation === initialIsolation, 'Przywrócenie stylu canvas');
+            manager.setEnabled('legendary-notificator', true);
+            LegendaryNotificator.preset('referenceCyanTube');
+            Engine.communication.parseJSON(packet(loc, false));
+            await wait(100);
+            assert(!document.querySelector('.ln-fx'), 'Zwykły loot bez legendy');
+        }
+        manager.changeSettings('legendary-notificator', { worldEnabled: true });
+        Engine.communication.parseJSON(packet('k'));
+        await wait(150);
+        assert(document.getElementById('ln580-world'), 'Aura świata');
+        const unrelated = document.createElement('div');
+        unrelated.className = 'c-window addon-window';
+        unrelated.innerHTML = '<div class="item" data-item-type="t-leg"></div>';
+        document.body.append(unrelated);
+        Engine.communication.parseJSON({ loot: { init: 0 } });
+        await wait(150);
+        assert(!document.querySelector('.ln-fx'), 'Zamknięty loot; addonowe okno nie jest celem');
+        assert(!document.getElementById('ln580-world'), 'Cleanup aury');
+        manager.setEnabled('notification-position', false);
+        assert(!document.querySelector('[data-mtk-style="notification-position:position"]'), 'Cleanup powiadomień');
+        assert(Engine.communication.parseJSON === parser, 'Brak dodatkowych hooków');
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = '../dist/margonem-toolkit.user.js?restart';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.append(script);
+        });
+        assert(document.querySelectorAll('#mtk-button').length === 1, 'Singleton panelu po reexec');
+        __MARGONEM_TOOLKIT__.destroy();
+        assert(Engine.communication.parseJSON === fixtureOriginalParser, 'Przywrócenie oryginalnego parsera po reexec');
+        assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
+        assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
+        assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
+        document.getElementById('result').textContent = 'PASS: synthetic browser DOM, settings, 10 presets, loc l/k, mixed rarity, lifecycle, singleton';
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        run().catch(error => {
+            document.getElementById('result').textContent = `FAIL: ${error.stack}\n${fixtureErrors.join('\n')}`;
+        });
+    }, { once: true });
+</script>
+</html>
