@@ -1,6 +1,7 @@
 import { build, context } from 'esbuild';
 import { readFile, writeFile, rm } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
+import { VERSION } from '../src/version.js';
 
 const options = {
     entryPoints: ['src/main.js'],
@@ -23,6 +24,7 @@ const options = {
                     const loader = await readFile('src/installer.js', 'utf8');
                     await writeFile('dist/installer.user.js', `${header.trim()}\n\n${loader.trim()}\n`.replace(/\r\n/g, '\n'));
                     await rm('dist/margonem-toolkit.user.js', { force: true });
+                    await writeFile('dist/version.json', JSON.stringify({ version: VERSION }, null, 2) + '\n');
                     for (const file of [options.outfile, 'dist/installer.user.js']) {
                         execFileSync(process.execPath, ['--check', file], { stdio: 'inherit' });
                     }

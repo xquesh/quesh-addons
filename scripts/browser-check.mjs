@@ -21,8 +21,10 @@ const deadline = Date.now() + 35000;
 let socket;
 let command;
 let runtimeRequests = 0;
+let versionRequests = 0;
 try {
     const runtimeBody = (await readFile('dist/margonem-toolkit.js')).toString('base64');
+    const versionBody = await readFile('dist/version.json', 'utf8');
     let port;
     while (!port && Date.now() < deadline) {
         try { port = (await readFile(join(profile, 'DevToolsActivePort'), 'utf8')).split('\n')[0]; }
@@ -41,12 +43,19 @@ try {
     socket.addEventListener('message', event => {
         const response = JSON.parse(event.data);
         if (response.method === 'Fetch.requestPaused') {
-            runtimeRequests++;
+            const isVersion = new URL(response.params.request.url).pathname.endsWith('/version.json');
+            if (isVersion) versionRequests++;
+            else runtimeRequests++;
+            const manifest = versionRequests === 2 ? '{"version":"99.0.0"}'
+                : versionRequests === 3 ? '{"version":"invalid"}' : versionBody;
             command('Fetch.fulfillRequest', {
                 requestId: response.params.requestId,
                 responseCode: 200,
-                responseHeaders: [{ name: 'Content-Type', value: 'application/javascript; charset=utf-8' }],
-                body: runtimeBody
+                responseHeaders: [
+                    { name: 'Content-Type', value: isVersion ? 'application/json' : 'application/javascript; charset=utf-8' },
+                    { name: 'Access-Control-Allow-Origin', value: '*' }
+                ],
+                body: isVersion ? Buffer.from(manifest).toString('base64') : runtimeBody
             }).catch(error => { browserError = error.message; });
             return;
         }
@@ -64,6 +73,9 @@ try {
     await command('Fetch.enable', { patterns: [{
         urlPattern: 'https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js',
         requestStage: 'Request'
+    }, {
+        urlPattern: 'https://xquesh.github.io/quesh-addons/dist/version.json*',
+        requestStage: 'Request'
     }] });
     await command('Page.bringToFront');
     await command('Page.navigate', { url: pathToFileURL(resolve('scripts/browser-sanity.html')).href });
@@ -76,6 +88,7 @@ try {
     }
     if (!summary.startsWith('PASS:')) throw new Error(summary || 'Browser sanity timeout');
     if (runtimeRequests !== 1) throw new Error(`Expected one runtime request from installer, got ${runtimeRequests}`);
+    if (versionRequests < 4) throw new Error('Missing automatic/manual version checks');
     console.log(summary);
 } catch (error) {
     console.error(error.message);

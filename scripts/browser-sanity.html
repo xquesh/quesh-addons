@@ -93,6 +93,24 @@
         } });
         manager.changeSettings('legendary-notificator', { mute: true });
         __MARGONEM_TOOLKIT__.open();
+        const updateStatus = document.querySelector('.mtk-update-status');
+        const checkUpdates = document.querySelector('[data-check-update]');
+        async function waitForUpdate(status) {
+            const deadline = Date.now() + 3000;
+            while (updateStatus.dataset.status !== status && Date.now() < deadline) await wait(20);
+            assert(updateStatus.dataset.status === status, `Status aktualizacji: ${status}`);
+        }
+        await waitForUpdate('current');
+        assert(document.querySelector('.mtk-version').textContent === `v${__MARGONEM_TOOLKIT__.version}`, 'Wersja runtime w nagłówku');
+        assert(getComputedStyle(document.querySelector('.mtk-update-light')).backgroundColor === 'rgb(69, 223, 135)', 'Zielona lampka aktualnej wersji');
+        checkUpdates.click();
+        await waitForUpdate('outdated');
+        assert(getComputedStyle(document.querySelector('.mtk-update-light')).backgroundColor === 'rgb(255, 91, 103)', 'Czerwona lampka nowej wersji');
+        assert(updateStatus.textContent.includes('99.0.0'), 'Numer dostępnej wersji');
+        checkUpdates.click();
+        await waitForUpdate('error');
+        checkUpdates.click();
+        await waitForUpdate('current');
         assert(document.querySelectorAll('.mtk-addon').length === 2, 'Manager dwóch addonów');
         document.querySelector('.mtk-addon button').click();
         assert(document.querySelectorAll('.ln-tab-button').length === 11, '11 zakładek');

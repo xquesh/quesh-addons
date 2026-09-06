@@ -8,6 +8,7 @@ import { createAddonManager } from './core/addon-manager.js';
 import { createPanel } from './core/ui/panel.js';
 import { createLegendaryNotificator } from './addons/legendary-notificator/index.js';
 import { createNotificationPosition } from './addons/notification-position/index.js';
+import { VERSION } from './version.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -22,7 +23,7 @@ let panel = null;
 let destroyed = false;
 
 const toolkit = {
-    version: '1.0.1',
+    version: VERSION,
     get addons() { return manager; },
     open: () => panel?.open(),
     destroy() {

@@ -16,6 +16,7 @@ import { createNotificationPosition } from '../src/addons/notification-position/
 import { createLegendaryNotificator } from '../src/addons/legendary-notificator/index.js';
 import { LEGENDARY_DOM_SELECTOR } from '../src/addons/legendary-notificator/constants.js';
 import { installEffectStyles } from '../src/addons/legendary-notificator/effect-styles.js';
+import './check-updates.mjs';
 
 async function listFiles(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
@@ -80,7 +81,7 @@ assert.match(installer, /@grant\s+none/);
 assert.ok(Buffer.byteLength(installer) < 2048, 'Installer powinien pozostać małym loaderem');
 assert.ok(installer.trimEnd().split('\n').length <= 50);
 assert.doesNotMatch(installer, /createAddonManager|localStorage|__MARGONEM_TOOLKIT__|createPanel|createLegendaryNotificator|createNotificationPosition/);
-assert.deepEqual((await listFiles('dist')).sort(), ['dist/installer.user.js', 'dist/margonem-toolkit.js']);
+assert.deepEqual((await listFiles('dist')).sort(), ['dist/installer.user.js', 'dist/margonem-toolkit.js', 'dist/version.json']);
 for (const domain of ['pl', 'com']) {
     assert.ok(installer.includes(`// @match        https://*.margonem.${domain}/*`));
     assert.ok(installer.includes(`// @exclude      https://forum.margonem.${domain}/*`));

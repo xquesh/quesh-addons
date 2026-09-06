@@ -27,7 +27,7 @@ jobs:
       - name: Stage installer and runtime
         run: |
           mkdir -p _site/dist
-          cp dist/installer.user.js dist/margonem-toolkit.js _site/dist/
+          cp dist/installer.user.js dist/margonem-toolkit.js dist/version.json _site/dist/
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

@@ -13,12 +13,25 @@ wraca do listy. Przycisk z ikoną i panel można przeciągać. Pozycje zapisują
 zakończeniu przeciągania. Kółko myszy przewija panel i listę zakładek.
 Konfigurację można otworzyć także dla wyłączonego dodatku; nie uruchamia to efektów.
 
+Nagłówek pokazuje numer uruchomionego runtime QADDONS. Lampka pod nagłówkiem:
+
+- zielona — nie ma nowszej opublikowanej wersji;
+- czerwona — dostępna jest nowsza wersja; obok zobaczysz jej numer i wskazówkę,
+  żeby odświeżyć grę przez Ctrl+F5;
+- szara — trwa sprawdzanie;
+- żółta — nie udało się sprawdzić wersji (np. brak sieci).
+
+Sprawdzanie odbywa się po uruchomieniu, co 5 minut i po kliknięciu
+**Sprawdź aktualizacje**. Zapytanie o `dist/version.json` omija cache, ma limit
+10 sekund i nie przesyła cookies ani danych gry. Nie instaluje nic automatycznie.
+
 ## Instalacja i build
 
 | Plik | Rola |
 | --- | --- |
 | `dist/installer.user.js` | Mały loader instalowany w Tampermonkey: nagłówek i wstawienie `<script src="…">`. Bez addonów, storage i UI. |
 | `dist/margonem-toolkit.js` | Właściwy kod aplikacji pobierany z GitHub Pages: core, addon manager, UI i wszystkie addony. Zwykły bundle IIFE bez nagłówka userscripta. |
+| `dist/version.json` | Numer opublikowanej wersji runtime, używany przez lampkę aktualizacji. |
 
 [Zainstaluj loader w Tampermonkey](https://xquesh.github.io/quesh-addons/dist/installer.user.js)
 i potwierdź **Zainstaluj** lub **Aktualizuj**, a następnie odśwież Margonem.
@@ -42,7 +55,7 @@ node --check dist/installer.user.js
 node --check dist/margonem-toolkit.js
 ```
 
-`npm run build` generuje oba pliki. Stary pełny `dist/margonem-toolkit.user.js`
+`npm run build` generuje oba pliki JavaScript i `version.json`. Stary pełny `dist/margonem-toolkit.user.js`
 jest usuwany przez build, aby nie pozostawał alternatywny plik instalacyjny.
 
 Obsługiwane domeny: `https://*.margonem.pl/*` i `https://*.margonem.com/*`,
@@ -76,7 +89,8 @@ npm run watch
 
 Watch przebudowuje runtime po zmianach jego modułów i przy każdym buildzie zapisuje
 także installer. Po zmianie samego `src/installer.js` lub nagłówka uruchom build
-albo zrestartuj watch. Lokalny build nie zmienia plików na GitHub Pages.
+albo zrestartuj watch. Po zmianie `src/version.js` zrestartuj watch, aby manifest
+i runtime użyły tej samej wersji. Lokalny build nie zmienia plików na GitHub Pages.
 
 Jedyna zależność developerska to `esbuild`. Nie ma zależności npm w runtime,
 `@require`, dynamicznych importów ani backendu. Build tworzy czytelny, nieminifikowany
@@ -91,6 +105,7 @@ src/
   main.js
   installer.js
   userscript-header.txt
+  version.js
   assets/
     quesh.png
   core/
@@ -101,6 +116,7 @@ src/
     game.js
     styles.js
     scheduler.js
+    updates.js
     ui/
       panel.js
       controls.js
@@ -136,11 +152,13 @@ src/
 dist/
   installer.user.js
   margonem-toolkit.js
+  version.json
 legacy/
   legendary-notificator-v6.2.1.txt
 scripts/
   build.mjs
   check.mjs
+  check-updates.mjs
   browser-check.mjs
   browser-sanity.html
   install.ps1
@@ -330,8 +348,8 @@ Repozytorium: [xquesh/quesh-addons](https://github.com/xquesh/quesh-addons).
    **Source: GitHub Actions**.
 2. Wyślij zmiany na `master` lub uruchom ręcznie workflow **Deploy GitHub Pages**
    z zakładki **Actions**.
-3. Workflow wykonuje `npm ci`, build i check, po czym publikuje wyłącznie oba
-   pliki w katalogu `dist/` artefaktu Pages. Poczekaj na pomyślne zakończenie
+3. Workflow wykonuje `npm ci`, build i check, po czym publikuje oba pliki
+   JavaScript i `version.json` w katalogu `dist/` artefaktu Pages. Poczekaj na pomyślne zakończenie
    zadania `deploy`.
 4. Otwórz [installer](https://xquesh.github.io/quesh-addons/dist/installer.user.js)
    i sprawdź dostępność [runtime](https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js).
@@ -339,6 +357,11 @@ Repozytorium: [xquesh/quesh-addons](https://github.com/xquesh/quesh-addons).
 Konfiguracja workflow: [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 Uprawnienia i mechanizm publikacji opisuje
 [dokumentacja GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
+Przy wydaniu nowego runtime podnieś `VERSION` w `src/version.js` oraz wersję
+pakietu w `package.json` i `package-lock.json`. Build bierze numer z `src/version.js`
+do runtime i `dist/version.json`; check pilnuje zgodności z wersją pakietu.
+Używaj numerów `MAJOR.MINOR.PATCH`, np. `1.1.0`.
 
 Zmiany addonów wymagają wdrożenia nowego runtime, a następnie odświeżenia gry;
 nie wymagają ponownej instalacji loadera. Przeglądarka/CDN mogą przez pewien czas
