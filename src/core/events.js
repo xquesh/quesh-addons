@@ -14,7 +14,7 @@ export function createEvents() {
     function emit(name, payload) {
         for (const callback of [...(listeners.get(name) || [])]) {
             if (!listeners.get(name)?.has(callback)) continue;
-            try { callback(payload); } catch (error) { console.error(`[Margonem Toolkit: ${name}]`, error); }
+            try { callback(payload); } catch (error) { console.error(`[QADDONS: ${name}]`, error); }
         }
     }
 

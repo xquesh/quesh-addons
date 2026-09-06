@@ -11,6 +11,7 @@ const options = {
     target: ['es2020'],
     minify: false,
     charset: 'utf8',
+    loader: { '.png': 'dataurl' },
     legalComments: 'inline',
     logLevel: 'info',
     plugins: [{

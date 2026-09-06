@@ -1,5 +1,6 @@
 import { bindDrag } from './controls.js';
 import { installSettingsStyles } from './settings-styles.js';
+import buttonIcon from '../../assets/quesh.png';
 
 export function createPanel(settings, styles, scheduler, events) {
     let manager;
@@ -9,7 +10,8 @@ export function createPanel(settings, styles, scheduler, events) {
     installSettingsStyles(style);
     style.set('panel', `
         #mtk-button, #mtk-panel { color:#d6dfe7; font:12px Consolas,monospace; z-index:2147483001; }
-        #mtk-button { position:fixed; width:58px; height:58px; border:1px solid #2b3943; border-radius:12px; background:#101820; color:#4ce2cb; cursor:grab; touch-action:none; }
+        #mtk-button { position:fixed; box-sizing:border-box; width:58px; height:58px; padding:3px; display:grid; place-items:center; border:1px solid #2b3943; border-radius:12px; background:#101820; cursor:grab; touch-action:none; }
+        #mtk-button img { display:block; width:50px; height:50px; object-fit:contain; image-rendering:pixelated; pointer-events:none; user-select:none; }
         #mtk-panel { position:fixed; width:760px; height:570px; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px); display:flex; flex-direction:column; border:1px solid #293640; border-radius:8px; background:#0c1218; box-shadow:0 20px 65px #000b; overflow:hidden; }
         #mtk-panel[hidden] { display:none; }
         #mtk-panel > header { display:flex; gap:10px; align-items:center; padding:10px; border-bottom:1px solid #293640; cursor:move; touch-action:none; }
@@ -28,8 +30,13 @@ export function createPanel(settings, styles, scheduler, events) {
     `);
     const button = document.createElement('button');
     button.id = 'mtk-button';
-    button.textContent = 'MTK';
-    button.title = 'Margonem Toolkit';
+    button.title = 'QADDONS';
+    button.setAttribute('aria-label', 'Otwórz QADDONS');
+    const icon = document.createElement('img');
+    icon.src = buttonIcon;
+    icon.alt = '';
+    icon.draggable = false;
+    button.append(icon);
     button.style.right = `${settings.data.core.buttonRight ?? 20}px`;
     button.style.top = `${settings.data.core.buttonTop ?? 120}px`;
     const panel = document.createElement('section');
@@ -37,7 +44,7 @@ export function createPanel(settings, styles, scheduler, events) {
     panel.hidden = true;
     panel.style.left = `${Math.max(0, Math.min(innerWidth - 60, settings.data.core.panelX))}px`;
     panel.style.top = `${Math.max(0, Math.min(innerHeight - 40, settings.data.core.panelY))}px`;
-    panel.innerHTML = '<header><strong>MARGONEM TOOLKIT</strong><button class="ln-btn" data-view="addons">DODATKI</button><button class="ln-btn" data-close aria-label="Zamknij">×</button></header><div id="mtk-content"></div>';
+    panel.innerHTML = '<header><strong>QADDONS</strong><button class="ln-btn" data-view="addons">DODATKI</button><button class="ln-btn" data-close aria-label="Zamknij">×</button></header><div id="mtk-content"></div>';
     const content = panel.querySelector('#mtk-content');
 
     function closeSettings() {

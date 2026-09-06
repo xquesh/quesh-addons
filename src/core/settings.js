@@ -5,7 +5,7 @@ export const SCHEMA_MIGRATIONS = new Map();
 export function migrateSchema(data, target = SCHEMA_VERSION, migrations = SCHEMA_MIGRATIONS) {
     let current = structuredClone(data);
     if (!Number.isInteger(current.version) || current.version > target || current.version < 1) {
-        throw new Error('Nieobsługiwana wersja ustawień Toolkit');
+        throw new Error('Nieobsługiwana wersja ustawień QADDONS');
     }
     while (current.version < target) {
         const migrate = migrations.get(current.version);
@@ -24,13 +24,13 @@ export function createSettings(storage, importLegacy = () => null) {
         : JSON.parse(raw);
     const data = migrateSchema(initial);
     if (!data.core || typeof data.core !== 'object' || !data.addons || typeof data.addons !== 'object') {
-        throw new Error('Niepoprawna struktura ustawień Toolkit');
+        throw new Error('Niepoprawna struktura ustawień QADDONS');
     }
     data.core = { panelX: 70, panelY: 55, lastView: 'addons', ...data.core };
 
     function save() {
         try { storage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-        catch (error) { console.error('[Margonem Toolkit storage]', error); }
+        catch (error) { console.error('[QADDONS storage]', error); }
     }
 
     function addon(definition) {

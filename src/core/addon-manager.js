@@ -118,7 +118,7 @@ export function createAddonManager(services) {
     function start() {
         for (const record of registry.values()) {
             try { setEnabled(record.definition.id, record.entry.enabled); }
-            catch (error) { console.error(`[Margonem Toolkit: ${record.definition.id}]`, error); }
+            catch (error) { console.error(`[QADDONS: ${record.definition.id}]`, error); }
         }
     }
 
@@ -127,14 +127,14 @@ export function createAddonManager(services) {
         destroyed = true;
         for (const dispose of views) {
             try { dispose(); }
-            catch (error) { console.error('[Margonem Toolkit settings cleanup]', error); }
+            catch (error) { console.error('[QADDONS settings cleanup]', error); }
         }
         views.clear();
         for (const record of [...registry.values()].reverse()) {
             try { stop(record); }
-            catch (error) { console.error('[Margonem Toolkit disable]', error); }
+            catch (error) { console.error('[QADDONS disable]', error); }
             try { record.definition.destroy?.(record.lifetime); }
-            catch (error) { console.error('[Margonem Toolkit destroy]', error); }
+            catch (error) { console.error('[QADDONS destroy]', error); }
             record.lifetime?.scheduler.destroy();
             record.lifetime?.styles.clear();
         }

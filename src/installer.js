@@ -5,7 +5,7 @@
     script.async = false;
 
     script.onerror = () => {
-        console.error('[Margonem Toolkit] Nie udało się pobrać runtime.');
+        console.error('[QADDONS] Nie udało się pobrać runtime.');
     };
 
     (document.head || document.documentElement)

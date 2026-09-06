@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         Margonem Toolkit
+// @name         QADDONS
 // @namespace    margonem-toolkit
-// @version      1.0.1
+// @version      1.0.2
 // @homepageURL  https://github.com/xquesh/quesh-addons
 // @updateURL    https://xquesh.github.io/quesh-addons/dist/installer.user.js
 // @downloadURL  https://xquesh.github.io/quesh-addons/dist/installer.user.js
-// @description  Loader Margonem Toolkit — pobiera runtime z GitHub Pages.
+// @description  Loader QADDONS — pobiera runtime z GitHub Pages.
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
 // @exclude      https://forum.margonem.pl/*

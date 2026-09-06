@@ -69,7 +69,7 @@ export function createScheduler(host = window) {
         timeouts.clear();
         frames.clear();
         for (const callback of cleanups) {
-            try { callback(); } catch (error) { console.error('[Margonem Toolkit cleanup]', error); }
+            try { callback(); } catch (error) { console.error('[QADDONS cleanup]', error); }
         }
         cleanups.clear();
     }

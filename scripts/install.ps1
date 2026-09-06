@@ -40,7 +40,7 @@ try {
         exit 0
     }
 
-    Write-Host 'Margonem Toolkit - instalacja w Tampermonkey'
+    Write-Host 'QADDONS - instalacja w Tampermonkey'
     Write-Host ''
     Write-Host '1. Otwieram maly loader z GitHub Pages w domyslnej przegladarce.'
     Write-Host '2. W Tampermonkey kliknij Zainstaluj (lub Aktualizuj).'

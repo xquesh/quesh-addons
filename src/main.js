@@ -22,7 +22,7 @@ let panel = null;
 let destroyed = false;
 
 const toolkit = {
-    version: '1.0.0',
+    version: '1.0.1',
     get addons() { return manager; },
     open: () => panel?.open(),
     destroy() {
@@ -52,7 +52,7 @@ function start() {
         game.start();
     } catch (error) {
         toolkit.destroy();
-        console.error('[Margonem Toolkit start]', error);
+        console.error('[QADDONS start]', error);
     }
 }
 

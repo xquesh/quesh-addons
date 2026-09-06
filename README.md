@@ -1,15 +1,15 @@
-# quesh-addons
+# QADDONS
 
-Mały loader Tampermonkey pobiera runtime Toolkita z dwoma niezależnymi dodatkami:
+Mały loader Tampermonkey pobiera runtime QADDONS z dwoma niezależnymi dodatkami:
 
 - **Legendary Notificator** — neonowe powiadomienie po legendarnym łupie,
   przeniesione z istniejącego Legendary Notificator 6.2.1.
 - **Pozycja powiadomień** — ustawienie odległości tekstowych komunikatów gry
   od dołu ekranu (0–300 px), bez przesuwania konsoli.
 
-Przycisk **MTK** otwiera listę **DODATKI**. Checkbox rzeczywiście uruchamia lub
+Przycisk z ikoną **quesh.png** otwiera listę **DODATKI** w panelu **QADDONS**. Checkbox rzeczywiście uruchamia lub
 zatrzymuje addon; **USTAWIENIA** otwiera jego konfigurację. Przycisk **DODATKI**
-wraca do listy. Przycisk MTK i panel można przeciągać. Pozycje zapisują się przy
+wraca do listy. Przycisk z ikoną i panel można przeciągać. Pozycje zapisują się przy
 zakończeniu przeciągania. Kółko myszy przewija panel i listę zakładek.
 Konfigurację można otworzyć także dla wyłączonego dodatku; nie uruchamia to efektów.
 
@@ -27,9 +27,9 @@ Runtime jest pobierany przez loader z
 Nie instaluj runtime jako osobnego userscripta.
 
 Przy przejściu ze starego pełnego userscripta zainstaluj loader ręcznie z linku
-powyżej. Zachowuje on `@name` i `@namespace`, ma wyższe `@version` (1.0.1),
-więc Tampermonkey może zastąpić dotychczasowy wpis. Jeśli zostaną dwa wpisy,
-wyłącz stary. Wyłącz też samodzielny Legendary Notificator. Ustawienia Toolkita
+powyżej. Loader nazywa się teraz **QADDONS** i ma `@version` 1.0.2.
+Po instalacji wyłącz poprzedni wpis, jeśli Tampermonkey pozostawi oba skrypty.
+Wyłącz też samodzielny Legendary Notificator. Ustawienia QADDONS
 pozostają pod dotychczasowym kluczem localStorage.
 
 Do lokalnego budowania potrzebny jest Node.js (zalecane 22 lub nowsze) i npm.
@@ -91,6 +91,8 @@ src/
   main.js
   installer.js
   userscript-header.txt
+  assets/
+    quesh.png
   core/
     addon-manager.js
     settings.js

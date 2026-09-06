@@ -75,7 +75,7 @@ const bundle = (await readFile('dist/margonem-toolkit.js', 'utf8')).replace(/\r\
 const installer = (await readFile('dist/installer.user.js', 'utf8')).replace(/\r\n/g, '\n');
 assert.ok(bundle.startsWith('(() => {'));
 assert.doesNotMatch(bundle, /==UserScript==|@(?:match|grant|updateURL|downloadURL)/);
-assert.ok(installer.startsWith('// ==UserScript==\n// @name         Margonem Toolkit'));
+assert.ok(installer.startsWith('// ==UserScript==\n// @name         QADDONS'));
 assert.match(installer, /@grant\s+none/);
 assert.ok(Buffer.byteLength(installer) < 2048, 'Installer powinien pozostać małym loaderem');
 assert.ok(installer.trimEnd().split('\n').length <= 50);
@@ -108,7 +108,7 @@ for (const hasHead of [true, false]) {
     assert.equal(appended[0].async, false);
     assert.equal(errors.length, 0);
     appended[0].onerror();
-    assert.deepEqual(errors, ['[Margonem Toolkit] Nie udało się pobrać runtime.']);
+    assert.deepEqual(errors, ['[QADDONS] Nie udało się pobrać runtime.']);
 }
 console.log('OK: mały loader, runtime bez nagłówka, wstrzyknięcie do head/root, błąd pobierania');
 const source = (await Promise.all(sourceFiles.map(path => readFile(path, 'utf8')))).join('\n');
