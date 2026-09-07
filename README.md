@@ -1,17 +1,38 @@
 # QADDONS
 
-Mały loader Tampermonkey pobiera runtime QADDONS z dwoma niezależnymi dodatkami:
+Mały loader Tampermonkey pobiera runtime QADDONS z trzema niezależnymi dodatkami:
 
 - **Legendary Notificator** — neonowe powiadomienie po legendarnym łupie,
   przeniesione z istniejącego Legendary Notificator 6.2.1.
 - **Pozycja powiadomień** — ustawienie odległości tekstowych komunikatów gry
   od dołu ekranu (0–300 px), bez przesuwania konsoli.
+- **Wykrywacz → GLOBAL** — przycisk GLOBAL w oknie wykrywacza, wysyłający
+  dokładnie jego natywny komunikat; przeniesiony z dostarczonego skryptu 1.0.0.
 
 Przycisk z ikoną **quesh.png** otwiera listę **DODATKI** w panelu **QADDONS**. Checkbox rzeczywiście uruchamia lub
 zatrzymuje addon; **USTAWIENIA** otwiera jego konfigurację. Przycisk **DODATKI**
 wraca do listy. Przycisk z ikoną i panel można przeciągać. Pozycje zapisują się przy
 zakończeniu przeciągania. Kółko myszy przewija panel i listę zakładek.
 Konfigurację można otworzyć także dla wyłączonego dodatku; nie uruchamia to efektów.
+
+Panel i formularze wszystkich dodatków mają czarne tło, biały/szary tekst i proste
+obramowania. Przycisk z ikoną ma 42 × 42 px, bez zaokrągleń, z białą poświatą
+po najechaniu. Kolory efektów Legendary Notificatora nadal ustawia się niezależnie.
+
+### Wykrywacz → GLOBAL
+
+Dodatek jest domyślnie włączony. Otwórz wykrywacz i kliknij **GLOBAL** obok
+jego natywnych przycisków. Pobiera tekst z przycisku **Kopiuj** (Clipboard API,
+`execCommand` lub zdarzenie `copy`), a jeśli to niemożliwe — z natywnego wołania
+na klan, przechwytując wysłanie. Wysyła przejęty tekst na GLOBAL bez zmiany spacji,
+nowych linii, linków ani dopisków i przywraca poprzedni kanał czatu.
+Nie wysyła wiadomości automatycznie. Bez dokładnego tekstu wyświetla **BŁĄD**;
+przyczynę można odczytać po najechaniu na przycisk.
+
+Wyłączenie dodatku usuwa przyciski, obserwator, oczekujące timery i tymczasowe
+podmiany metod. Wyłącz osobny userscript **Wykrywacz → GLOBAL**, jeśli był
+wcześniej zainstalowany. Oryginał jest zachowany w
+`legacy/wykrywacz-global-exact-v1.0.0.txt`.
 
 Nagłówek pokazuje numer uruchomionego runtime QADDONS. Lampka pod nagłówkiem:
 
@@ -149,18 +170,23 @@ src/
       index.js
       defaults.js
       settings-ui.js
+    detector-global/
+      index.js
+      runtime.js
 dist/
   installer.user.js
   margonem-toolkit.js
   version.json
 legacy/
   legendary-notificator-v6.2.1.txt
+  wykrywacz-global-exact-v1.0.0.txt
 scripts/
   build.mjs
   check.mjs
   check-updates.mjs
   browser-check.mjs
   browser-sanity.html
+  detector-sanity.js
   install.ps1
 docs/
   legacy-analysis.md
@@ -213,7 +239,8 @@ Jedyny główny klucz to `margonem_toolkit_settings`:
   "core": { "panelX": 70, "panelY": 55, "lastView": "addons" },
   "addons": {
     "legendary-notificator": { "enabled": true, "settings": {} },
-    "notification-position": { "enabled": true, "settings": { "bottom": 75 } }
+    "notification-position": { "enabled": true, "settings": { "bottom": 75 } },
+    "detector-global": { "enabled": true, "settings": {} }
   }
 }
 ```
@@ -334,6 +361,11 @@ Potwierdza działanie w kontekście strony bez `unsafeWindow` oraz obejmuje mana
 zakładki, TESTUJ przez parser fixture,
 oba oznaczenia legendy, loc l/k, mieszane rarity, wszystkie presety, lokalny
 canvas, aurę, zamykanie lootu, enable/disable i ponowne wykonanie bundle.
+
+Test wykrywacza używa wyłącznie atrap czatu i schowka: sprawdza trzy ścieżki
+kopiowania, natywne wołanie, dokładny tekst, GLOBAL, przywrócenie kanału/metod,
+brak podwójnej wysyłki, wyłączenie w trakcie pracy i brak źródła wiadomości.
+Nie wysyła żadnych wiadomości do gry.
 
 To nie zastępuje testu w grze. W działającym Margonem trzeba potwierdzić
 rzeczywiste pakiety zwykłego lootu/kolosa, aktualny DOM i stacking innych addonów,

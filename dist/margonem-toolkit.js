@@ -623,92 +623,85 @@
 
   // src/core/ui/settings-styles.js
   function installSettingsStyles(styles2) {
-    styles2.set("settings", `#mtk-panel { --ln-ui-accent: #49dfca; --ln-ui-border: #293640; --ln-ui-text: #d6dfe7; } /* ========================================================= CONFIG BUTTON ========================================================= */ #mtk-unused-button { position: fixed; width: 58px; height: 58px; right: 20px; top: 120px; z-index: 2147483000; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #2b3943; border-radius: 12px; background: linear-gradient( 180deg, #151e25, #070b0f ); box-shadow: 0 10px 30px rgba(0,0,0,.75), inset 0 1px rgba(255,255,255,.04); color: #4ce2cb; font: 800 16px Consolas, monospace; cursor: grab; user-select: none; } #mtk-unused-button small { margin-top: 2px; color: #70808a; font-size: 7px; } /* ========================================================= PANEL ========================================================= */ #mtk-legendary-settings { position: fixed; left: 70px; top: 55px; width: 510px; height: 535px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); z-index: 2147483001; display: none; flex-direction: column; overflow: hidden; border: 1px solid #293640; border-radius: 8px; background: linear-gradient( 180deg, #111820, #070a0e ); box-shadow: 0 20px 65px rgba(0,0,0,.82); color: var(--ln-ui-text); font: 10px Consolas, monospace; } #mtk-legendary-settings.visible { display: flex; } .ln-panel-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 9px 11px; border-bottom: 1px solid #293640; background: #0c1218; cursor: move; user-select: none; } .ln-panel-title { font-size: 13px; font-weight: 700; } .ln-panel-sub { margin-top: 2px; color: #6f7e89; font-size: 8px; } .ln-status { display: inline-block; margin-left: 8px; padding: 3px 6px; border: 1px solid rgba(73,223,202,.3); border-radius: 4px; color: #85e7d8; font-size: 8px; } .ln-status.off { color: #ff8492; border-color: rgba(255,132,146,.3); } .ln-panel-close, .ln-btn { border: 1px solid #2c3943; border-radius: 4px; background: #10171d; color: #b5bec7; font: 9px Consolas, monospace; cursor: pointer; } .ln-panel-close { width: 28px; height: 28px; } .ln-panel-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 9px; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #35444f #080c10; } .ln-section { margin-bottom: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,.065); border-radius: 6px; background: rgba(0,0,0,.20); } .ln-section-head { display: flex; align-items: center; justify-content: space-between; padding: 7px 9px; border-bottom: 1px solid rgba(255,255,255,.055); background: rgba(255,255,255,.018); color: #bdc7cf; font-weight: 700; } .ln-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; padding: 9px; } .ln-full { grid-column: 1 / -1; } .ln-field, .ln-range { display: flex; flex-direction: column; gap: 5px; } .ln-label { color: #bbc5ce; font-weight: 600; } .ln-help { color: #6f7e89; font-size: 8px; line-height: 1.5; } .ln-switch { min-height: 28px; display: flex; align-items: center; gap: 7px; } .ln-switch input { width: 15px; height: 15px; accent-color: #49dfca; } #mtk-legendary-settings select, #mtk-legendary-settings input[type="url"] { box-sizing: border-box; width: 100%; height: 31px; padding: 4px 6px; border: 1px solid #26323d; border-radius: 4px; outline: none; background: #080c10; color: #d4dde5; font: 10px Consolas, monospace; } #mtk-legendary-settings input[type="color"] { box-sizing: border-box; width: 100%; height: 31px; padding: 2px; border: 1px solid #26323d; border-radius: 4px; background: #080c10; } #mtk-legendary-settings input[type="range"] { width: 100%; accent-color: #49dfca; } .ln-range-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; } .ln-range-value { min-width: 54px; padding: 2px 5px; border: 1px solid rgba(73,223,202,.15); border-radius: 3px; color: #7ce5d5; text-align: center; font-size: 8px; } .ln-panel-foot { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 7px 8px; border-top: 1px solid #293640; background: #0c1218; } .ln-panel-foot small { color: #64727d; } .ln-actions { display: flex; gap: 4px; } .ln-btn { height: 28px; padding: 0 8px; } .ln-btn.test { color: #7be5d6; border-color: rgba(73,223,202,.35); } .ln-btn.danger { color: #dc8b94; } /* ========================================================= FX ========================================================= */ /* =========================================================
-   TABBED CONFIG PANEL
-========================================================= */
-#mtk-legendary-settings {
-    width: 760px;
-    height: 570px;
-}
-.ln-panel-body {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    padding: 0;
-    overflow: hidden;
-}
-.ln-tabs {
-    flex: 0 0 150px;
-    min-width: 150px;
-    padding: 8px 6px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-right: 1px solid #293640;
-    background: #0a1015;
-    scrollbar-width: thin;
-    scrollbar-color: #35444f #080c10;
-}
-.ln-tab-button {
-    width: 100%;
-    min-height: 34px;
-    margin: 0 0 5px;
-    padding: 7px 8px;
-    border: 1px solid transparent;
-    border-radius: 5px;
-    background: transparent;
-    color: #8997a2;
-    font: 9px Consolas, monospace;
-    text-align: left;
-    cursor: pointer;
-    transition: background .12s ease, border-color .12s ease, color .12s ease;
-}
-.ln-tab-button:hover {
-    background: rgba(255,255,255,.035);
-    color: #cbd5dd;
-}
-.ln-tab-button.active {
-    border-color: rgba(73,223,202,.28);
-    background: rgba(73,223,202,.075);
-    color: #7fe8d8;
-}
-.ln-tab-button small {
-    display: block;
-    margin-top: 2px;
-    color: #5f6d77;
-    font-size: 7px;
-    pointer-events: none;
-}
-.ln-tab-button.active small {
-    color: #6ca99f;
-}
-.ln-tab-content {
-    position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-}
-.ln-tab-pane {
-    display: none;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    padding: 9px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: #35444f #080c10;
-}
-.ln-tab-pane.active {
-    display: block;
-}
-.ln-tab-pane > .ln-section:last-child {
-    margin-bottom: 0;
-}
-@media (max-width: 760px) {
-    #mtk-legendary-settings {
-        width: calc(100vw - 16px);
+    styles2.set("settings", `
+        #mtk-panel { color-scheme:dark; --ln-ui-accent:#eee; --ln-ui-border:#333; --ln-ui-text:#ddd; }
+        #mtk-panel *, #mtk-panel *::before, #mtk-panel *::after { box-sizing:border-box; }
+        #mtk-panel button, #mtk-panel input, #mtk-panel select { font:inherit; }
+        #mtk-panel .ln-btn, #mtk-panel .ln-panel-close {
+            min-height:28px; padding:4px 10px; border:1px solid #333; border-radius:0;
+            background:#080808; color:#ddd; font:12px Arial,sans-serif; cursor:pointer;
+        }
+        #mtk-panel button:hover:not(:disabled) { background:#202020; border-color:#777; color:#fff; }
+        #mtk-panel button:focus-visible, #mtk-panel input:focus-visible, #mtk-panel select:focus-visible {
+            outline:1px solid #fff; outline-offset:2px;
+        }
+        #mtk-panel button:disabled { opacity:.45; cursor:default; }
+        #mtk-panel input[type="checkbox"] {
+            appearance:none; display:inline-grid; place-content:center; flex:0 0 15px;
+            width:15px; height:15px; margin:0 7px 0 0; vertical-align:middle;
+            border:1px solid #454545; border-radius:0; background:#000; cursor:pointer;
+        }
+        #mtk-panel input[type="checkbox"]:checked::after { content:'✓'; color:#fff; font:bold 13px Arial,sans-serif; }
+        #mtk-panel input[type="range"] { width:100%; accent-color:#ccc; }
+        #mtk-panel select, #mtk-panel input[type="url"], #mtk-panel input[type="text"], #mtk-panel input[type="number"] {
+            width:100%; min-width:0; height:30px; padding:4px 6px; border:1px solid #333;
+            border-radius:0; background:#080808; color:#eee; font:12px Arial,sans-serif;
+        }
+        #mtk-panel input[type="color"] { width:100%; height:30px; padding:2px; border:1px solid #333; border-radius:0; background:#080808; }
+        #mtk-panel .ln-panel-head { display:none; }
+        #mtk-panel .ln-panel-body { display:flex; flex:1; min-height:0; padding:0; overflow:hidden; }
+        #mtk-panel .ln-tabs {
+            flex:0 0 150px; min-width:0; padding:6px; overflow-y:auto; overflow-x:hidden;
+            border-right:1px solid #292929; background:#000;
+        }
+        #mtk-panel .ln-tab-button {
+            display:block; width:100%; min-height:34px; margin:0 0 3px; padding:7px 8px;
+            border:1px solid transparent; border-radius:0; background:#000; color:#999;
+            font:12px Arial,sans-serif; text-align:left; cursor:pointer;
+        }
+        #mtk-panel .ln-tab-button.active { border-color:#444; background:#171717; color:#fff; }
+        #mtk-panel .ln-tab-button small { display:block; margin-top:3px; color:#888; font-size:10px; pointer-events:none; }
+        #mtk-panel .ln-tab-content { position:relative; flex:1; min-width:0; min-height:0; overflow:hidden; }
+        #mtk-panel .ln-tab-pane {
+            display:none; width:100%; height:100%; padding:10px; overflow-y:auto;
+            overflow-x:hidden; overscroll-behavior:contain; background:#000;
+        }
+        #mtk-panel .ln-tab-pane.active { display:block; }
+        #mtk-panel .ln-section { margin:0 0 12px; border:1px solid #292929; border-radius:0; background:#000; }
+        #mtk-panel .ln-section-head {
+            display:flex; align-items:center; justify-content:space-between; gap:8px;
+            padding:6px 9px; border-bottom:1px solid #292929; background:#101010; color:#eee; font-weight:bold;
+        }
+        #mtk-panel .ln-section-head > :last-child:not(:first-child) { color:#888; font-size:10px; font-weight:normal; }
+        #mtk-panel .ln-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; padding:10px; }
+        #mtk-panel .ln-full { grid-column:1 / -1; }
+        #mtk-panel .ln-field, #mtk-panel .ln-range { display:flex; flex-direction:column; min-width:0; gap:6px; }
+        #mtk-panel .ln-label { color:#ddd; font-weight:normal; }
+        #mtk-panel .ln-help { color:#999; font-size:11px; line-height:1.5; }
+        #mtk-panel .ln-switch { display:flex; align-items:center; gap:0; min-height:26px; color:#ccc; }
+        #mtk-panel .ln-range-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+        #mtk-panel .ln-range-value { padding:2px 5px; border:1px solid #333; color:#eee; font-size:11px; white-space:nowrap; }
+        #mtk-panel .ln-panel-foot {
+            display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+            gap:8px; padding:7px 10px; border-top:1px solid #292929; background:#080808;
+        }
+        #mtk-panel .ln-panel-foot small { color:#999; font-size:11px; }
+        #mtk-panel .ln-actions { display:flex; gap:5px; }
+        #mtk-panel .ln-status { margin-left:8px; padding:2px 5px; border:1px solid #555; border-radius:0; color:#eee; font-size:11px; }
+        #mtk-panel .ln-status.off { color:#999; border-color:#333; }
+        #mtk-panel .mtk-addon-settings { padding:10px; line-height:1.6; }
+        #mtk-panel .mtk-addon-settings h2 { margin:0 0 10px; padding:6px 9px; border:1px solid #292929; background:#101010; color:#eee; font-size:13px; }
+        #mtk-panel .mtk-addon-settings p { padding:0 10px; color:#bbb; }
+        #mtk-panel .mtk-addon-settings .mtk-enabled { padding:8px 10px; }
+        #mtk-panel ::-webkit-scrollbar { width:7px; height:7px; }
+        #mtk-panel ::-webkit-scrollbar-track { background:#050505; }
+        #mtk-panel ::-webkit-scrollbar-thumb { background:#555; border:1px solid #080808; }
+        #mtk-panel .ln-tabs, #mtk-panel .ln-tab-pane, #mtk-content { scrollbar-width:thin; scrollbar-color:#555 #050505; }
+        @media (max-width:600px) {
+            #mtk-panel .ln-tabs { flex-basis:112px; }
+            #mtk-panel .ln-grid { grid-template-columns:minmax(0,1fr); }
+            #mtk-panel .ln-panel-foot small { display:none; }
+        }
     `);
   }
 
@@ -716,7 +709,7 @@
   var quesh_default = "data:image/png;base64,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";
 
   // src/version.js
-  var VERSION = "1.1.0";
+  var VERSION = "1.2.0";
 
   // src/core/updates.js
   var MANIFEST_URL = "https://xquesh.github.io/quesh-addons/dist/version.json";
@@ -788,31 +781,33 @@
     const style = styles2.scope("core:panel");
     installSettingsStyles(style);
     style.set("panel", `
-        #mtk-button, #mtk-panel { color:#d6dfe7; font:12px Consolas,monospace; z-index:2147483001; }
-        #mtk-button { position:fixed; box-sizing:border-box; width:58px; height:58px; padding:3px; display:grid; place-items:center; border:1px solid #2b3943; border-radius:12px; background:#101820; cursor:grab; touch-action:none; }
-        #mtk-button img { display:block; width:50px; height:50px; object-fit:contain; image-rendering:pixelated; pointer-events:none; user-select:none; }
-        #mtk-panel { position:fixed; width:760px; height:570px; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px); display:flex; flex-direction:column; border:1px solid #293640; border-radius:8px; background:#0c1218; box-shadow:0 20px 65px #000b; overflow:hidden; }
+        #mtk-button, #mtk-panel { color:#ddd; font:13px Arial,sans-serif; z-index:2147483001; }
+        #mtk-button { position:fixed; box-sizing:border-box; width:42px; height:42px; padding:2px; display:grid; place-items:center; border:1px solid #444; border-radius:0; background:#050505; cursor:grab; touch-action:none; transition:box-shadow .15s,border-color .15s; }
+        #mtk-button:hover, #mtk-button:focus-visible { border-color:#bbb; box-shadow:0 0 12px #ffffff60; outline:none; }
+        #mtk-button img { display:block; width:36px; height:36px; object-fit:contain; image-rendering:pixelated; pointer-events:none; user-select:none; }
+        #mtk-panel { position:fixed; width:760px; height:570px; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px); display:flex; flex-direction:column; border:1px solid #333; border-radius:0; background:#000; box-shadow:0 12px 40px #0009; overflow:hidden; }
         #mtk-panel[hidden] { display:none; }
-        #mtk-panel > header { display:flex; gap:10px; align-items:center; padding:10px; border-bottom:1px solid #293640; cursor:move; touch-action:none; }
+        #mtk-panel > header { display:flex; gap:8px; align-items:center; padding:6px 8px; border-bottom:1px solid #292929; background:#080808; cursor:move; touch-action:none; }
         #mtk-panel header strong { flex:1; }
-        #mtk-panel .mtk-version { margin-left:8px; color:#8997a2; font-size:11px; font-weight:normal; }
-        #mtk-panel .mtk-update-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid #293640; }
+        #mtk-panel .mtk-version { margin-left:8px; color:#999; font-size:11px; font-weight:normal; }
+        #mtk-panel .mtk-update-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:6px 10px; border-bottom:1px solid #292929; background:#000; }
         #mtk-panel .mtk-update-status { flex:1; display:flex; align-items:center; gap:8px; font-size:11px; }
-        #mtk-panel .mtk-update-light { flex:0 0 8px; height:8px; border-radius:50%; background:#8997a2; }
+        #mtk-panel .mtk-update-light { flex:0 0 8px; height:8px; border-radius:50%; background:#999; }
         #mtk-panel [data-status="current"] .mtk-update-light { background:#45df87; box-shadow:0 0 8px #45df8780; }
         #mtk-panel [data-status="outdated"] .mtk-update-light { background:#ff5b67; box-shadow:0 0 8px #ff5b6780; }
         #mtk-panel [data-status="error"] .mtk-update-light { background:#e8b04d; }
         #mtk-panel [data-check-update]:disabled { opacity:.5; cursor:wait; }
         #mtk-panel button { cursor:pointer; }
         #mtk-content { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; }
-        .mtk-addon { margin:12px; padding:14px; border:1px solid #293640; border-radius:6px; }
-        .mtk-addon p { color:#8997a2; line-height:1.6; }
-        .mtk-addon button { margin-left:15px; }
-        #mtk-panel input[type=checkbox], #mtk-panel input[type=range] { accent-color:#49dfca; }
-        .mtk-range { display:grid; grid-template-columns:1fr auto; gap:14px; padding:20px; }
-        .mtk-range input { grid-column:1/-1; width:100%; }
-        #mtk-panel .mtk-enabled { display:block; padding:20px; }
-        #mtk-legendary-settings { position:relative; left:auto; top:auto; width:100%; height:100%; max-width:none; max-height:none; display:flex; border:0; box-shadow:none; }
+        #mtk-panel .mtk-addon { margin:10px; padding:0 0 12px; border-bottom:1px solid #222; }
+        #mtk-panel .mtk-addon > strong { display:block; padding:6px 9px; border:1px solid #292929; background:#101010; color:#eee; }
+        #mtk-panel .mtk-addon p { margin:10px; color:#aaa; line-height:1.5; }
+        #mtk-panel .mtk-addon > label { margin-left:10px; }
+        #mtk-panel .mtk-addon button { margin-left:15px; }
+        #mtk-panel .mtk-range { display:grid; grid-template-columns:1fr auto; gap:14px; padding:16px; }
+        #mtk-panel .mtk-range input { grid-column:1/-1; width:100%; }
+        #mtk-panel .mtk-enabled { display:block; padding:16px; }
+        #mtk-legendary-settings { position:relative; left:auto; top:auto; width:100%; height:100%; max-width:none; max-height:none; display:flex; flex-direction:column; border:0; background:#000; box-shadow:none; }
         #mtk-legendary-settings .ln-panel-head { display:none; }
     `);
     const button = document.createElement("button");
@@ -912,7 +907,7 @@
       button,
       button,
       scheduler2,
-      (panelX, panelY) => settings.updateCore({ buttonRight: innerWidth - panelX - 58, buttonTop: panelY }),
+      (panelX, panelY) => settings.updateCore({ buttonRight: innerWidth - panelX - button.getBoundingClientRect().width, buttonTop: panelY }),
       { button: true, click: () => panel2.hidden ? open() : close() }
     );
     scheduler2.cleanup(events2.on("addonChanged", () => {
@@ -4437,6 +4432,10 @@
 
   // src/addons/notification-position/settings-ui.js
   function renderSettings(ctx) {
+    const section = document.createElement("section");
+    section.className = "mtk-addon-settings";
+    const heading = document.createElement("h2");
+    heading.textContent = "Pozycja powiadomień";
     const label = document.createElement("label");
     label.className = "mtk-enabled";
     const enabled = document.createElement("input");
@@ -4447,13 +4446,14 @@
       if (event.id === ctx.id) enabled.checked = event.enabled;
     });
     label.append(enabled, " Pozycja powiadomień włączona");
-    ctx.container.append(label, rangeControl({
+    section.append(heading, label, rangeControl({
       label: "Odległość od dołu",
       value: ctx.settings.bottom,
       min: 0,
       max: 300,
       onChange: (bottom) => ctx.changeSettings({ bottom })
     }, ctx.scheduler));
+    ctx.container.append(section);
   }
 
   // src/addons/notification-position/index.js
@@ -4485,6 +4485,286 @@
       destroy: (ctx) => ctx?.styles.clear(),
       onSettingsChange: apply,
       renderSettings
+    };
+  }
+
+  // src/addons/detector-global/runtime.js
+  var ROOT_SELECTOR = ".heros-detector";
+  var GLOBAL_CLASS = "wykrywacz-global-exact";
+  var BUTTON_TITLE = "Wyślij na GLOBAL dokładnie komunikat Wykrywacza — bez zmian";
+  function startDetectorGlobal(ctx) {
+    const page2 = ctx.game.page;
+    const { scheduler: scheduler2 } = ctx;
+    const buttons = /* @__PURE__ */ new Set();
+    let busy = false;
+    let syncFrame = 0;
+    function ensureActive() {
+      if (scheduler2.disposed) throw new Error("Dodatek został wyłączony.");
+    }
+    function wait(ms) {
+      ensureActive();
+      return new Promise((resolve, reject) => {
+        const release = scheduler2.cleanup(() => reject(new Error("Dodatek został wyłączony.")));
+        scheduler2.timeout(() => {
+          release();
+          resolve();
+        }, ms);
+      });
+    }
+    function patchMethod(target, key, replacement) {
+      if (!target || typeof target[key] !== "function") return null;
+      const original = target[key];
+      const descriptor = Object.getOwnPropertyDescriptor(target, key);
+      let active = true;
+      const wrapper = function(...args) {
+        return (active ? replacement : original).apply(this, args);
+      };
+      try {
+        Object.defineProperty(target, key, { configurable: true, writable: true, value: wrapper });
+      } catch {
+        try {
+          target[key] = wrapper;
+        } catch {
+          return null;
+        }
+      }
+      if (target[key] !== wrapper) return null;
+      let restored = false;
+      function restore() {
+        if (restored) return;
+        restored = true;
+        active = false;
+        if (target[key] !== wrapper) return;
+        try {
+          if (descriptor) Object.defineProperty(target, key, descriptor);
+          else delete target[key];
+        } catch {
+          try {
+            target[key] = original;
+          } catch {
+          }
+        }
+      }
+      const release = scheduler2.cleanup(restore);
+      return () => {
+        release();
+        restore();
+      };
+    }
+    function label(element) {
+      return String(element.querySelector(".label")?.textContent ?? element.textContent ?? "").replace(/\s+/g, " ").trim();
+    }
+    function nativeButtons(detector) {
+      return [...detector.querySelectorAll(".btns-container .button, .btns-container button")].filter((button) => !button.classList.contains(GLOBAL_CLASS));
+    }
+    function selectedText() {
+      const active = document.activeElement;
+      if (typeof active?.value === "string" && Number.isInteger(active.selectionStart) && Number.isInteger(active.selectionEnd)) {
+        const selected2 = active.value.slice(active.selectionStart, active.selectionEnd);
+        if (selected2.length) return selected2;
+      }
+      const selected = page2.getSelection?.()?.toString?.();
+      return typeof selected === "string" && selected.length ? selected : null;
+    }
+    async function captureCopy(detector) {
+      const copy = nativeButtons(detector).find((button) => /\bkopiuj\b/i.test(label(button)));
+      if (!copy) return null;
+      let captured = null;
+      const restores = [];
+      const onCopy = (event) => {
+        if (captured !== null) return;
+        try {
+          const data = event.clipboardData?.getData?.("text/plain");
+          if (typeof data === "string" && data.length) {
+            captured = data;
+            return;
+          }
+        } catch {
+        }
+        captured = selectedText();
+      };
+      try {
+        restores.push(scheduler2.listen(document, "copy", onCopy));
+        restores.push(patchMethod(page2.navigator?.clipboard, "writeText", (text) => {
+          captured = text;
+          return Promise.resolve();
+        }));
+        const originalExec = document.execCommand;
+        restores.push(patchMethod(document, "execCommand", function(command, ...args) {
+          if (String(command).toLowerCase() === "copy") {
+            captured = selectedText();
+            return true;
+          }
+          return originalExec.call(this, command, ...args);
+        }));
+        copy.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: page2 }));
+        await wait(0);
+      } finally {
+        restores.reverse().forEach((restore) => restore?.());
+      }
+      return typeof captured === "string" && captured.length ? captured : null;
+    }
+    function getChat() {
+      return page2.Engine?.chatController?.getChatInputWrapper?.() || null;
+    }
+    function rememberChannel(chat) {
+      return { name: chat.getChannelName?.(), receiver: chat.getPrivateReceiver?.(), style: chat.getStyleMessage?.() };
+    }
+    function restoreChannel(chat, previous, expectedChannel = null) {
+      try {
+        const current = chat.getChannelName?.();
+        if (previous.name && current && current !== previous.name && (!expectedChannel || current === expectedChannel)) {
+          chat.setChannel?.({ name: previous.name }, previous.receiver, previous.style);
+        }
+      } catch {
+      }
+    }
+    async function captureCall(detector) {
+      const call = nativeButtons(detector).find((button) => /\b(klan|zawołaj|zawolaj)\b/i.test(label(button)));
+      const chat = getChat();
+      if (!call || typeof chat?.getDataAndSendRequest !== "function") return null;
+      const previous = rememberChannel(chat);
+      let captured = null;
+      const restore = patchMethod(chat, "getDataAndSendRequest", (message) => {
+        if (captured === null) captured = message;
+        return true;
+      });
+      if (!restore) return null;
+      const restoreChat = () => restoreChannel(chat, previous);
+      const release = scheduler2.cleanup(restoreChat);
+      try {
+        call.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: page2 }));
+        for (let attempt = 0; attempt < 6 && captured === null; attempt++) await wait(20);
+      } finally {
+        restore();
+        restoreChat();
+        release();
+      }
+      return typeof captured === "string" && captured.length ? captured : null;
+    }
+    async function sendGlobal(message) {
+      ensureActive();
+      const chat = getChat();
+      if (typeof chat?.setChannel !== "function" || typeof chat?.getDataAndSendRequest !== "function") {
+        throw new Error("Czat Margonem nie jest jeszcze gotowy.");
+      }
+      const previous = rememberChannel(chat);
+      const restore = () => restoreChannel(chat, previous, "GLOBAL");
+      const release = scheduler2.cleanup(restore);
+      try {
+        if (previous.name !== "GLOBAL") {
+          chat.setChannel({ name: "GLOBAL" });
+          for (let attempt = 0; attempt < 10; attempt++) {
+            if (chat.getChannelName?.() === "GLOBAL") break;
+            await wait(25);
+          }
+        }
+        ensureActive();
+        if (typeof chat.getChannelName === "function" && chat.getChannelName() !== "GLOBAL") {
+          throw new Error("Nie udało się przełączyć czatu na GLOBAL.");
+        }
+        return await chat.getDataAndSendRequest(message);
+      } finally {
+        restore();
+        release();
+      }
+    }
+    async function onGlobalClick(event, detector, button) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (busy || scheduler2.disposed) return;
+      busy = true;
+      button.dataset.busy = "1";
+      button.textContent = "...";
+      try {
+        let message = await captureCopy(detector);
+        ensureActive();
+        if (message === null) message = await captureCall(detector);
+        ensureActive();
+        if (message === null) throw new Error("Nie udało się odczytać dokładnego komunikatu Wykrywacza. Nic nie wysłano.");
+        await sendGlobal(message);
+        if (!scheduler2.disposed) {
+          button.textContent = "OK";
+          button.title = BUTTON_TITLE;
+        }
+      } catch (error) {
+        if (!scheduler2.disposed) {
+          button.textContent = "BŁĄD";
+          button.title = error.message;
+          console.warn("[QADDONS Wykrywacz → GLOBAL]", error);
+        }
+      } finally {
+        busy = false;
+        button.dataset.busy = "0";
+        if (!scheduler2.disposed) scheduler2.timeout(() => {
+          if (button.isConnected) button.textContent = "GLOBAL";
+        }, 1400);
+      }
+    }
+    function sync() {
+      syncFrame = 0;
+      if (scheduler2.disposed) return;
+      for (const button of buttons) {
+        if (!button.isConnected) buttons.delete(button);
+      }
+      for (const detector of document.querySelectorAll(ROOT_SELECTOR)) {
+        const container = detector.querySelector(".btns-container");
+        if (!container || container.querySelector(`.${GLOBAL_CLASS}`)) continue;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = GLOBAL_CLASS;
+        button.textContent = "GLOBAL";
+        button.title = BUTTON_TITLE;
+        buttons.add(button);
+        container.append(button);
+      }
+    }
+    function requestSync() {
+      if (!scheduler2.disposed && !syncFrame) syncFrame = scheduler2.frame(sync);
+    }
+    page2.__WYKRYWACZ_GLOBAL_EXACT__?.destroy?.();
+    const api = { version: "1.0.0", sync: requestSync, destroy: () => scheduler2.destroy() };
+    page2.__WYKRYWACZ_GLOBAL_EXACT__ = api;
+    ctx.styles.set("button", `
+        .${GLOBAL_CLASS} { min-height:24px; padding:3px 12px; border:1px solid #555; border-radius:0; background:#080808; color:#eee; font:12px Arial,sans-serif; cursor:pointer; }
+        .${GLOBAL_CLASS}:hover { background:#202020; border-color:#aaa; }
+        .${GLOBAL_CLASS}[data-busy="1"] { opacity:.6; cursor:wait; }
+    `);
+    scheduler2.listen(document, "click", (event) => {
+      const button = event.target.closest?.(`.${GLOBAL_CLASS}`);
+      if (button && buttons.has(button)) onGlobalClick(event, button.closest(ROOT_SELECTOR), button);
+    }, { capture: true });
+    scheduler2.observer(MutationObserver, requestSync).observe(document.documentElement, { childList: true, subtree: true });
+    scheduler2.cleanup(() => {
+      buttons.forEach((button) => button.remove());
+      buttons.clear();
+      ctx.styles.clear();
+      if (page2.__WYKRYWACZ_GLOBAL_EXACT__ === api) delete page2.__WYKRYWACZ_GLOBAL_EXACT__;
+    });
+    requestSync();
+  }
+
+  // src/addons/detector-global/index.js
+  function createDetectorGlobal() {
+    return {
+      id: "detector-global",
+      name: "Wykrywacz → GLOBAL",
+      description: "Dodaje do wykrywacza przycisk wysyłający jego dokładny komunikat na GLOBAL.",
+      defaultEnabled: true,
+      defaults: {},
+      enable: startDetectorGlobal,
+      renderSettings(ctx) {
+        const section = document.createElement("section");
+        section.className = "mtk-addon-settings";
+        section.innerHTML = '<h2>Wykrywacz → GLOBAL</h2><label class="mtk-enabled"><input type="checkbox"> Dodatek aktywny</label><p>Otwórz okno wykrywacza i kliknij <strong>GLOBAL</strong> obok jego przycisków.</p><p>Wiadomość pochodzi bezpośrednio z wykrywacza. Dodatek nie zmienia jej treści i po wysłaniu przywraca poprzedni kanał czatu.</p><p>Jeśli nie da się odczytać komunikatu, wiadomość nie zostanie wysłana. Najedź na przycisk z napisem „BŁĄD”, żeby zobaczyć przyczynę.</p><p>Wyłącz osobny skrypt „Wykrywacz → GLOBAL”, jeśli był wcześniej zainstalowany.</p>';
+        const enabled = section.querySelector("input");
+        enabled.checked = ctx.enabled;
+        ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        ctx.events.on("addonChanged", (event) => {
+          if (event.id === ctx.id) enabled.checked = event.enabled;
+        });
+        ctx.container.append(section);
+      }
     };
   }
 
@@ -4526,6 +4806,7 @@
       manager = createAddonManager({ settings, events, styles, game, ui: panel });
       manager.register(createLegendaryNotificator());
       manager.register(createNotificationPosition());
+      manager.register(createDetectorGlobal());
       panel.connect(manager);
       manager.start();
       game.start();

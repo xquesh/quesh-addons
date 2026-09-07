@@ -1,0 +1,558 @@
+// ==UserScript==
+// @name         Wykrywacz -> GLOBAL (dokładny komunikat)
+// @namespace    quesh.margonem
+// @version      1.0.0
+// @description  Dodaje przycisk GLOBAL do okna Wykrywacza i wysyła dokładnie komunikat generowany przez Wykrywacz, bez dopisywania ani zmieniania treści.
+// @match        https://*.margonem.pl/*
+// @match        https://*.margonem.com/*
+// @exclude      https://www.margonem.pl/*
+// @exclude      https://forum.margonem.pl/*
+// @grant        unsafeWindow
+// @run-at       document-idle
+// ==/UserScript==
+
+(() => {
+    'use strict';
+
+    const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+
+    const ROOT_SELECTOR = '.heros-detector';
+    const BUTTONS_SELECTOR = '.btns-container';
+    const GLOBAL_CLASS = 'wykrywacz-global-exact';
+
+    let destroyed = false;
+    let observer = null;
+    let syncFrame = 0;
+
+    const log = (...args) => console.log('[Wykrywacz -> GLOBAL]', ...args);
+    const warn = (...args) => console.warn('[Wykrywacz -> GLOBAL]', ...args);
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function buttonLabel(element) {
+        return String(
+            element?.querySelector?.('.label')?.textContent ??
+            element?.textContent ??
+            ''
+        ).replace(/\s+/g, ' ').trim();
+    }
+
+    function getDetectorButtons(detector) {
+        return [...detector.querySelectorAll(
+            `${BUTTONS_SELECTOR} .button, ${BUTTONS_SELECTOR} button`
+        )].filter(button => !button.classList.contains(GLOBAL_CLASS));
+    }
+
+    function findNativeCopyButton(detector) {
+        return getDetectorButtons(detector).find(button =>
+            /^kopiuj$/i.test(buttonLabel(button)) ||
+            /\bkopiuj\b/i.test(buttonLabel(button))
+        ) || null;
+    }
+
+    function findNativeCallButton(detector) {
+        return getDetectorButtons(detector).find(button => {
+            const label = buttonLabel(button);
+
+            return (
+                /\bklan\b/i.test(label) ||
+                /\bzawołaj\b/i.test(label) ||
+                /\bzawolaj\b/i.test(label)
+            );
+        }) || null;
+    }
+
+    function getSelectedInputText() {
+        const active = document.activeElement;
+
+        if (
+            active &&
+            typeof active.value === 'string' &&
+            Number.isInteger(active.selectionStart) &&
+            Number.isInteger(active.selectionEnd)
+        ) {
+            const selected = active.value.slice(
+                active.selectionStart,
+                active.selectionEnd
+            );
+
+            if (selected.length) {
+                return selected;
+            }
+        }
+
+        const selection = window.getSelection?.()?.toString?.();
+
+        return typeof selection === 'string' && selection.length
+            ? selection
+            : null;
+    }
+
+    /**
+     * Próbuje uzyskać dokładnie ten sam tekst, który natywny przycisk
+     * "Kopiuj" Wykrywacza przekazuje do schowka.
+     *
+     * Nie parsujemy nazwy NPC, mapy, poziomu ani koordynatów i nie budujemy
+     * własnego komunikatu. Treść pochodzi wyłącznie z Wykrywacza.
+     */
+    async function captureNativeCopyText(detector) {
+        const copyButton = findNativeCopyButton(detector);
+
+        if (!copyButton) {
+            return null;
+        }
+
+        let captured = null;
+
+        const clipboard = navigator.clipboard;
+        let ownClipboardPatch = false;
+
+        const originalWriteText = clipboard?.writeText;
+        const originalExecCommand = document.execCommand;
+
+        const onCopy = event => {
+            if (captured !== null) {
+                return;
+            }
+
+            try {
+                const fromClipboardData =
+                    event.clipboardData?.getData?.('text/plain');
+
+                if (typeof fromClipboardData === 'string' && fromClipboardData.length) {
+                    captured = fromClipboardData;
+                    return;
+                }
+            } catch {}
+
+            const selected = getSelectedInputText();
+
+            if (selected !== null) {
+                captured = selected;
+            }
+        };
+
+        try {
+            document.addEventListener('copy', onCopy, false);
+
+            if (clipboard && typeof originalWriteText === 'function') {
+                try {
+                    Object.defineProperty(clipboard, 'writeText', {
+                        configurable: true,
+                        writable: true,
+                        value(text) {
+                            captured = text;
+                            return Promise.resolve();
+                        }
+                    });
+
+                    ownClipboardPatch = clipboard.writeText !== originalWriteText;
+                } catch {
+                    try {
+                        clipboard.writeText = text => {
+                            captured = text;
+                            return Promise.resolve();
+                        };
+
+                        ownClipboardPatch = clipboard.writeText !== originalWriteText;
+                    } catch {}
+                }
+            }
+
+            if (typeof originalExecCommand === 'function') {
+                try {
+                    document.execCommand = function(command, ...args) {
+                        if (String(command).toLowerCase() === 'copy') {
+                            const selected = getSelectedInputText();
+
+                            if (selected !== null) {
+                                captured = selected;
+                            }
+
+                            return true;
+                        }
+
+                        return originalExecCommand.call(this, command, ...args);
+                    };
+                } catch {}
+            }
+
+            copyButton.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            }));
+
+            // Dajemy natywnemu handlerowi jeden mikrotask na wykonanie
+            // Clipboard API, jeśli jego implementacja jest asynchroniczna.
+            await wait(0);
+        } catch (error) {
+            warn('Nie udało się przechwycić natywnego KOPIUJ:', error);
+        } finally {
+            document.removeEventListener('copy', onCopy, false);
+
+            if (typeof originalExecCommand === 'function') {
+                try {
+                    document.execCommand = originalExecCommand;
+                } catch {}
+            }
+
+            if (clipboard && typeof originalWriteText === 'function' && ownClipboardPatch) {
+                try {
+                    Object.defineProperty(clipboard, 'writeText', {
+                        configurable: true,
+                        writable: true,
+                        value: originalWriteText
+                    });
+                } catch {
+                    try {
+                        clipboard.writeText = originalWriteText;
+                    } catch {}
+                }
+            }
+        }
+
+        return typeof captured === 'string' && captured.length
+            ? captured
+            : null;
+    }
+
+    function getChatWrapper() {
+        return page.Engine?.chatController?.getChatInputWrapper?.() || null;
+    }
+
+    /**
+     * Fallback: jeżeli wersja Wykrywacza nie ma działającego KOPIUJ,
+     * klikamy jego natywny przycisk wołania i tylko przechwytujemy tekst,
+     * który Wykrywacz sam chciał przekazać do czatu.
+     *
+     * Nadal nie konstruujemy wiadomości samodzielnie.
+     */
+    async function captureNativeChatText(detector) {
+        const nativeButton = findNativeCallButton(detector);
+        const chat = getChatWrapper();
+
+        if (
+            !nativeButton ||
+            !chat ||
+            typeof chat.getDataAndSendRequest !== 'function'
+        ) {
+            return null;
+        }
+
+        const originalSend = chat.getDataAndSendRequest;
+        const previousChannel = chat.getChannelName?.();
+        const previousReceiver = chat.getPrivateReceiver?.();
+        const previousStyle = chat.getStyleMessage?.();
+
+        let captured = null;
+
+        try {
+            chat.getDataAndSendRequest = function(message, ...args) {
+                if (captured === null) {
+                    captured = message;
+                }
+
+                // Nie wysyłamy natywnego wywołania na klan.
+                // Potrzebujemy wyłącznie tekstu, który Wykrywacz wygenerował.
+                return true;
+            };
+
+            nativeButton.dispatchEvent(new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            }));
+
+            // Obsługuje także wersje, które wykonują wysłanie chwilę po kliknięciu.
+            for (let attempt = 0; attempt < 6 && captured === null; attempt++) {
+                await wait(20);
+            }
+        } catch (error) {
+            warn('Nie udało się przechwycić natywnego wołania:', error);
+        } finally {
+            try {
+                chat.getDataAndSendRequest = originalSend;
+            } catch {}
+
+            try {
+                const currentChannel = chat.getChannelName?.();
+
+                if (
+                    previousChannel &&
+                    currentChannel &&
+                    currentChannel !== previousChannel
+                ) {
+                    chat.setChannel?.(
+                        { name: previousChannel },
+                        previousReceiver,
+                        previousStyle
+                    );
+                }
+            } catch {}
+        }
+
+        return typeof captured === 'string' && captured.length
+            ? captured
+            : null;
+    }
+
+    async function getExactDetectorMessage(detector) {
+        // Preferujemy natywne KOPIUJ, bo jest bezpośrednim źródłem tekstu.
+        const copied = await captureNativeCopyText(detector);
+
+        if (copied !== null) {
+            return copied;
+        }
+
+        // Fallback nadal pobiera tekst z natywnej funkcji Wykrywacza.
+        return await captureNativeChatText(detector);
+    }
+
+    async function sendExactMessageToGlobal(message) {
+        if (typeof message !== 'string' || message.length === 0) {
+            throw new Error('Wykrywacz nie zwrócił komunikatu.');
+        }
+
+        const chat = getChatWrapper();
+
+        if (
+            !chat ||
+            typeof chat.setChannel !== 'function' ||
+            typeof chat.getDataAndSendRequest !== 'function'
+        ) {
+            throw new Error('Czat Margonem nie jest jeszcze gotowy.');
+        }
+
+        const previousChannel = chat.getChannelName?.();
+        const previousReceiver = chat.getPrivateReceiver?.();
+        const previousStyle = chat.getStyleMessage?.();
+
+        try {
+            if (previousChannel !== 'GLOBAL') {
+                chat.setChannel({ name: 'GLOBAL' });
+
+                for (let attempt = 0; attempt < 10; attempt++) {
+                    if (chat.getChannelName?.() === 'GLOBAL') {
+                        break;
+                    }
+
+                    await wait(25);
+                }
+            }
+
+            if (
+                typeof chat.getChannelName === 'function' &&
+                chat.getChannelName() !== 'GLOBAL'
+            ) {
+                throw new Error('Nie udało się przełączyć czatu na GLOBAL.');
+            }
+
+            /*
+             * KLUCZOWE:
+             * "message" idzie do czatu dokładnie takie, jakie przejęliśmy
+             * z Wykrywacza. Bez trim(), replace(), prefiksów i dopisków.
+             */
+            return await chat.getDataAndSendRequest(message);
+        } finally {
+            try {
+                if (
+                    previousChannel &&
+                    previousChannel !== 'GLOBAL' &&
+                    chat.getChannelName?.() === 'GLOBAL'
+                ) {
+                    chat.setChannel(
+                        { name: previousChannel },
+                        previousReceiver,
+                        previousStyle
+                    );
+                }
+            } catch {}
+        }
+    }
+
+    async function onGlobalClick(event, detector, globalButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (globalButton.dataset.busy === '1') {
+            return;
+        }
+
+        globalButton.dataset.busy = '1';
+
+        const label = globalButton.querySelector('.label') || globalButton;
+
+        const normalText = label.textContent;
+
+        try {
+            label.textContent = '...';
+
+            const message = await getExactDetectorMessage(detector);
+
+            if (message === null) {
+                throw new Error(
+                    'Nie udało się odczytać dokładnego komunikatu Wykrywacza. ' +
+                    'Nie wysyłam własnej, przerobionej wersji.'
+                );
+            }
+
+            await sendExactMessageToGlobal(message);
+
+            label.textContent = 'OK';
+            log('Wysłano bez zmian:', message);
+
+            setTimeout(() => {
+                if (label.isConnected) {
+                    label.textContent = normalText;
+                }
+            }, 900);
+        } catch (error) {
+            label.textContent = 'BŁĄD';
+            warn(error);
+
+            setTimeout(() => {
+                if (label.isConnected) {
+                    label.textContent = normalText;
+                }
+            }, 1400);
+        } finally {
+            globalButton.dataset.busy = '0';
+        }
+    }
+
+    function createGlobalButton(detector, container) {
+        const template = getDetectorButtons(detector)[0];
+
+        let button;
+
+        if (template) {
+            button = template.cloneNode(true);
+
+            // cloneNode nie kopiuje listenerów JS, więc nie odziedziczymy
+            // akcji oryginalnego przycisku.
+            button.removeAttribute('id');
+            button.removeAttribute('tip-id');
+            button.removeAttribute('disabled');
+            button.classList.remove('disabled');
+
+            if ('disabled' in button) {
+                button.disabled = false;
+            }
+
+            button.querySelectorAll('[id]').forEach(node =>
+                node.removeAttribute('id')
+            );
+
+            button.querySelectorAll('[tip-id]').forEach(node =>
+                node.removeAttribute('tip-id')
+            );
+        } else {
+            button = document.createElement('div');
+            button.className = 'button small green';
+            button.innerHTML = '<div class="label">GLOBAL</div>';
+        }
+
+        button.classList.add(GLOBAL_CLASS);
+        button.dataset.wykrywaczGlobal = '1';
+
+        const label = button.querySelector('.label') || button;
+        label.textContent = 'GLOBAL';
+
+        button.title =
+            'Wyślij na GLOBAL dokładnie komunikat Wykrywacza — bez zmian';
+
+        button.addEventListener('click', event =>
+            onGlobalClick(event, detector, button)
+        );
+
+        container.appendChild(button);
+    }
+
+    function syncDetector(detector) {
+        if (!(detector instanceof Element)) {
+            return;
+        }
+
+        const container = detector.querySelector(BUTTONS_SELECTOR);
+
+        if (!container) {
+            return;
+        }
+
+        if (container.querySelector(`.${GLOBAL_CLASS}`)) {
+            return;
+        }
+
+        createGlobalButton(detector, container);
+    }
+
+    function sync() {
+        syncFrame = 0;
+
+        if (destroyed) {
+            return;
+        }
+
+        document.querySelectorAll(ROOT_SELECTOR).forEach(syncDetector);
+    }
+
+    function requestSync() {
+        if (destroyed || syncFrame) {
+            return;
+        }
+
+        syncFrame = requestAnimationFrame(sync);
+    }
+
+    function start() {
+        requestSync();
+
+        observer = new MutationObserver(requestSync);
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+
+        log(
+            'Aktywny. Przycisk GLOBAL będzie dodawany do',
+            `${ROOT_SELECTOR} ${BUTTONS_SELECTOR}.`
+        );
+    }
+
+    function destroy() {
+        if (destroyed) {
+            return;
+        }
+
+        destroyed = true;
+
+        observer?.disconnect();
+        observer = null;
+
+        if (syncFrame) {
+            cancelAnimationFrame(syncFrame);
+            syncFrame = 0;
+        }
+
+        document.querySelectorAll(`.${GLOBAL_CLASS}`).forEach(button =>
+            button.remove()
+        );
+
+        if (page.__WYKRYWACZ_GLOBAL_EXACT__?.destroy === destroy) {
+            delete page.__WYKRYWACZ_GLOBAL_EXACT__;
+        }
+    }
+
+    page.__WYKRYWACZ_GLOBAL_EXACT__?.destroy?.();
+
+    page.__WYKRYWACZ_GLOBAL_EXACT__ = {
+        version: '1.0.0',
+        sync: requestSync,
+        destroy
+    };
+
+    start();
+})();

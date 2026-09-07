@@ -9,6 +9,7 @@ import { createPanel } from './core/ui/panel.js';
 import { createLegendaryNotificator } from './addons/legendary-notificator/index.js';
 import { createNotificationPosition } from './addons/notification-position/index.js';
 import { VERSION } from './version.js';
+import { createDetectorGlobal } from './addons/detector-global/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -48,6 +49,7 @@ function start() {
         manager = createAddonManager({ settings, events, styles, game, ui: panel });
         manager.register(createLegendaryNotificator());
         manager.register(createNotificationPosition());
+        manager.register(createDetectorGlobal());
         panel.connect(manager);
         manager.start();
         game.start();

@@ -73,6 +73,7 @@
     };
     window.fixtureOriginalParser = Engine.communication.parseJSON;
 </script>
+<script src="./detector-sanity.js"></script>
 <script src="../dist/installer.user.js"></script>
 <script>
     async function run() {
@@ -111,9 +112,15 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 2, 'Manager dwóch addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 3, 'Manager trzech addonów');
+        await runDetectorChecks(manager, assert, wait);
+        assert(getComputedStyle(document.querySelector('#mtk-panel')).backgroundColor === 'rgb(0, 0, 0)', 'Czarny panel');
+        assert(getComputedStyle(document.querySelector('#mtk-button')).borderRadius === '0px', 'Kwadratowy przycisk');
+        assert(document.querySelector('#mtk-button').getBoundingClientRect().width === 42, 'Mniejszy przycisk 42px');
         document.querySelector('.mtk-addon button').click();
         assert(document.querySelectorAll('.ln-tab-button').length === 11, '11 zakładek');
+        assert(document.querySelector('.ln-tab-content').getBoundingClientRect().width > 300, 'Ustawienia wykorzystują szerokość panelu');
+        assert(document.querySelector('.ln-panel-foot').getBoundingClientRect().top >= document.querySelector('.ln-panel-body').getBoundingClientRect().bottom - 1, 'Stopka pod formularzem');
         assert(!document.querySelector('[data-key="notificationBottomOffset"]'), 'Wydzielone ustawienia powiadomień');
         document.querySelector('[data-tab="canvas"]').click();
         assert(document.querySelector('[data-pane="canvas"]').classList.contains('active'), 'Zakładka CANVAS');
@@ -189,7 +196,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: installer → runtime, page context, synthetic browser DOM, settings, 10 presets, loc l/k, mixed rarity, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: loader, three addons, detector exact GLOBAL/copy/fallback/cleanup, monochrome UI, settings, 10 presets, loc l/k, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {
