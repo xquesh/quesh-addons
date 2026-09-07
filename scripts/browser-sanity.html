@@ -29,7 +29,7 @@
         <div class="positioner bottom"><div class="bottom-panel-of-bottom-positioner"><div class="hp-indicator-wrapper"></div></div></div>
     </div>
 </div>
-<div class="mAlert-layer"><div class="big-messages">Komunikat</div></div>
+<div class="mAlert-layer"><div class="big-messages"><span style="font-size:15px;color:rgb(160, 170, 180)">Komunikat</span></div></div>
 <div class="console-layer" style="top:17px">Konsola</div>
 <pre id="result">RUNNING</pre>
 <script>
@@ -143,6 +143,41 @@
         bottom.dispatchEvent(new Event('change', { bubbles: true }));
         assert(getComputedStyle(document.querySelector('.big-messages')).bottom === '100px', 'Pozycja powiadomień');
         assert(document.querySelector('.console-layer').style.top === '17px', 'Konsola bez zmian');
+        const notificationText = document.querySelector('.big-messages span');
+        const consoleSize = getComputedStyle(document.querySelector('.console-layer')).fontSize;
+        function changeTypography(key, value) {
+            const input = document.querySelector(`[data-notification-setting="${key}"]`);
+            if (input.type === 'checkbox') input.checked = value;
+            else input.value = value;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        assert(getComputedStyle(notificationText).fontSize === '15px', 'Domyślna czcionka gry zachowana');
+        changeTypography('customTypography', true);
+        changeTypography('fontSize', 24);
+        changeTypography('fontFamily', 'georgia');
+        changeTypography('fontWeight', '700');
+        changeTypography('italic', true);
+        changeTypography('shadow', 'outline');
+        assert(getComputedStyle(notificationText).fontSize === '24px', 'Rozmiar także w zagnieżdżonym tekście');
+        assert(getComputedStyle(notificationText).fontFamily.includes('Georgia'), 'Wybrana czcionka');
+        assert(getComputedStyle(notificationText).fontWeight === '700', 'Grubość tekstu');
+        assert(getComputedStyle(notificationText).fontStyle === 'italic', 'Kursywa');
+        assert(getComputedStyle(notificationText).color === 'rgb(160, 170, 180)', 'Domyślnie zachowane kolory gry');
+        changeTypography('customColor', true);
+        changeTypography('color', '#abcdef');
+        assert(getComputedStyle(notificationText).color === 'rgb(171, 205, 239)', 'Własny kolor');
+        assert(getComputedStyle(document.querySelector('.console-layer')).fontSize === consoleSize, 'Typografia konsoli bez zmian');
+        manager.setEnabled('notification-position', false);
+        assert(getComputedStyle(notificationText).fontSize === '15px', 'Wyłączenie przywraca typografię gry');
+        manager.setEnabled('notification-position', true);
+        assert(getComputedStyle(notificationText).fontSize === '24px', 'Ponowne włączenie odtwarza wygląd');
+        __MARGONEM_TOOLKIT__.open();
+        document.querySelectorAll('.mtk-addon button')[1].click();
+        assert(document.querySelector('[data-notification-setting="fontSize"]').value === '24', 'Ustawienia zachowane po otwarciu');
+        document.querySelector('[data-reset-typography]').click();
+        assert(getComputedStyle(notificationText).fontSize === '15px', 'Reset przywraca czcionkę gry');
+        assert(getComputedStyle(notificationText).color === 'rgb(160, 170, 180)', 'Reset przywraca kolor gry');
+        assert(getComputedStyle(document.querySelector('.big-messages')).bottom === '100px', 'Reset wyglądu zachowuje pozycję');
         __MARGONEM_TOOLKIT__.open();
         document.querySelector('[data-close]').click();
 

@@ -1,13 +1,13 @@
 import { defaults } from './defaults.js';
 import { renderSettings } from './settings-ui.js';
+import { normalize, typographyCss } from './typography.js';
 
 function apply(ctx) {
-    const value = Number(ctx.settings.bottom);
-    const bottom = Number.isFinite(value) ? Math.max(0, Math.min(300, value)) : defaults.bottom;
+    const { bottom } = normalize(ctx.settings);
+    const selectors = ['.mAlert-layer .big-messages', '.mAlert-layer .big-messages-light-mode', '.alerts-layer > .big-messages'];
+    const typography = typographyCss(ctx.settings);
     ctx.styles.set('position', `
-        .mAlert-layer .big-messages,
-        .mAlert-layer .big-messages-light-mode,
-        .alerts-layer > .big-messages {
+        ${selectors.join(',\n')} {
             top: auto !important;
             bottom: ${bottom}px !important;
             left: 50% !important;
@@ -15,13 +15,14 @@ function apply(ctx) {
             transform: translateX(-50%) !important;
             text-align: center !important;
         }
+        ${typography ? `${selectors.flatMap(selector => [selector, `${selector} *`]).join(',\n')} { ${typography} }` : ''}
     `);
 }
 
 export function createNotificationPosition() {
     return {
         id: 'notification-position', name: 'Pozycja powiadomień',
-        description: 'Zmienia pozycję komunikatów tekstowych gry.',
+        description: 'Zmienia pozycję, czcionkę, rozmiar i wygląd komunikatów tekstowych gry.',
         defaultEnabled: true, defaults,
         enable: apply,
         disable: ctx => ctx.styles.remove('position'),

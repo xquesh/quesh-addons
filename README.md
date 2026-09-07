@@ -5,7 +5,8 @@ Mały loader Tampermonkey pobiera runtime QADDONS z trzema niezależnymi dodatka
 - **Legendary Notificator** — neonowe powiadomienie po legendarnym łupie,
   przeniesione z istniejącego Legendary Notificator 6.2.1.
 - **Pozycja powiadomień** — ustawienie odległości tekstowych komunikatów gry
-  od dołu ekranu (0–300 px), bez przesuwania konsoli.
+  od dołu ekranu (0–300 px) oraz ich czcionki, rozmiaru, grubości, kursywy,
+  odstępów, koloru i cienia, bez zmiany konsoli i czatu.
 - **Wykrywacz → GLOBAL** — przycisk GLOBAL w oknie wykrywacza, wysyłający
   dokładnie jego natywny komunikat; przeniesiony z dostarczonego skryptu 1.0.0.
 
@@ -18,6 +19,16 @@ Konfigurację można otworzyć także dla wyłączonego dodatku; nie uruchamia t
 Panel i formularze wszystkich dodatków mają czarne tło, biały/szary tekst i proste
 obramowania. Przycisk z ikoną ma 42 × 42 px, bez zaokrągleń, z białą poświatą
 po najechaniu. Kolory efektów Legendary Notificatora nadal ustawia się niezależnie.
+
+### Wygląd powiadomień
+
+W ustawieniach **Pozycji powiadomień** zaznacz **Własny wygląd powiadomień**.
+Możesz wybrać czcionkę systemową, rozmiar 10–40 px, grubość, kursywę, odstęp
+między literami i wierszami oraz cień lub czarny obrys. Opcjonalny własny kolor
+zastępuje kolory komunikatów; domyślnie pozostają kolory gry.
+Podgląd reaguje podczas przesuwania suwaka, a puszczenie zapisuje zmianę
+i stosuje ją do komunikatów. **Przywróć wygląd gry** resetuje typografię,
+zachowując ustawioną pozycję. Wyłączenie dodatku usuwa wszystkie jego style.
 
 ### Wykrywacz → GLOBAL
 
@@ -170,6 +181,7 @@ src/
       index.js
       defaults.js
       settings-ui.js
+      typography.js
     detector-global/
       index.js
       runtime.js

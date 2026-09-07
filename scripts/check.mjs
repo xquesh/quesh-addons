@@ -17,6 +17,7 @@ import { createLegendaryNotificator } from '../src/addons/legendary-notificator/
 import { LEGENDARY_DOM_SELECTOR } from '../src/addons/legendary-notificator/constants.js';
 import { installEffectStyles } from '../src/addons/legendary-notificator/effect-styles.js';
 import './check-updates.mjs';
+import { normalize as normalizeTypography, typographyCss } from '../src/addons/notification-position/typography.js';
 
 async function listFiles(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
@@ -67,6 +68,16 @@ function fakeDocument() {
     };
 }
 
+assert.equal(typographyCss({ bottom: 75 }), '', 'Stare ustawienia zachowują wygląd gry');
+const typographyLimits = normalizeTypography({ fontSize: 999, letterSpacing: -99, lineHeight: Infinity, fontFamily: 'bad; color:red', color: '#fff; display:none' });
+assert.equal(typographyLimits.fontSize, 40);
+assert.equal(typographyLimits.letterSpacing, -1);
+assert.equal(typographyLimits.lineHeight, 1.3);
+assert.equal(typographyLimits.fontFamily, 'game');
+assert.equal(typographyLimits.color, '#ffffff');
+assert.doesNotMatch(typographyCss({ customTypography: true, fontFamily: 'bad; display:none', customColor: true, color: '#fff; display:none' }), /display:/);
+assert.doesNotMatch(typographyCss({ customTypography: true }), /(?:^|\n)color:/);
+console.log('OK: domyślna typografia bez zmian, limity i walidacja CSS');
 const files = await listFiles('src');
 const sourceFiles = files.filter(file => file.endsWith('.js'));
 for (const path of [...sourceFiles, ...await listFiles('scripts'), 'dist/installer.user.js', 'dist/margonem-toolkit.js']) {
