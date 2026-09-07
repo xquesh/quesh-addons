@@ -7,7 +7,7 @@ Mały loader Tampermonkey pobiera runtime QADDONS z trzema niezależnymi dodatka
 - **Pozycja powiadomień** — ustawienie odległości tekstowych komunikatów gry
   od dołu ekranu (0–300 px) oraz ich czcionki, rozmiaru, grubości, kursywy,
   odstępów, koloru i cienia, bez zmiany konsoli i czatu.
-- **Wykrywacz → GLOBAL** — przycisk GLOBAL w oknie wykrywacza, wysyłający
+- **Wykrywacz → czat** — przycisk w oknie wykrywacza, wysyłający na wybrane kanały
   dokładnie jego natywny komunikat; przeniesiony z dostarczonego skryptu 1.0.0.
 
 Przycisk z ikoną **quesh.png** otwiera listę **DODATKI** w panelu **QADDONS**. Checkbox rzeczywiście uruchamia lub
@@ -30,15 +30,21 @@ Podgląd reaguje podczas przesuwania suwaka, a puszczenie zapisuje zmianę
 i stosuje ją do komunikatów. **Przywróć wygląd gry** resetuje typografię,
 zachowując ustawioną pozycję. Wyłączenie dodatku usuwa wszystkie jego style.
 
-### Wykrywacz → GLOBAL
+### Wykrywacz → czat
 
-Dodatek jest domyślnie włączony. Otwórz wykrywacz i kliknij **GLOBAL** obok
-jego natywnych przycisków. Pobiera tekst z przycisku **Kopiuj** (Clipboard API,
-`execCommand` lub zdarzenie `copy`), a jeśli to niemożliwe — z natywnego wołania
-na klan, przechwytując wysłanie. Wysyła przejęty tekst na GLOBAL bez zmiany spacji,
-nowych linii, linków ani dopisków i przywraca poprzedni kanał czatu.
-Nie wysyła wiadomości automatycznie. Bez dokładnego tekstu wyświetla **BŁĄD**;
-przyczynę można odczytać po najechaniu na przycisk.
+Dodatek jest domyślnie włączony i ma wybrany tylko **Lokalny**, również po aktualizacji
+starszej konfiguracji. W **USTAWIENIACH** zaznacz kanały: **Lokalny**, **Globalny**,
+**Klan**, **Grupa**. Kliknięcie wysyła na każdy zaznaczony kanał. Do testów zostaw
+tylko Lokalny; przycisk ma wtedy napis **LOKALNY**. Pusty wybór wyłącza wysyłanie.
+
+Pobiera tekst z natywnej ikony kopiowania przy nazwie mapy (Clipboard API,
+`execCommand` lub zdarzenie `copy`), a w starszych wariantach także z przycisku
+**Kopiuj** lub wołania na klan, przechwytując wysłanie. Przekazuje dokładny tekst
+do natywnej procedury czatu i przywraca poprzedni kanał, odbiorcę oraz styl.
+Nie wysyła automatycznie ani po zmianie ustawień. Niedostępny kanał lub aktywna
+blokada czasowa zatrzymują próbę. Bez dokładnego tekstu wyświetla **BŁĄD**;
+przyczyna jest w dymku przycisku i w sekcji **Ostatnia próba** ustawień.
+Status przekazania do czatu nie jest potwierdzeniem dostarczenia przez serwer gry.
 
 Wyłączenie dodatku usuwa przyciski, obserwator, oczekujące timery i tymczasowe
 podmiany metod. Wyłącz osobny userscript **Wykrywacz → GLOBAL**, jeśli był
@@ -252,7 +258,7 @@ Jedyny główny klucz to `margonem_toolkit_settings`:
   "addons": {
     "legendary-notificator": { "enabled": true, "settings": {} },
     "notification-position": { "enabled": true, "settings": { "bottom": 75 } },
-    "detector-global": { "enabled": true, "settings": {} }
+    "detector-global": { "enabled": true, "settings": { "channels": ["LOCAL"] } }
   }
 }
 ```
@@ -375,7 +381,8 @@ oba oznaczenia legendy, loc l/k, mieszane rarity, wszystkie presety, lokalny
 canvas, aurę, zamykanie lootu, enable/disable i ponowne wykonanie bundle.
 
 Test wykrywacza używa wyłącznie atrap czatu i schowka: sprawdza trzy ścieżki
-kopiowania, natywne wołanie, dokładny tekst, GLOBAL, przywrócenie kanału/metod,
+kopiowania, natywne wołanie, dokładny tekst, cztery kanały i ich konfigurację,
+blokady dostępności/czasowe, przywrócenie kanału/odbiorcy/stylu/metod,
 brak podwójnej wysyłki, wyłączenie w trakcie pracy i brak źródła wiadomości.
 Nie wysyła żadnych wiadomości do gry.
 

@@ -1,9 +1,9 @@
-// Adaptacja wykrywacz_global_exact_v1.0.0.txt: zachowuje natywny tekst i kanał GLOBAL.
+// Adaptacja wykrywacz_global_exact_v1.0.0.txt: natywny tekst i konfigurowalne kanały.
+import { selectedChannels, channelLabel, buttonLabel } from './channels.js';
 const ROOT_SELECTOR = '.heros-detector';
 const GLOBAL_CLASS = 'wykrywacz-global-exact';
-const BUTTON_TITLE = 'Wyślij na GLOBAL dokładnie komunikat Wykrywacza — bez zmian';
 
-export function startDetectorGlobal(ctx) {
+export function startDetectorGlobal(ctx, report = () => {}) {
     const page = ctx.game.page;
     const { scheduler } = ctx;
     const buttons = new Set();
@@ -75,7 +75,9 @@ export function startDetectorGlobal(ctx) {
     }
 
     async function captureCopy(detector) {
-        const copy = nativeButtons(detector).find(button => /\bkopiuj\b/i.test(label(button)));
+        // Natywny wykrywacz umieszcza pusty div.copy-btn przy nazwie mapy, poza przyciskami.
+        const copy = detector.querySelector('.map-label .copy-btn, .copy-btn')
+            || nativeButtons(detector).find(button => /\bkopiuj\b/i.test(label(button)));
         if (!copy) return null;
         let captured = null;
         const restores = [];
@@ -120,7 +122,8 @@ export function startDetectorGlobal(ctx) {
     function restoreChannel(chat, previous, expectedChannel = null) {
         try {
             const current = chat.getChannelName?.();
-            if (previous.name && current && current !== previous.name && (!expectedChannel || current === expectedChannel)) {
+            const changed = current !== previous.name || chat.getPrivateReceiver?.() !== previous.receiver || chat.getStyleMessage?.() !== previous.style;
+            if (previous.name && current && changed && (!expectedChannel || current === expectedChannel || current === previous.name)) {
                 chat.setChannel?.({ name: previous.name }, previous.receiver, previous.style);
             }
         } catch {}
@@ -138,12 +141,18 @@ export function startDetectorGlobal(ctx) {
         });
         // Nie klikamy natywnego wołania, jeśli nie możemy zablokować wysłania na klan.
         if (!restore) return null;
+        const hasGhost = typeof chat.sendMessageGhostMessageProcedure === 'function';
+        const restoreGhost = hasGhost ? patchMethod(chat, 'sendMessageGhostMessageProcedure', message => {
+            if (captured === null) captured = message;
+        }) : null;
+        if (hasGhost && !restoreGhost) { restore(); return null; }
         const restoreChat = () => restoreChannel(chat, previous);
         const release = scheduler.cleanup(restoreChat);
         try {
             call.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: page }));
             for (let attempt = 0; attempt < 6 && captured === null; attempt++) await wait(20);
         } finally {
+            restoreGhost?.();
             restore();
             restoreChat();
             release();
@@ -151,26 +160,45 @@ export function startDetectorGlobal(ctx) {
         return typeof captured === 'string' && captured.length ? captured : null;
     }
 
-    async function sendGlobal(message) {
+    function checkAvailability(channels) {
+        const availability = page.Engine?.chatController?.getChatChannelsAvailable?.();
+        const notifications = getChat()?.getChatNotificationManager?.();
+        for (const channel of channels) {
+            if (typeof availability?.checkAvailable === 'function' && !availability.checkAvailable(channel)) {
+                throw new Error(`Kanał ${channelLabel([channel])} jest niedostępny. Zmień wybór w ustawieniach.`);
+            }
+            if (notifications?.checkBlockadeLeftSeconds?.(channel)) {
+                throw new Error(`Kanał ${channelLabel([channel])}: odczekaj przed kolejną wiadomością.`);
+            }
+        }
+    }
+
+    async function sendToChannel(message, channel) {
         ensureActive();
         const chat = getChat();
         if (typeof chat?.setChannel !== 'function' || typeof chat?.getDataAndSendRequest !== 'function') {
             throw new Error('Czat Margonem nie jest jeszcze gotowy.');
         }
         const previous = rememberChannel(chat);
-        const restore = () => restoreChannel(chat, previous, 'GLOBAL');
+        const restore = () => restoreChannel(chat, previous, channel);
         const release = scheduler.cleanup(restore);
         try {
-            if (previous.name !== 'GLOBAL') {
-                chat.setChannel({ name: 'GLOBAL' });
+            checkAvailability([channel]);
+            // Ta sama ścieżka co natywne wołanie: zachowuje walidację i blokady czatu gry.
+            if (typeof chat.sendMessageGhostMessageProcedure === 'function') {
+                await chat.sendMessageGhostMessageProcedure(message, channel);
+                return;
+            }
+            if (previous.name !== channel) {
+                chat.setChannel({ name: channel });
                 for (let attempt = 0; attempt < 10; attempt++) {
-                    if (chat.getChannelName?.() === 'GLOBAL') break;
+                    if (chat.getChannelName?.() === channel) break;
                     await wait(25);
                 }
             }
             ensureActive();
-            if (typeof chat.getChannelName === 'function' && chat.getChannelName() !== 'GLOBAL') {
-                throw new Error('Nie udało się przełączyć czatu na GLOBAL.');
+            if (typeof chat.getChannelName === 'function' && chat.getChannelName() !== channel) {
+                throw new Error(`Nie udało się przełączyć czatu na ${channelLabel([channel])}.`);
             }
             // Bez trim(), prefiksów, parsowania i dopisków.
             return await chat.getDataAndSendRequest(message);
@@ -184,33 +212,55 @@ export function startDetectorGlobal(ctx) {
         event.preventDefault();
         event.stopPropagation();
         if (busy || scheduler.disposed) return;
+        const channels = selectedChannels(ctx.settings);
+        if (!channels.length) return;
+        const submitted = [];
+        let stage = 'Odczyt komunikatu';
         busy = true;
         button.dataset.busy = '1';
         button.textContent = '...';
+        report({ kind: 'busy', text: `Odczyt komunikatu. Cel: ${channelLabel(channels)}.` });
         try {
             let message = await captureCopy(detector);
             ensureActive();
             if (message === null) message = await captureCall(detector);
             ensureActive();
             if (message === null) throw new Error('Nie udało się odczytać dokładnego komunikatu Wykrywacza. Nic nie wysłano.');
-            await sendGlobal(message);
+            stage = 'Sprawdzenie kanałów';
+            checkAvailability(channels);
+            for (const channel of channels) {
+                stage = `Wysyłanie: ${channelLabel([channel])}`;
+                await sendToChannel(message, channel);
+                submitted.push(channel);
+            }
             if (!scheduler.disposed) {
                 button.textContent = 'OK';
-                button.title = BUTTON_TITLE;
+                button.title = `Przekazano komunikat do czatu: ${channelLabel(submitted)}.`;
+                report({ kind: 'success', text: button.title });
             }
         } catch (error) {
             if (!scheduler.disposed) {
                 button.textContent = 'BŁĄD';
-                button.title = error.message;
-                console.warn('[QADDONS Wykrywacz → GLOBAL]', error);
+                button.title = `${stage}: ${error.message}${submitted.length ? ` Przekazano już do: ${channelLabel(submitted)}.` : ''}`;
+                report({ kind: 'error', text: button.title });
+                console.warn('[QADDONS Wykrywacz → czat]', button.title, error);
             }
         } finally {
             busy = false;
             button.dataset.busy = '0';
             if (!scheduler.disposed) scheduler.timeout(() => {
-                if (button.isConnected) button.textContent = 'GLOBAL';
+                if (button.isConnected) updateButton(button);
             }, 1400);
         }
+    }
+
+    function updateButton(button) {
+        if (button.dataset.busy === '1') return;
+        const channels = selectedChannels(ctx.settings);
+        const text = buttonLabel(channels);
+        if (button.textContent !== text) button.textContent = text;
+        button.disabled = channels.length === 0;
+        button.title = channels.length ? `Wyślij dokładny komunikat na: ${channelLabel(channels)}.` : 'Wybierz kanały w ustawieniach dodatku.';
     }
 
     function sync() {
@@ -225,8 +275,7 @@ export function startDetectorGlobal(ctx) {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = GLOBAL_CLASS;
-            button.textContent = 'GLOBAL';
-            button.title = BUTTON_TITLE;
+            updateButton(button);
             buttons.add(button);
             container.append(button);
         }
@@ -237,7 +286,7 @@ export function startDetectorGlobal(ctx) {
     }
 
     page.__WYKRYWACZ_GLOBAL_EXACT__?.destroy?.();
-    const api = { version: '1.0.0', sync: requestSync, destroy: () => scheduler.destroy() };
+    const api = { version: '1.1.0', sync: requestSync, destroy: () => scheduler.destroy() };
     page.__WYKRYWACZ_GLOBAL_EXACT__ = api;
     ctx.styles.set('button', `
         .${GLOBAL_CLASS} { min-height:24px; padding:3px 12px; border:1px solid #555; border-radius:0; background:#080808; color:#eee; font:12px Arial,sans-serif; cursor:pointer; }
@@ -249,6 +298,7 @@ export function startDetectorGlobal(ctx) {
         if (button && buttons.has(button)) onGlobalClick(event, button.closest(ROOT_SELECTOR), button);
     }, { capture: true });
     scheduler.observer(MutationObserver, requestSync).observe(document.documentElement, { childList: true, subtree: true });
+    ctx.events.on('detectorChannelsChanged', () => buttons.forEach(updateButton));
     scheduler.cleanup(() => {
         buttons.forEach(button => button.remove());
         buttons.clear();

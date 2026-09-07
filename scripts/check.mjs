@@ -1,4 +1,10 @@
 import assert from 'node:assert/strict';
+import { selectedChannels, buttonLabel } from '../src/addons/detector-global/channels.js';
+assert.deepEqual(selectedChannels({}), ['LOCAL']);
+assert.deepEqual(selectedChannels({ channels: [] }), []);
+assert.deepEqual(selectedChannels({ channels: 'GLOBAL' }), []);
+assert.deepEqual(selectedChannels({ channels: ['LOCAL', 'GLOBAL', 'LOCAL', 'PRIVATE', '__proto__', null] }), ['LOCAL', 'GLOBAL']);
+assert.equal(buttonLabel(['LOCAL']), 'LOKALNY');
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import vm from 'node:vm';

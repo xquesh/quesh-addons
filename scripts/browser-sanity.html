@@ -231,7 +231,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: loader, three addons, detector exact GLOBAL/copy/fallback/cleanup, monochrome UI, settings, 10 presets, loc l/k, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: loader, three addons, detector LOCAL/GLOBAL/CLAN/GROUP, channel settings, native copy/ghost, availability/cooldown/cleanup, monochrome UI, settings, 10 presets, loc l/k, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {
