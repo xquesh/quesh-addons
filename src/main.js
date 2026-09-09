@@ -10,6 +10,7 @@ import { createLegendaryNotificator } from './addons/legendary-notificator/index
 import { createNotificationPosition } from './addons/notification-position/index.js';
 import { VERSION } from './version.js';
 import { createDetectorGlobal } from './addons/detector-global/index.js';
+import { createItemTools } from './addons/item-tools/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -50,6 +51,7 @@ function start() {
         manager.register(createLegendaryNotificator());
         manager.register(createNotificationPosition());
         manager.register(createDetectorGlobal());
+        manager.register(createItemTools());
         panel.connect(manager);
         manager.start();
         game.start();

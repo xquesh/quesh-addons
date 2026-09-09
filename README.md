@@ -1,6 +1,6 @@
 # QADDONS
 
-Mały loader Tampermonkey pobiera runtime QADDONS z trzema niezależnymi dodatkami:
+Mały loader Tampermonkey pobiera runtime QADDONS z czterema niezależnymi dodatkami:
 
 - **Legendary Notificator** — neonowe powiadomienie po legendarnym łupie,
   przeniesione z istniejącego Legendary Notificator 6.2.1.
@@ -9,6 +9,8 @@ Mały loader Tampermonkey pobiera runtime QADDONS z trzema niezależnymi dodatka
   odstępów, koloru i cienia, bez zmiany konsoli i czatu.
 - **Wykrywacz → czat** — przycisk w oknie wykrywacza, wysyłający na wybrane kanały
   dokładnie jego natywny komunikat; przeniesiony z dostarczonego skryptu 1.0.0.
+- **Przedmioty: ramki i tooltipy** — własne ramki i nakładki, skróty bonusów
+  legendarnych oraz dodatkowe informacje w opisie przedmiotów.
 
 Przycisk z ikoną **quesh.png** otwiera listę **DODATKI** w panelu **QADDONS**. Checkbox rzeczywiście uruchamia lub
 zatrzymuje addon; **USTAWIENIA** otwiera jego konfigurację. Przycisk **DODATKI**
@@ -19,6 +21,42 @@ Konfigurację można otworzyć także dla wyłączonego dodatku; nie uruchamia t
 Panel i formularze wszystkich dodatków mają czarne tło, biały/szary tekst i proste
 obramowania. Przycisk z ikoną ma 42 × 42 px, bez zaokrągleń, z białą poświatą
 po najechaniu. Kolory efektów Legendary Notificatora nadal ustawia się niezależnie.
+
+### Przedmioty: ramki i tooltipy
+
+W **USTAWIENIACH** dodatku są trzy zakładki:
+
+- **Ramki i nakładki** — biblioteka nazwanych grafik, dodawanie przez adres HTTPS,
+  podgląd kafelka legendarnego, wybór i usuwanie. Grafika powinna być arkuszem
+  Margonem z kafelkami 32 × 32 px, nie pojedynczym dowolnym obrazkiem.
+  **Wygląd gry** przywraca oryginał; początkowo nie wybrano własnych grafik.
+- **Bonusy legendarne** — włączane etykiety w prawym dolnym rogu ikon, także
+  na przedmiotach na mapie. Domyślnie włączone. Działają również bez własnej ramki.
+  Wielowyrazowe nazwy dają pierwsze litery (**KO**, **CBK**, **DA**, **OR**),
+  jednowyrazowe dwie pierwsze (**OŚ**, **KL**). Rozpoznawane jest 15 bonusów.
+  Nazwa pochodzi z danych `legbon`, z obsługą parametrów po przecinku.
+  Nieznane bonusy i przedmioty bez bonusu nie dostają wymyślonej etykiety.
+- **Tooltipy** — włączenie rozszerzenia, koszty dla poszczególnych rang,
+  poziomy/suma, data łupu, wielkość grupy i esencja oraz podgląd konfiguracji.
+  Dodana sekcja ma czarne tło i biało-szary tekst; zachowuje natywny opis gry.
+
+Pozostawiono wyłącznie te funkcje dostarczonego **Quesh Tools NI 1.0.0**.
+Wyszukiwarki symboli, alarmów tytanów, minutnika, wake up i better selling
+nie ma w nowym dodatku ani w bundlu. Nie powstaje drugi panel ani drugi launcher.
+Jeśli używasz osobnego Quesh Tools NI w Tampermonkey, wyłącz go, aby uniknąć
+podwójnych rozszerzeń tooltipów i nadpisywania ramek.
+
+Wzory kosztów i esencji pochodzą z dostarczonego skryptu. Jeżeli gra nie udostępnia
+pełnej daty zdobycia, wyświetlana jest dostępna data z oznaczeniem braku godziny.
+Wyłączenie dodatku usuwa etykiety, sekcje tooltipów, style i obserwatory,
+przywraca rysowanie mapy oraz poprzedni wygląd zmienionych ramek i nakładek.
+
+Integracja korzysta z publicznego klienta Margonem, funkcji `GroundItems` i danych
+przedmiotów. Nazwy bonusów i format `legbon` sprawdzono 09.09.2026 w
+[słowniku gry](https://commons.margonem.pl/js/dictionaries/dictionary_pl.js)
+i [parserze tooltipów](https://commons.margonem.pl/js/TipsParser.js).
+Testy lokalne sprawdzają dane i DOM zgodne z tymi interfejsami; nie zastępują
+próby na zalogowanej postaci.
 
 ### Wygląd powiadomień
 

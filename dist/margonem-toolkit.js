@@ -479,7 +479,7 @@
       services.settings.save();
       if (record.running) record.definition.onSettingsChange?.(record.runtime);
     }
-    function renderSettings2(id, container) {
+    function renderSettings3(id, container) {
       if (destroyed2) throw new Error("Addon manager zniszczony");
       const record = find(id);
       initialize(record);
@@ -548,7 +548,7 @@
       start: start2,
       setEnabled,
       changeSettings,
-      renderSettings: renderSettings2,
+      renderSettings: renderSettings3,
       destroy,
       list: () => [...registry.values()].map((record) => ({
         id: record.definition.id,
@@ -709,7 +709,7 @@
   var quesh_default = "data:image/png;base64,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";
 
   // src/version.js
-  var VERSION = "1.4.0";
+  var VERSION = "1.5.0";
 
   // src/core/updates.js
   var MANIFEST_URL = "https://xquesh.github.io/quesh-addons/dist/version.json";
@@ -4985,6 +4985,686 @@
     };
   }
 
+  // src/addons/item-tools/data.js
+  var BONUSES = Object.freeze({
+    anguish: "Krwawa udręka",
+    cleanse: "Płomienne oczyszczenie",
+    critred: "Krytyczna osłona",
+    curse: "Klątwa",
+    dmgred: "Fizyczna osłona",
+    facade: "Fasada opieki",
+    frenzy: "Eskalacja szału",
+    glare: "Oślepienie",
+    holytouch: "Dotyk anioła",
+    lastheal: "Ostatni ratunek",
+    puncture: "Przeszywająca skuteczność",
+    pushback: "Odrzut",
+    resgain: "Ochrona żywiołów",
+    retaliation: "Aura odwetu",
+    verycrit: "Cios bardzo krytyczny"
+  });
+  var defaults3 = {
+    frames: [],
+    overlays: [],
+    activeFrame: "",
+    activeOverlay: "",
+    bonusLabels: true,
+    tooltipEnabled: true,
+    showUpgradeCost: true,
+    upgradeDisplay: "both",
+    showLootDate: true,
+    showLootGroup: true,
+    showEssence: true,
+    rarities: { zwykly: true, unikatowy: true, heroiczny: true, ulepszony: true, legendarny: true }
+  };
+  function abbreviation(name) {
+    const words = String(name).normalize("NFC").match(/\p{L}+/gu) || [];
+    return (words.length === 1 ? [...words[0]].slice(0, 2).join("") : words.map((word) => [...word][0]).join("")).toLocaleUpperCase("pl-PL");
+  }
+  function itemStats(item) {
+    if (typeof item?.stat?.stat === "string") return itemStats({ stat: item.stat.stat });
+    if (typeof item?.stat === "string") return Object.fromEntries(item.stat.split(";").filter(Boolean).map((part) => {
+      const index = part.indexOf("=");
+      return index < 0 ? [part, true] : [part.slice(0, index), part.slice(index + 1)];
+    }));
+    return item?._cachedStats || item?.stat || {};
+  }
+  function legendaryBonus(item, legendaryDom = false) {
+    const stats = itemStats(item);
+    const type = item?.getItemType?.() || item?.itemType;
+    const legendary = type ? type === "t-leg" : Object.hasOwn(stats, "legendary") || stats.rarity === "legendary" || legendaryDom;
+    if (!legendary) return null;
+    const value = item?.getLegbonStat?.() ?? stats.legbon;
+    if (typeof value !== "string") return null;
+    const code = value.split(",")[0];
+    if (!Object.hasOwn(BONUSES, code)) return null;
+    const name = BONUSES[code];
+    return { name, short: abbreviation(name) };
+  }
+  function imageUrl(value) {
+    try {
+      const url = new URL(String(value));
+      return url.protocol === "https:" ? url.href : "";
+    } catch {
+      return "";
+    }
+  }
+  function cssImage(value) {
+    return JSON.stringify(imageUrl(value)).replace(/</g, "\\3c ");
+  }
+
+  // src/addons/item-tools/tooltip.js
+  function createTooltipTools(tooltipConfig) {
+    const ITEM_TYPES = ["Pierścienie", "Naszyjniki", "Hełmy", "Rękawice", "Zbroje", "Dystansowe", "Strzały", "Buty", "Jednoręczne", "Półtoraręczne", "Dwuręczne", "Orby magiczne", "Tarcze", "Pomocnicze"];
+    function isUpgradeableItem(html) {
+      const match = html.match(/Typ:\s*([^<\n]+)/i);
+      return match ? ITEM_TYPES.some((type) => match[1].trim().includes(type)) : false;
+    }
+    function calculateUpgradeCosts(level, currentUpgrade, rarity) {
+      const levelMultipliers = { 1: 1, 2: 1.1, 3: 1.3, 4: 1.6, 5: 2 };
+      const rarityMultipliers = {
+        zwykły: 1,
+        zwykłe: 1,
+        unikatowy: 10,
+        unikatowe: 10,
+        heroiczny: 30,
+        heroiczne: 30,
+        ulepszony: 40,
+        ulepszonych: 40,
+        legendarny: 60,
+        legendarne: 60
+      };
+      const upgradeMultipliers = {
+        zwykły: 1,
+        zwykłe: 1,
+        unikatowy: 10,
+        unikatowe: 10,
+        heroiczny: 100,
+        heroiczne: 100,
+        ulepszony: 1,
+        ulepszonych: 1,
+        legendarny: 1e3,
+        legendarne: 1e3
+      };
+      const rarityKey = String(rarity || "").toLowerCase();
+      const rarityMultiplier = rarityMultipliers[rarityKey] || 1;
+      const upgradeMultiplier = upgradeMultipliers[rarityKey] || 1;
+      const upgradedItem = rarityKey === "ulepszony" || rarityKey === "ulepszonych";
+      const costs = {};
+      const totals = { upgrade: 0, gold: 0, essence: 0 };
+      for (let upgrade = currentUpgrade + 1; upgrade <= 5; upgrade++) {
+        const multiplier = levelMultipliers[upgrade];
+        const upgradeCost = upgradedItem ? Math.round((150 * level + 27e3) * multiplier) : Math.round((180 + level) * multiplier * upgradeMultiplier);
+        let gold = 0;
+        let essence = 0;
+        totals.upgrade += upgradeCost;
+        if (upgrade === 5) {
+          gold = Math.round((10 * level + 1300) * level * rarityMultiplier);
+          essence = Math.round((level / 10 + 10) * 3);
+          totals.gold += gold;
+          totals.essence += essence;
+        }
+        costs[upgrade] = { upgrade: upgradeCost, gold, essence };
+      }
+      return { costs, totals };
+    }
+    function parseItemInfo(html) {
+      const info = {
+        level: null,
+        currentUpgrade: 0,
+        rarity: "zwykły"
+      };
+      for (const pattern of [/Wymagany poziom:\s*(\d+)/i, /Poziom:\s*(\d+)/i]) {
+        const match = html.match(pattern);
+        if (match) {
+          info.level = parseInt(match[1], 10);
+          break;
+        }
+      }
+      const dataTypes = [
+        [/data-item-type="t-leg"/i, "legendarny"],
+        [/data-item-type="t-her"/i, "heroiczny"],
+        [/data-item-type="t-uniupg"/i, "unikatowy"],
+        [/data-item-type="t-upgraded"/i, "ulepszony"],
+        [/data-item-type="t-norm"/i, "zwykły"]
+      ];
+      for (const [pattern, rarity] of dataTypes) {
+        if (pattern.test(html)) {
+          info.rarity = rarity;
+          break;
+        }
+      }
+      if (info.rarity === "zwykły") {
+        const textTypes = [
+          [/\bLegendarn[ey]\b/i, "legendarny"],
+          [/\bHeroiczn[ey]\b/i, "heroiczny"],
+          [/\bUnikatow[ey]\b/i, "unikatowy"],
+          [/\bUlepszony\b|\bUlepszonych\b/i, "ulepszony"]
+        ];
+        for (const [pattern, rarity] of textTypes) {
+          if (pattern.test(html)) {
+            info.rarity = rarity;
+            break;
+          }
+        }
+      }
+      const nameSection = html.split("Typ:")[0] || html;
+      const upgradeMatch = nameSection.match(/\+([1-5])(?=\s|$|<)/);
+      if (upgradeMatch) {
+        info.currentUpgrade = parseInt(upgradeMatch[1], 10);
+      }
+      return info;
+    }
+    function itemById(itemId) {
+      try {
+        if (!itemId) return null;
+        const items = window.Engine?.items;
+        if (typeof items?.getItemById === "function") {
+          const direct = items.getItemById(itemId);
+          if (direct) return direct;
+        }
+        return items?.items?.[itemId] || null;
+      } catch {
+        return null;
+      }
+    }
+    function itemByHid(hid) {
+      try {
+        if (!hid) return null;
+        const store = window.Engine?.items?.items || window.Engine?.items?._items || {};
+        for (const item of Object.values(store)) {
+          if (item?.hid === hid) return item;
+        }
+      } catch {
+      }
+      return null;
+    }
+    function statFromItem(item) {
+      if (!item) return null;
+      if (typeof item.stat === "string") return item.stat;
+      if (typeof item.stat?.stat === "string") return item.stat.stat;
+      return null;
+    }
+    function currentItemId(html) {
+      try {
+        const htmlMatch = String(html || "").match(/item-id-(-?\d+)/);
+        if (htmlMatch) return htmlMatch[1];
+        const hovered = document.querySelector(".item:hover");
+        const classMatch = hovered?.className?.match?.(/item-id-(-?\d+)/);
+        if (classMatch) return classMatch[1];
+        const targetItem = window.TIPS?.target?.data?.("item");
+        if (targetItem?.id) return String(targetItem.id);
+      } catch {
+      }
+      return null;
+    }
+    function currentHid(html) {
+      try {
+        const source = String(html || "");
+        const htmlMatch = source.match(/data-hid="([a-f0-9]{40,})"/i) || source.match(/ITEM#([a-f0-9]{40,})/i);
+        if (htmlMatch) return htmlMatch[1];
+        const hovered = document.querySelector(".item:hover");
+        const hid = hovered?.dataset?.hid || hovered?.getAttribute?.("data-hid");
+        if (hid) return hid;
+        const targetItem = window.TIPS?.target?.data?.("item");
+        if (targetItem?.hid) return targetItem.hid;
+      } catch {
+      }
+      return null;
+    }
+    function parseLootStat(stat) {
+      if (!stat) return null;
+      const match = stat.match(/loot=([^;]+)/);
+      if (!match) return null;
+      const parts = match[1].split(",");
+      if (parts.length < 4) return null;
+      const groupSize = parseInt(parts[2], 10);
+      const timestamp = parseInt(parts[3], 10);
+      if (!Number.isFinite(groupSize) || !Number.isFinite(timestamp)) return null;
+      const date = new Date(timestamp * 1e3);
+      const pad = (value) => String(value).padStart(2, "0");
+      return {
+        groupSize,
+        formattedDate: `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+      };
+    }
+    function parseLootFallback(html) {
+      const dateMatch = String(html || "").match(/W dniu (\d{2}\.\d{2}\.\d{4})/);
+      if (!dateMatch) return null;
+      let groupSizeText = "solo";
+      if (/wraz z kompanem/i.test(html)) groupSizeText = "2 osoby";
+      else if (/wraz z drużyną/i.test(html)) groupSizeText = "drużyna";
+      return {
+        formattedDate: dateMatch[1],
+        groupSizeText
+      };
+    }
+    function formatNumber(value) {
+      return Number(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+    function upgradeHtml(info) {
+      const rarityMap = {
+        zwykły: "zwykly",
+        zwykłe: "zwykly",
+        unikatowy: "unikatowy",
+        unikatowe: "unikatowy",
+        heroiczny: "heroiczny",
+        heroiczne: "heroiczny",
+        ulepszony: "ulepszony",
+        ulepszonych: "ulepszony",
+        legendarny: "legendarny",
+        legendarne: "legendarny"
+      };
+      const rarity = rarityMap[String(info.rarity || "").toLowerCase()] || "zwykly";
+      if (tooltipConfig.rarities?.[rarity] === false) return "";
+      if (!info.level || info.currentUpgrade >= 5) return "";
+      const { costs, totals } = calculateUpgradeCosts(info.level, info.currentUpgrade, info.rarity);
+      const showLevels = tooltipConfig.upgradeDisplay === "all" || tooltipConfig.upgradeDisplay === "both";
+      const showSum = tooltipConfig.upgradeDisplay === "sum" || tooltipConfig.upgradeDisplay === "both";
+      let html = '<div style="border-top:1px solid #333333;margin-top:8px;padding-top:6px">';
+      html += '<div style="color:#eeeeee;font-weight:700;margin-bottom:4px">Koszt ulepszeń</div>';
+      if (showLevels) {
+        for (const [level, cost] of Object.entries(costs)) {
+          html += `<div style="font-size:11px;color:#cccccc;line-height:1.55">+${level}: <span style="color:#eeeeee">${formatNumber(cost.upgrade)}</span> pkt.`;
+          if (cost.gold > 0) html += ` · <span style="color:#eeeeee">${formatNumber(cost.gold)}</span> zł`;
+          if (cost.essence > 0) html += ` · <span style="color:#eeeeee">${cost.essence}</span> es.`;
+          html += "</div>";
+        }
+      }
+      if (showSum && Object.keys(costs).length > 0) {
+        html += `<div style="font-size:11px;color:#cccccc;margin-top:5px;padding-top:5px;border-top:1px solid #333333"><b>Suma:</b> <span style="color:#eeeeee">${formatNumber(totals.upgrade)}</span> pkt.`;
+        if (totals.gold > 0) html += ` · <span style="color:#eeeeee">${formatNumber(totals.gold)}</span> zł`;
+        if (totals.essence > 0) html += ` · <span style="color:#eeeeee">${totals.essence}</span> es.`;
+        html += "</div>";
+      }
+      html += "</div>";
+      return html;
+    }
+    function lootHtml(itemId, info, fullHtml) {
+      const hid = currentHid(fullHtml);
+      let item = itemById(itemId);
+      if (!item && hid) item = itemByHid(hid);
+      const stat = statFromItem(item);
+      let loot = parseLootStat(stat);
+      if (!loot) {
+        const fallback = parseLootFallback(fullHtml);
+        if (fallback) {
+          loot = {
+            formattedDate: `${fallback.formattedDate} (brak godz.)`,
+            groupSizeText: fallback.groupSizeText
+          };
+        }
+      } else {
+        loot.groupSizeText = loot.groupSize === 1 ? "solo" : `${loot.groupSize} graczy`;
+      }
+      let essence = item?.salvageItems;
+      if ((essence === null || essence === void 0 || Number.isNaN(Number(essence))) && info?.level && info.rarity !== "zwykły") {
+        essence = Math.floor(info.level / 10) + 10;
+        if (String(info.rarity).toLowerCase() === "legendarny") essence *= 3;
+      }
+      let html = "";
+      if (loot && tooltipConfig.showLootDate) {
+        html += `<div><span style="color:#999999">Zdobyto:</span> <span style="color:#eeeeee">${loot.formattedDate}</span></div>`;
+      }
+      if (loot && tooltipConfig.showLootGroup) {
+        html += `<div><span style="color:#999999">Grupa:</span> <span style="color:#eeeeee">${loot.groupSizeText}</span></div>`;
+      }
+      if (tooltipConfig.showEssence && essence !== null && essence !== void 0 && !Number.isNaN(Number(essence))) {
+        html += `<div><span style="color:#999999">Esencja:</span> <span style="color:#eeeeee">${Number(essence)}</span></div>`;
+      }
+      return html ? `<div data-qtn-loot="1" style="font-size:11px;color:#cccccc;line-height:1.65;margin-top:5px">${html}</div>` : "";
+    }
+    return { isUpgradeableItem, calculateUpgradeCosts, parseItemInfo, upgradeHtml, lootHtml, currentItemId, itemById, statFromItem, currentHid, itemByHid };
+  }
+
+  // src/addons/item-tools/runtime.js
+  var ITEM_SELECTOR = ".item, .bottomItem";
+  var HIGHLIGHTS = ".item .highlight.h-exist,.bottomItem .highlight.h-exist,.item .icon.h-exist,.bottomItem .icon.h-exist";
+  function startItemTools(ctx) {
+    const { scheduler: scheduler2, settings } = ctx;
+    const page2 = ctx.game.page;
+    const tips = createTooltipTools(settings);
+    const fingerprints = /* @__PURE__ */ new WeakMap();
+    const groundDraws = /* @__PURE__ */ new Map();
+    let pending = 0;
+    let ground = null;
+    let groundFrameChanged = false;
+    let groundOverlayChanged = false;
+    let appearanceKey = "";
+    const sample = document.querySelector(".item .highlight.h-exist");
+    const nativeStyle = sample ? getComputedStyle(sample) : null;
+    const nativeFrame = nativeStyle?.backgroundImage.match(/^url\(["']?(.*?)["']?\)$/)?.[1] || "/img/gui/item_frames/frames/item_frames.png";
+    const nativeOffset = Math.max(0, -(parseFloat(nativeStyle?.backgroundPositionY) || 0) / 32);
+    const nativeOverlayStyle = sample ? getComputedStyle(sample, "::after") : null;
+    const nativeOverlay = nativeOverlayStyle?.backgroundImage.match(/^url\(["']?(.*?)["']?\)$/)?.[1] || null;
+    function resolveItem(element) {
+      try {
+        const attached = page2.$?.(element)?.data?.("item");
+        if (attached) return attached;
+        const id = element.className?.match?.(/(?:^|\s)item-id-(-?\d+)(?=\s|$)/)?.[1] || element.dataset.itemId;
+        return tips.itemById(id);
+      } catch {
+        return null;
+      }
+    }
+    function badges() {
+      for (const element of document.querySelectorAll(ITEM_SELECTOR)) {
+        const badge = element.querySelector(":scope > .qaddons-item-bonus");
+        const bonus = settings.bonusLabels ? legendaryBonus(resolveItem(element), element.matches('[data-item-type="t-leg"]') || !!element.querySelector(".t-leg")) : null;
+        if (!bonus) {
+          badge?.remove();
+          element.classList.remove("qaddons-bonus-static");
+          continue;
+        }
+        if (!badge && getComputedStyle(element).position === "static") element.classList.add("qaddons-bonus-static");
+        const label = badge || document.createElement("span");
+        if (!badge) {
+          label.className = "qaddons-item-bonus";
+          element.append(label);
+        }
+        if (label.textContent !== bonus.short) label.textContent = bonus.short;
+        if (label.getAttribute("aria-label") !== bonus.name) label.setAttribute("aria-label", bonus.name);
+      }
+    }
+    function tooltips() {
+      for (const element of document.querySelectorAll(".tip-wrapper .content")) {
+        const extra = element.querySelector(":scope > [data-qaddons-item-extra]");
+        if (!settings.tooltipEnabled) {
+          extra?.remove();
+          fingerprints.delete(element);
+          continue;
+        }
+        const clone = element.cloneNode(true);
+        clone.querySelectorAll("[data-qaddons-item-extra]").forEach((node) => node.remove());
+        const html = clone.innerHTML;
+        if (document.querySelector(".item:hover")?.closest(".show-equipment") || document.querySelector(".item:hover")?.className.includes("-showeq")) {
+          extra?.remove();
+          continue;
+        }
+        const id = tips.currentItemId(html);
+        const item = tips.itemById(id) || tips.itemByHid(tips.currentHid(html));
+        const fingerprint = html + JSON.stringify([id, item?.hid, tips.statFromItem(item), item?.salvageItems, settings.tooltipEnabled, settings.showUpgradeCost, settings.upgradeDisplay, settings.showLootDate, settings.showLootGroup, settings.showEssence, settings.rarities]);
+        if (fingerprints.get(element) === fingerprint && extra) continue;
+        fingerprints.set(element, fingerprint);
+        const info = tips.parseItemInfo(html);
+        const upgrade = settings.showUpgradeCost && tips.isUpgradeableItem(html) ? tips.upgradeHtml(info) : "";
+        const loot = tips.lootHtml(id, tips.isUpgradeableItem(html) ? info : null, html);
+        extra?.remove();
+        if (!upgrade && !loot) continue;
+        const wrapper = document.createElement("div");
+        wrapper.dataset.qaddonsItemExtra = "1";
+        wrapper.innerHTML = upgrade + loot;
+        const anchor = element.querySelector(":scope > .tip-item-stat-reqp,:scope > .tip-item-stat-lvl");
+        element.insertBefore(wrapper, anchor || null);
+      }
+    }
+    function restoreGround() {
+      if (groundFrameChanged) ground?.changeFrames?.(nativeFrame, nativeOffset);
+      if (groundOverlayChanged) ground?.changeOverlays?.(nativeOverlay);
+      groundFrameChanged = groundOverlayChanged = false;
+    }
+    function groundAppearance() {
+      const next = page2.Engine?.map?.groundItems;
+      const key = JSON.stringify([settings.activeFrame, settings.activeOverlay]);
+      if (next === ground && key === appearanceKey) return;
+      if (next !== ground) {
+        restoreGround();
+        ground = next;
+      }
+      appearanceKey = key;
+      const frame = imageUrl(settings.activeFrame);
+      const overlay = imageUrl(settings.activeOverlay);
+      if (frame || groundFrameChanged) ground?.changeFrames?.(frame || nativeFrame, frame ? 0 : nativeOffset);
+      if (overlay || groundOverlayChanged) ground?.changeOverlays?.(overlay || nativeOverlay);
+      groundFrameChanged = !!frame;
+      groundOverlayChanged = !!overlay;
+    }
+    function groundBadges() {
+      const drawables = new Set(page2.Engine?.map?.groundItems?.getDrawableItems?.() || []);
+      for (const [item, restore] of groundDraws) if (!drawables.has(item) || !settings.bonusLabels) {
+        restore();
+        groundDraws.delete(item);
+      }
+      if (!settings.bonusLabels) return;
+      for (const item of drawables) {
+        if (!item.i || typeof item.draw !== "function" || groundDraws.has(item)) continue;
+        const original = item.draw;
+        let active = true;
+        const wrapper = function(canvas, ...args) {
+          const result = original.call(this, canvas, ...args);
+          if (!active || scheduler2.disposed || !settings.bonusLabels || !this.frames || !this.sprite) return result;
+          const bonus = legendaryBonus(this.i);
+          const engine = page2.Engine;
+          if (!bonus || !engine?.map?.offset || !engine.mapShift?.getShift) return result;
+          const shift = engine.mapShift.getShift();
+          const x = Math.round(this.i.x * 32 - engine.map.offset[0] - shift[0]) + 31;
+          const y = Math.round(this.i.y * 32 - engine.map.offset[1] - shift[1]) + 31;
+          canvas.save();
+          canvas.globalAlpha = 1;
+          canvas.font = "bold 9px Arial";
+          const width = canvas.measureText(bonus.short).width + 4;
+          canvas.fillStyle = "#000";
+          canvas.fillRect(x - width, y - 11, width, 11);
+          canvas.fillStyle = "#fff";
+          canvas.textAlign = "right";
+          canvas.textBaseline = "bottom";
+          canvas.fillText(bonus.short, x - 2, y);
+          canvas.restore();
+          return result;
+        };
+        item.draw = wrapper;
+        groundDraws.set(item, () => {
+          active = false;
+          if (item.draw === wrapper) item.draw = original;
+        });
+      }
+    }
+    function scan() {
+      pending = 0;
+      badges();
+      tooltips();
+      groundAppearance();
+      groundBadges();
+    }
+    function queue() {
+      if (!pending) pending = scheduler2.timeout(scan, 80);
+    }
+    function apply2() {
+      const frame = imageUrl(settings.activeFrame);
+      const overlay = imageUrl(settings.activeOverlay);
+      ctx.styles.set("items", `
+            ${frame ? `${HIGHLIGHTS}{background-image:url(${cssImage(frame)})!important;background-position-y:0!important;}` : ""}
+            ${overlay ? `${HIGHLIGHTS.split(",").map((selector) => selector + "::after").join(",")}{content:"";position:absolute;inset:0;z-index:1;background-image:url(${cssImage(overlay)})!important;pointer-events:none;}` : ""}
+            .qaddons-bonus-static{position:relative!important}
+            .qaddons-item-bonus{position:absolute!important;right:1px!important;bottom:1px!important;z-index:6;pointer-events:none!important;
+                padding:0 2px!important;margin:0!important;border:1px solid #777!important;border-radius:0!important;background:#000!important;color:#fff!important;
+                font:bold 9px/11px Arial,sans-serif!important;text-shadow:none!important;letter-spacing:0!important;white-space:nowrap!important;}
+            [data-qaddons-item-extra]{background:#080808;color:#ddd;border:1px solid #333;padding:6px 8px;margin:6px 0;font:11px/1.55 Arial,sans-serif;}
+            [data-qaddons-item-extra]>div:first-child{border-top:0!important;margin-top:0!important;padding-top:0!important;}
+        `);
+      queue();
+    }
+    scheduler2.observer(MutationObserver, (records) => {
+      if (records.some((record) => !record.target.closest?.(".qaddons-item-bonus,[data-qaddons-item-extra]") && (record.type !== "childList" || [...record.addedNodes, ...record.removedNodes].some((node) => node.nodeType !== 1 || !node.matches(".qaddons-item-bonus,[data-qaddons-item-extra]"))))) queue();
+    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "data-item-type", "data-item-id", "data-hid"], characterData: true });
+    const poll = () => {
+      queue();
+      scheduler2.timeout(poll, 500);
+    };
+    ctx.events.on("itemToolsChanged", apply2);
+    scheduler2.cleanup(() => {
+      groundDraws.forEach((restore) => restore());
+      groundDraws.clear();
+      restoreGround();
+      document.querySelectorAll(".qaddons-item-bonus,[data-qaddons-item-extra]").forEach((node) => node.remove());
+      document.querySelectorAll(".qaddons-bonus-static").forEach((node) => node.classList.remove("qaddons-bonus-static"));
+    });
+    apply2();
+    poll();
+  }
+
+  // src/addons/item-tools/index.js
+  function createItemTools() {
+    return {
+      id: "item-tools",
+      name: "Przedmioty: ramki i tooltipy",
+      description: "Własne ramki i nakładki, skróty bonusów legendarnych oraz informacje o ulepszeniach i łupie.",
+      defaultEnabled: true,
+      defaults: defaults3,
+      enable: startItemTools,
+      onSettingsChange: (ctx) => ctx.events.emit("itemToolsChanged"),
+      renderSettings: renderSettings2
+    };
+  }
+  function renderSettings2(ctx) {
+    const section = document.createElement("section");
+    section.className = "mtk-addon-settings qaddons-items-settings";
+    section.innerHTML = `<h2>Przedmioty: ramki i tooltipy</h2>
+        <label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
+        <nav class="qi-tabs" aria-label="Ustawienia przedmiotów">
+            <button type="button" class="ln-btn" data-tab="appearance" aria-pressed="true">Ramki i nakładki</button>
+            <button type="button" class="ln-btn" data-tab="bonuses" aria-pressed="false">Bonusy legendarne</button>
+            <button type="button" class="ln-btn" data-tab="tooltips" aria-pressed="false">Tooltipy</button>
+        </nav>
+        <div data-pane="appearance"><p>Dodaj adres HTTPS arkusza ramek lub nakładek zgodnego z Margonem (kafelki 32 × 32 px). Wybór zapisuje się od razu. „Wygląd gry” przywraca oryginał.</p>
+            ${["frame", "overlay"].map((type) => `<h2>${type === "frame" ? "Ramki" : "Nakładki"}</h2><div data-library="${type}"></div>
+                <form data-add="${type}" class="ln-grid"><label class="ln-field">Nazwa<input type="text" name="name" maxlength="60" required placeholder="Moja ${type === "frame" ? "ramka" : "nakładka"}"></label>
+                <label class="ln-field">Adres grafiki HTTPS<input type="url" name="url" required placeholder="https://…/grafika.png"></label>
+                <div class="qi-art-preview" aria-label="Podgląd arkusza"><span></span><small>Podgląd ramki legendarnej</small></div>
+                <button class="ln-btn" type="submit">Dodaj i zastosuj</button><div class="ln-help ln-full" role="status" data-message></div></form>`).join("")}
+        </div>
+        <div data-pane="bonuses" hidden><h2>Skrót w prawym dolnym rogu</h2>
+            <label class="mtk-enabled"><input type="checkbox" data-setting="bonusLabels"> Pokaż bonus na legendarnych przedmiotach</label>
+            <p>Skrót pojawia się na ikonie przedmiotu, również z oryginalną ramką. Kilka słów → pierwsze litery; jedno słowo → dwie pierwsze litery. Polskie znaki zostają zachowane.</p>
+            <div class="qi-bonus-preview">${["Krytyczna osłona", "Cios bardzo krytyczny", "Oślepienie"].map((name) => `<div><div class="qi-example-icon">◇<span>${abbreviation(name)}</span></div><small>${name}</small></div>`).join("")}</div>
+            <h2>Rozpoznawane bonusy</h2><div class="qi-bonus-list">${Object.values(BONUSES).map((name) => `<div><b>${abbreviation(name)}</b><span>${name}</span></div>`).join("")}</div>
+            <p>Przedmiot bez bonusu lub z nierozpoznanym bonusem pozostaje bez etykiety. Etykieta nie przechwytuje kliknięć ani tooltipów.</p>
+        </div>
+        <div data-pane="tooltips" hidden><h2>Rozszerzenie opisu przedmiotu</h2>
+            <div class="ln-grid">${[
+      ["tooltipEnabled", "Rozszerzone tooltipy"],
+      ["showUpgradeCost", "Koszty ulepszania"],
+      ["showLootDate", "Data zdobycia"],
+      ["showLootGroup", "Liczebność grupy"],
+      ["showEssence", "Esencja z przedmiotu"]
+    ].map(([key, name]) => `<label class="ln-switch"><input type="checkbox" data-setting="${key}">${name}</label>`).join("")}
+            <label class="ln-field">Pokazywane koszty<select data-setting="upgradeDisplay"><option value="both">Każdy poziom i suma</option><option value="all">Każdy poziom</option><option value="sum">Tylko suma</option></select></label></div>
+            <h2>Koszty dla wybranych rang</h2><div class="ln-grid">${Object.entries({ zwykly: "Zwykłe", unikatowy: "Unikatowe", heroiczny: "Heroiczne", ulepszony: "Ulepszone", legendarny: "Legendarne" }).map(([key, name]) => `<label class="ln-switch"><input type="checkbox" data-rarity="${key}">${name}</label>`).join("")}</div>
+            <h2>Podgląd</h2><p>Przykładowy legendarny przedmiot, poziom 100, ulepszenie +3. Koszty zachowują wzory z dostarczonego skryptu.</p><div class="qi-tip-preview"></div>
+        </div>`;
+    ctx.styles.set("settings", `
+        #mtk-panel .qi-tabs{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0;}
+        #mtk-panel .qi-tabs [aria-pressed="true"]{border-color:#aaa;background:#222;color:#fff;}
+        #mtk-panel .qi-library-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #292929;}
+        #mtk-panel .qi-library-row label{flex:1;min-width:0;overflow-wrap:anywhere;cursor:pointer;}
+        #mtk-panel .qi-library-row input{margin-right:8px;accent-color:#ccc;}
+        #mtk-panel .qi-art-preview{display:flex;align-items:center;gap:10px;color:#aaa;}
+        #mtk-panel .qi-art-preview>span{display:block;width:32px;height:32px;background-color:#111;background-position:-128px 0;flex:none;border:1px solid #333;box-sizing:content-box;}
+        #mtk-panel .qi-bonus-preview{display:flex;gap:22px;padding:14px 10px;flex-wrap:wrap;}
+        #mtk-panel .qi-bonus-preview>div{display:flex;align-items:center;gap:9px;}
+        #mtk-panel .qi-example-icon{position:relative;width:32px;height:32px;flex:none;border:1px solid #888;color:#aaa;text-align:center;line-height:28px;font-size:23px;background:#111;}
+        #mtk-panel .qi-example-icon span{position:absolute;bottom:0;right:0;background:#000;color:#fff;font:bold 9px/11px Arial;padding:0 2px;border:1px solid #666;}
+        #mtk-panel .qi-bonus-list{display:grid;grid-template-columns:1fr 1fr;gap:0 15px;padding:0 10px 14px;}
+        #mtk-panel .qi-bonus-list>div{display:flex;gap:10px;border-bottom:1px solid #222;padding:5px 0;font-size:12px;}
+        #mtk-panel .qi-bonus-list b{min-width:30px;color:#fff;}
+        #mtk-panel .qi-tip-preview{margin:10px;background:#080808;border:1px solid #333;padding:10px;color:#ccc;font:11px/1.55 Arial;}
+    `);
+    const enabled = section.querySelector("[data-enabled]");
+    enabled.checked = ctx.enabled;
+    ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+    ctx.events.on("addonChanged", (event) => {
+      if (event.id === ctx.id) enabled.checked = event.enabled;
+    });
+    const preview = () => {
+      const target = section.querySelector(".qi-tip-preview");
+      const tools = createTooltipTools(ctx.settings);
+      target.innerHTML = ctx.settings.tooltipEnabled ? (ctx.settings.showUpgradeCost ? tools.upgradeHtml({ level: 100, currentUpgrade: 3, rarity: "legendarny" }) : "") + (ctx.settings.showLootDate ? "<div>Zdobyto: 09.09.2026 12:00:00</div>" : "") + (ctx.settings.showLootGroup ? "<div>Grupa: 3 graczy</div>" : "") + (ctx.settings.showEssence ? "<div>Esencja: 60</div>" : "") : "Rozszerzenie tooltipów jest wyłączone.";
+      if (!target.textContent) target.textContent = "Wybrane informacje nie dotyczą tego przykładu.";
+    };
+    for (const button of section.querySelectorAll("[data-tab]")) ctx.scheduler.listen(button, "click", () => {
+      section.querySelectorAll("[data-tab]").forEach((tab) => tab.setAttribute("aria-pressed", String(tab === button)));
+      section.querySelectorAll("[data-pane]").forEach((pane) => {
+        pane.hidden = pane.dataset.pane !== button.dataset.tab;
+      });
+    });
+    for (const input of section.querySelectorAll("[data-setting],[data-rarity]")) {
+      const key = input.dataset.setting;
+      if (input.type === "checkbox") input.checked = key ? !!ctx.settings[key] : ctx.settings.rarities?.[input.dataset.rarity] !== false;
+      else input.value = ctx.settings[key];
+      ctx.scheduler.listen(input, "change", () => {
+        ctx.changeSettings(key ? { [key]: input.type === "checkbox" ? input.checked : input.value } : { rarities: { ...ctx.settings.rarities, [input.dataset.rarity]: input.checked } });
+        preview();
+      });
+    }
+    for (const type of ["frame", "overlay"]) {
+      let renderLibrary = function() {
+        library.replaceChildren();
+        const list = Array.isArray(ctx.settings[key]) ? ctx.settings[key] : [];
+        [{ name: "Wygląd gry", url: "" }, ...list].forEach((item, index) => {
+          const row = document.createElement("div");
+          row.className = "qi-library-row";
+          const label = document.createElement("label");
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = `qi-${type}`;
+          input.value = item.url;
+          input.checked = (ctx.settings[active] || "") === item.url;
+          label.append(input, document.createTextNode(item.name));
+          row.append(label);
+          if (index) {
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "ln-btn";
+            remove.textContent = "Usuń";
+            remove.dataset.removeIndex = index - 1;
+            row.append(remove);
+          }
+          library.append(row);
+        });
+      };
+      const key = type === "frame" ? "frames" : "overlays";
+      const active = type === "frame" ? "activeFrame" : "activeOverlay";
+      const library = section.querySelector(`[data-library="${type}"]`);
+      ctx.scheduler.listen(library, "change", (event) => {
+        if (event.target.matches('input[type="radio"]')) ctx.changeSettings({ [active]: event.target.value });
+      });
+      ctx.scheduler.listen(library, "click", (event) => {
+        const button = event.target.closest("[data-remove-index]");
+        if (!button) return;
+        const list = [...ctx.settings[key]];
+        const [removed] = list.splice(Number(button.dataset.removeIndex), 1);
+        ctx.changeSettings({ [key]: list, ...removed?.url === ctx.settings[active] ? { [active]: "" } : {} });
+        renderLibrary();
+      });
+      const form = section.querySelector(`[data-add="${type}"]`);
+      const urlInput = form.elements.url;
+      const message = form.querySelector("[data-message]");
+      ctx.scheduler.listen(urlInput, "input", () => {
+        const url = imageUrl(urlInput.value);
+        form.querySelector(".qi-art-preview>span").style.backgroundImage = url ? `url(${JSON.stringify(url)})` : "";
+        message.textContent = urlInput.value && !url ? "Podaj pełny adres HTTPS grafiki." : "";
+      });
+      ctx.scheduler.listen(form, "submit", (event) => {
+        event.preventDefault();
+        const url = imageUrl(urlInput.value);
+        const name = form.elements.name.value.trim();
+        if (!url || !name) {
+          message.textContent = "Podaj nazwę i poprawny adres HTTPS.";
+          return;
+        }
+        const list = (Array.isArray(ctx.settings[key]) ? ctx.settings[key] : []).filter((item) => item.url !== url);
+        ctx.changeSettings({ [key]: [...list, { name, url }], [active]: url });
+        renderLibrary();
+        form.reset();
+        form.querySelector(".qi-art-preview>span").style.backgroundImage = "";
+        message.textContent = "Zapisano i wybrano grafikę.";
+      });
+      renderLibrary();
+    }
+    preview();
+    ctx.container.append(section);
+  }
+
   // src/main.js
   var page = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -5024,6 +5704,7 @@
       manager.register(createLegendaryNotificator());
       manager.register(createNotificationPosition());
       manager.register(createDetectorGlobal());
+      manager.register(createItemTools());
       panel.connect(manager);
       manager.start();
       game.start();
