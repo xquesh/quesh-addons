@@ -31,6 +31,15 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         assert(tip.textContent.includes('Grupa: 3 graczy') && tip.textContent.includes('Esencja: 60'), 'Dane łupu z przedmiotu');
         assert(tip.textContent.includes('Koszt ulepszeń'), 'Koszty z dostarczonego skryptu');
         assert(getComputedStyle(tip.querySelector('[data-qaddons-item-extra]')).backgroundColor === 'rgb(8, 8, 8)', 'Czarne rozszerzenie tooltipu');
+        const stableExtra = tip.querySelector('[data-qaddons-item-extra]');
+        const stableChild = stableExtra.firstElementChild;
+        const timer = document.createElement('div'); tip.append(timer);
+        for (let tick = 0; tick < 3; tick++) {
+            timer.textContent = `Pozostały czas: ${100 - tick}`;
+            await wait(150);
+            assert(tip.querySelector('[data-qaddons-item-extra]') === stableExtra && stableExtra.firstElementChild === stableChild, 'Zmiana natywnego opisu nie przebudowuje rozszerzenia');
+        }
+        timer.remove();
         assert(drawable.draw !== originalDraw, 'Obsługa bonusów na mapie');
         const canvas = document.createElement('canvas'); canvas.width = canvas.height = 32;
         const context = canvas.getContext('2d');
@@ -52,6 +61,23 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         assert(settings.querySelectorAll('[data-tab]').length === 3, 'Tylko trzy pozostawione zakładki');
         settings.querySelector('[data-tab="bonuses"]').click();
         assert(!settings.querySelector('[data-pane="bonuses"]').hidden && settings.querySelector('[data-pane="appearance"]').hidden, 'Nawigacja ustawień');
+        const sizeInput = settings.querySelector('[data-setting="bonusSize"]');
+        const colorInput = settings.querySelector('[data-setting="bonusColor"]');
+        const fontInput = settings.querySelector('[data-setting="bonusFont"]');
+        sizeInput.value = '14'; sizeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        colorInput.value = '#ff9900'; colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+        fontInput.value = 'Verdana'; fontInput.dispatchEvent(new Event('change', { bubbles: true }));
+        await wait(150);
+        assert(getComputedStyle(badge()).fontSize === '14px' && getComputedStyle(badge()).color === 'rgb(255, 153, 0)', 'Konfiguracja tekstu na ikonach');
+        assert(getComputedStyle(settings.querySelector('.qi-example-icon span')).fontSize === '14px', 'Podgląd na żywo');
+        let drawn;
+        const fillText = context.fillText;
+        context.fillText = function(...args) { drawn = { font: this.font, color: this.fillStyle }; return fillText.apply(this, args); };
+        drawable.draw(context); context.fillText = fillText;
+        assert(drawn.font.includes('14px') && drawn.font.includes('Verdana') && drawn.color === '#ff9900', 'Ten sam wygląd na mapie');
+        settings.querySelector('[data-reset-bonus]').click();
+        await wait(150);
+        assert(getComputedStyle(badge()).fontSize === '9px' && getComputedStyle(badge()).color === 'rgb(255, 255, 255)', 'Reset tylko wyglądu skrótów');
         const bonusToggle = settings.querySelector('[data-setting="bonusLabels"]');
         bonusToggle.click();
         await wait(150);

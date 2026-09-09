@@ -1,5 +1,6 @@
 import { cssImage, imageUrl, legendaryBonus } from './data.js';
 import { createTooltipTools } from './tooltip.js';
+import { bonusStyle, bonusFont, bonusCss } from './bonus-style.js';
 
 const ITEM_SELECTOR = '.item, .bottomItem';
 const HIGHLIGHTS = '.item .highlight.h-exist,.bottomItem .highlight.h-exist,.item .icon.h-exist,.bottomItem .icon.h-exist';
@@ -8,6 +9,7 @@ export function startItemTools(ctx) {
     const page = ctx.game.page;
     const tips = createTooltipTools(settings);
     const fingerprints = new WeakMap();
+    const renderedExtras = new WeakMap();
     const groundDraws = new Map();
     let pending = 0;
     let ground = null;
@@ -61,13 +63,19 @@ export function startItemTools(ctx) {
             const info = tips.parseItemInfo(html);
             const upgrade = settings.showUpgradeCost && tips.isUpgradeableItem(html) ? tips.upgradeHtml(info) : '';
             const loot = tips.lootHtml(id, tips.isUpgradeableItem(html) ? info : null, html);
-            extra?.remove();
-            if (!upgrade && !loot) continue;
-            const wrapper = document.createElement('div');
+            const content = upgrade + loot;
+            if (!content) { extra?.remove(); continue; }
+            // Natywny opis (np. licznik czasu) może zmieniać się bez zmiany naszego dodatku.
+            // Nie odpinamy sekcji: usuń/wstaw wymusza ponowne mierzenie i pozycjonowanie tooltipu.
+            if (extra && renderedExtras.get(extra) === content) continue;
+            const wrapper = extra || document.createElement('div');
             wrapper.dataset.qaddonsItemExtra = '1';
-            wrapper.innerHTML = upgrade + loot;
-            const anchor = element.querySelector(':scope > .tip-item-stat-reqp,:scope > .tip-item-stat-lvl');
-            element.insertBefore(wrapper, anchor || null);
+            wrapper.innerHTML = content;
+            renderedExtras.set(wrapper, content);
+            if (!extra) {
+                const anchor = element.querySelector(':scope > .tip-item-stat-reqp,:scope > .tip-item-stat-lvl');
+                element.insertBefore(wrapper, anchor || null);
+            }
         }
     }
     function restoreGround() {
@@ -107,8 +115,9 @@ export function startItemTools(ctx) {
                 const y = Math.round(this.i.y * 32 - engine.map.offset[1] - shift[1]) + 31;
                 canvas.save();
                 canvas.globalAlpha = 1;
-                canvas.font = 'bold 9px Arial';
-                canvas.fillStyle = '#fff'; canvas.textAlign = 'right'; canvas.textBaseline = 'bottom';
+                const textStyle = bonusStyle(settings);
+                canvas.font = bonusFont(textStyle);
+                canvas.fillStyle = textStyle.color; canvas.textAlign = 'right'; canvas.textBaseline = 'bottom';
                 canvas.fillText(bonus.short, x - 2, y);
                 canvas.restore();
                 return result;
@@ -131,8 +140,8 @@ export function startItemTools(ctx) {
             .qaddons-bonus-static{position:relative!important}
             .qaddons-item-bonus{position:absolute!important;right:1px!important;bottom:1px!important;z-index:6;pointer-events:none!important;
                 padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#fff!important;box-shadow:none!important;
-                font:bold 9px/11px Arial,sans-serif!important;text-shadow:none!important;letter-spacing:0!important;white-space:nowrap!important;}
-            [data-qaddons-item-extra]{background:#080808;color:#ddd;border:1px solid #333;padding:6px 8px;margin:6px 0;font:11px/1.55 Arial,sans-serif;}
+                ${bonusCss(bonusStyle(settings))}text-shadow:none!important;letter-spacing:0!important;white-space:nowrap!important;}
+            [data-qaddons-item-extra]{pointer-events:none;background:#080808;color:#ddd;border:1px solid #333;padding:6px 8px;margin:6px 0;font:11px/1.55 Arial,sans-serif;}
             [data-qaddons-item-extra]>div:first-child{border-top:0!important;margin-top:0!important;padding-top:0!important;}
         `);
         queue();

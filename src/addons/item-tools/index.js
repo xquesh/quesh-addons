@@ -1,6 +1,7 @@
 import { defaults, imageUrl, BONUSES, abbreviation } from './data.js';
 import { startItemTools } from './runtime.js';
 import { createTooltipTools } from './tooltip.js';
+import { BONUS_FONTS, bonusDefaults, bonusStyle, bonusCss } from './bonus-style.js';
 
 export function createItemTools() {
     return {
@@ -33,6 +34,13 @@ function renderSettings(ctx) {
         <div data-pane="bonuses" hidden><h2>Skrót w prawym dolnym rogu</h2>
             <label class="mtk-enabled"><input type="checkbox" data-setting="bonusLabels"> Pokaż bonus na legendarnych przedmiotach</label>
             <p>Skrót pojawia się na ikonie przedmiotu, również z oryginalną ramką. Kilka słów → pierwsze litery; jedno słowo → dwie pierwsze litery. Polskie znaki zostają zachowane.</p>
+            <div class="ln-grid">
+                <label class="ln-field">Czcionka<select data-setting="bonusFont">${Object.keys(BONUS_FONTS).map(font => `<option>${font}</option>`).join('')}</select></label>
+                <label class="ln-field">Rozmiar (7–18 px)<input type="number" min="7" max="18" step="1" data-setting="bonusSize"></label>
+                <label class="ln-field">Kolor tekstu<input type="color" data-setting="bonusColor"></label>
+                <div><label class="ln-switch"><input type="checkbox" data-setting="bonusBold">Pogrubienie</label><label class="ln-switch"><input type="checkbox" data-setting="bonusItalic">Kursywa</label></div>
+                <button class="ln-btn" type="button" data-reset-bonus>Przywróć wygląd tekstu</button>
+            </div>
             <div class="qi-bonus-preview">${['Krytyczna osłona', 'Cios bardzo krytyczny', 'Oślepienie'].map(name => `<div><div class="qi-example-icon">◇<span>${abbreviation(name)}</span></div><small>${name}</small></div>`).join('')}</div>
             <h2>Rozpoznawane bonusy</h2><div class="qi-bonus-list">${Object.values(BONUSES).map(name => `<div><b>${abbreviation(name)}</b><span>${name}</span></div>`).join('')}</div>
             <p>Przedmiot bez bonusu lub z nierozpoznanym bonusem pozostaje bez etykiety. Etykieta nie przechwytuje kliknięć ani tooltipów.</p>
@@ -68,6 +76,7 @@ function renderSettings(ctx) {
     ctx.scheduler.listen(enabled, 'change', () => ctx.setEnabled(enabled.checked));
     ctx.events.on('addonChanged', event => { if (event.id === ctx.id) enabled.checked = event.enabled; });
     const preview = () => {
+        ctx.styles.set('bonus-preview', `#mtk-panel .qi-example-icon span{${bonusCss(bonusStyle(ctx.settings))}}`);
         const target = section.querySelector('.qi-tip-preview');
         const tools = createTooltipTools(ctx.settings);
         target.innerHTML = ctx.settings.tooltipEnabled ?
@@ -85,11 +94,20 @@ function renderSettings(ctx) {
         const key = input.dataset.setting;
         if (input.type === 'checkbox') input.checked = key ? !!ctx.settings[key] : ctx.settings.rarities?.[input.dataset.rarity] !== false;
         else input.value = ctx.settings[key];
-        ctx.scheduler.listen(input, 'change', () => {
-            ctx.changeSettings(key ? { [key]: input.type === 'checkbox' ? input.checked : input.value } : { rarities: { ...ctx.settings.rarities, [input.dataset.rarity]: input.checked } });
+        ctx.scheduler.listen(input, key?.startsWith('bonus') && ['number', 'color'].includes(input.type) ? 'input' : 'change', () => {
+            if (input.type === 'number' && !input.checkValidity()) return;
+            ctx.changeSettings(key ? { [key]: input.type === 'checkbox' ? input.checked : input.type === 'number' ? Number(input.value) : input.value } : { rarities: { ...ctx.settings.rarities, [input.dataset.rarity]: input.checked } });
             preview();
         });
     }
+    ctx.scheduler.listen(section.querySelector('[data-reset-bonus]'), 'click', () => {
+        ctx.changeSettings({ ...bonusDefaults });
+        for (const [key, value] of Object.entries(bonusDefaults)) {
+            const input = section.querySelector(`[data-setting="${key}"]`);
+            if (input.type === 'checkbox') input.checked = value; else input.value = value;
+        }
+        preview();
+    });
     for (const type of ['frame', 'overlay']) {
         const key = type === 'frame' ? 'frames' : 'overlays';
         const active = type === 'frame' ? 'activeFrame' : 'activeOverlay';

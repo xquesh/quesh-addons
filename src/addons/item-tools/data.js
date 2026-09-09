@@ -1,4 +1,5 @@
 // Nazwy z publicznego dictionary_pl.js Margonem (2026-09-09).
+import { bonusDefaults } from './bonus-style.js';
 export const BONUSES = Object.freeze({
     anguish: 'Krwawa udręka', cleanse: 'Płomienne oczyszczenie', critred: 'Krytyczna osłona',
     curse: 'Klątwa', dmgred: 'Fizyczna osłona', facade: 'Fasada opieki', frenzy: 'Eskalacja szału',
@@ -7,6 +8,7 @@ export const BONUSES = Object.freeze({
     retaliation: 'Aura odwetu', verycrit: 'Cios bardzo krytyczny'
 });
 export const defaults = {
+    ...bonusDefaults,
     frames: [], overlays: [], activeFrame: '', activeOverlay: '', bonusLabels: true,
     tooltipEnabled: true, showUpgradeCost: true, upgradeDisplay: 'both',
     showLootDate: true, showLootGroup: true, showEssence: true,
