@@ -1,6 +1,7 @@
 import { defaults } from './defaults.js';
 import { renderSettings } from './settings-ui.js';
 import { normalize, typographyCss } from './typography.js';
+import { keepTextStyle } from './text-style.js';
 
 function apply(ctx) {
     const { bottom } = normalize(ctx.settings);
@@ -24,9 +25,9 @@ export function createNotificationPosition() {
         id: 'notification-position', name: 'Pozycja powiadomień',
         description: 'Zmienia pozycję, czcionkę, rozmiar i wygląd komunikatów tekstowych gry.',
         defaultEnabled: true, defaults,
-        enable: apply,
+        enable: ctx => { apply(ctx); keepTextStyle(ctx); },
         disable: ctx => ctx.styles.remove('position'),
         destroy: ctx => ctx?.styles.clear(),
-        onSettingsChange: apply, renderSettings
+        onSettingsChange: ctx => { apply(ctx); ctx.events.emit('notificationTextChanged'); }, renderSettings
     };
 }
