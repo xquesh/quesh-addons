@@ -29,13 +29,12 @@ export function legendaryBonus(item, legendaryDom = false) {
     const type = item?.getItemType?.() || item?.itemType;
     const legendary = type ? type === 't-leg' : Object.hasOwn(stats, 'legendary') || stats.rarity === 'legendary' || legendaryDom;
     if (!legendary) return null;
-    const value = item?.getLegbonStat?.() ?? stats.legbon;
-    if (typeof value !== 'string') return null;
-    // Tak jak natywny TipsParser: po przecinku mogą wystąpić parametry bonusu.
-    const code = value.split(',')[0];
-    if (!Object.hasOwn(BONUSES, code)) return null;
-    const name = BONUSES[code];
-    return { name, short: abbreviation(name) };
+    // TipsParser traktuje bonusy z gniazd tak samo jak zwykły legbon.
+    const values = [item?.getLegbonStat?.(), stats.legbon, stats.socket_injection_legbon, stats.socket_fleeting_legbon];
+    const codes = [...new Set(values.filter(value => typeof value === 'string')
+        .map(value => value.split(',')[0].trim()).filter(code => Object.hasOwn(BONUSES, code)))];
+    if (!codes.length) return null;
+    return { name: codes.map(code => BONUSES[code]).join(' / '), short: codes.map(code => abbreviation(BONUSES[code])).join('/') };
 }
 export function imageUrl(value) {
     try { const url = new URL(String(value)); return url.protocol === 'https:' ? url.href : ''; }

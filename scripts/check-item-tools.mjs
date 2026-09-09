@@ -5,12 +5,18 @@ import { createTooltipTools } from '../src/addons/item-tools/tooltip.js';
 for (const [name, result] of [['Krytyczna osłona', 'KO'], [' Cios  bardzo krytyczny ', 'CBK'], ['Oślepienie', 'OŚ'], ['Klątwa', 'KL'], ['Ochrona żywiołów', 'OŻ']]) assert.equal(abbreviation(name), result);
 for (const [code, name] of Object.entries(BONUSES)) {
     assert.deepEqual(legendaryBonus({ stat: `rarity=legendary;legbon=${code}` }), { name, short: abbreviation(name) });
+    for (const source of ['socket_injection_legbon', 'socket_fleeting_legbon']) {
+        assert.deepEqual(legendaryBonus({ cl: 5, itemType: 't-leg', stat: `rarity=legendary;${source}=${code},17`, getLegbonStat: () => null }), { name, short: abbreviation(name) });
+    }
     assert.equal(legendaryBonus({ itemType: 't-her', stat: `legbon=${code}` }, true), null);
 }
 assert.equal(legendaryBonus({ stat: 'legendary;legbon=unknown' }), null);
 assert.equal(legendaryBonus({ stat: 'legendary' }), null);
 assert.equal(legendaryBonus({ itemType: 't-leg', getLegbonStat: () => 'glare' }).short, 'OŚ');
 assert.equal(legendaryBonus({ itemType: 't-leg', getLegbonStat: () => 'critred,25' }).short, 'KO');
+assert.equal(legendaryBonus({ itemType: 't-leg', stat: 'socket_injection_legbon=verycrit,17' }).short, 'CBK');
+assert.equal(legendaryBonus({ itemType: 't-leg', stat: 'socket_fleeting_legbon=verycrit' }).short, 'CBK');
+assert.equal(legendaryBonus({ itemType: 't-leg', stat: 'legbon=verycrit;socket_injection_legbon=verycrit' }).short, 'CBK');
 assert.equal(legendaryBonus({ stat: { stat: 'legendary;legbon=verycrit' } }).short, 'CBK');
 assert.equal(imageUrl('javascript:alert(1)'), '');
 assert.equal(imageUrl('http://example.test/a.png'), '');

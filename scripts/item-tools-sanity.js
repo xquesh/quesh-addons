@@ -25,6 +25,7 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         assert(badge()?.textContent === 'KO', 'KO na legendzie');
         assert(!icons[1].querySelector('.qaddons-item-bonus'), 'Brak etykiety na heroiku');
         assert(getComputedStyle(badge()).pointerEvents === 'none', 'Etykieta przepuszcza kliknięcia i hover');
+        assert(getComputedStyle(badge()).backgroundColor === 'rgba(0, 0, 0, 0)' && getComputedStyle(badge()).borderWidth === '0px', 'Sam tekst bez tła i obramowania');
         const tip = fixture.querySelector('.content');
         assert(tip.querySelectorAll('[data-qaddons-item-extra]').length === 1, 'Jedno rozszerzenie tooltipu');
         assert(tip.textContent.includes('Grupa: 3 graczy') && tip.textContent.includes('Esencja: 60'), 'Dane łupu z przedmiotu');
@@ -33,10 +34,11 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         assert(drawable.draw !== originalDraw, 'Obsługa bonusów na mapie');
         const canvas = document.createElement('canvas'); canvas.width = canvas.height = 32;
         const context = canvas.getContext('2d');
-        assert(drawable.draw(context) === 42 && context.getImageData(30, 30, 1, 1).data[3] > 0, 'Bonus na canvas z zachowaniem wyniku rysowania');
-        item.stat = 'rarity=legendary;legbon=verycrit';
+        assert(drawable.draw(context) === 42 && context.getImageData(0, 0, 32, 32).data.some((value, index) => index % 4 === 3 && value > 0), 'Tekst na canvas z zachowaniem wyniku rysowania');
+        assert(context.getImageData(30, 30, 1, 1).data[3] === 0, 'Brak prostokątnego tła na canvas');
+        item.stat = 'rarity=legendary;socket_injection_legbon=verycrit,17';
         await wait(650);
-        assert(badge()?.textContent === 'CBK', 'Zmiana statystyk bez wymiany ikony');
+        assert(badge()?.textContent === 'CBK', 'Bonus CBK z gniazda zbroi bez zwykłego legbon');
         item.stat = 'rarity=legendary;legbon=glare';
         await wait(650);
         assert(badge()?.textContent === 'OŚ', 'Polskie znaki w skrócie');

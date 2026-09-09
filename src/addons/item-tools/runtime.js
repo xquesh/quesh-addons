@@ -108,8 +108,6 @@ export function startItemTools(ctx) {
                 canvas.save();
                 canvas.globalAlpha = 1;
                 canvas.font = 'bold 9px Arial';
-                const width = canvas.measureText(bonus.short).width + 4;
-                canvas.fillStyle = '#000'; canvas.fillRect(x - width, y - 11, width, 11);
                 canvas.fillStyle = '#fff'; canvas.textAlign = 'right'; canvas.textBaseline = 'bottom';
                 canvas.fillText(bonus.short, x - 2, y);
                 canvas.restore();
@@ -132,7 +130,7 @@ export function startItemTools(ctx) {
             ${overlay ? `${HIGHLIGHTS.split(',').map(selector => selector + '::after').join(',')}{content:"";position:absolute;inset:0;z-index:1;background-image:url(${cssImage(overlay)})!important;pointer-events:none;}` : ''}
             .qaddons-bonus-static{position:relative!important}
             .qaddons-item-bonus{position:absolute!important;right:1px!important;bottom:1px!important;z-index:6;pointer-events:none!important;
-                padding:0 2px!important;margin:0!important;border:1px solid #777!important;border-radius:0!important;background:#000!important;color:#fff!important;
+                padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#fff!important;box-shadow:none!important;
                 font:bold 9px/11px Arial,sans-serif!important;text-shadow:none!important;letter-spacing:0!important;white-space:nowrap!important;}
             [data-qaddons-item-extra]{background:#080808;color:#ddd;border:1px solid #333;padding:6px 8px;margin:6px 0;font:11px/1.55 Arial,sans-serif;}
             [data-qaddons-item-extra]>div:first-child{border-top:0!important;margin-top:0!important;padding-top:0!important;}

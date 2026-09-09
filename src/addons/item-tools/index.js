@@ -57,7 +57,7 @@ function renderSettings(ctx) {
         #mtk-panel .qi-bonus-preview{display:flex;gap:22px;padding:14px 10px;flex-wrap:wrap;}
         #mtk-panel .qi-bonus-preview>div{display:flex;align-items:center;gap:9px;}
         #mtk-panel .qi-example-icon{position:relative;width:32px;height:32px;flex:none;border:1px solid #888;color:#aaa;text-align:center;line-height:28px;font-size:23px;background:#111;}
-        #mtk-panel .qi-example-icon span{position:absolute;bottom:0;right:0;background:#000;color:#fff;font:bold 9px/11px Arial;padding:0 2px;border:1px solid #666;}
+        #mtk-panel .qi-example-icon span{position:absolute;bottom:0;right:0;background:transparent;color:#fff;font:bold 9px/11px Arial;padding:0;border:0;}
         #mtk-panel .qi-bonus-list{display:grid;grid-template-columns:1fr 1fr;gap:0 15px;padding:0 10px 14px;}
         #mtk-panel .qi-bonus-list>div{display:flex;gap:10px;border-bottom:1px solid #222;padding:5px 0;font-size:12px;}
         #mtk-panel .qi-bonus-list b{min-width:30px;color:#fff;}
