@@ -132,6 +132,12 @@
         assert(getComputedStyle(partyFixture.querySelector('.hp-points')).display === 'none', 'Dokładne HP domyślnie ukryte');
         assert(getComputedStyle(partyFixture.querySelector('.top-row')).display === 'none', 'Natywny dwuwierszowy opis ukryty');
         assert(partySummary?.textContent.includes('Bardzo długi nick postaci') && partySummary.textContent.includes('(492h|334h)') && partySummary.textContent.includes('(95%)'), 'Własny wiersz zawiera nick, poziom i HP');
+        const nickRect = partySummary.querySelector('.qaddons-party-nick').getBoundingClientRect();
+        const infoRect = partySummary.querySelector('.qaddons-party-info').getBoundingClientRect();
+        const hpRect = partySummary.querySelector('.qaddons-party-hp').getBoundingClientRect();
+        const summaryRect = partySummary.getBoundingClientRect();
+        assert(infoRect.left - nickRect.right <= 4, 'Poziom i profesja są bezpośrednio obok nicku');
+        assert(Math.abs((hpRect.left + hpRect.width / 2) - (summaryRect.left + summaryRect.width / 2)) < 2, 'Procent HP jest wyśrodkowany');
         assert(getComputedStyle(partySummary).fontSize === '9px', 'Kompaktowy tekst ma 9 px');
         assert(getComputedStyle(partyFixture.querySelector('.party__professions')).display !== 'none', 'Podsumowanie profesji pozostaje widoczne');
         partyFixture.querySelector('.nickname-text').textContent = 'Nowy nick';

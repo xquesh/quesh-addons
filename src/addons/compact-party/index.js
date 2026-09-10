@@ -9,10 +9,11 @@ function value(node) {
 function createSummary() {
     const summary = document.createElement('div');
     summary.className = 'qaddons-party-summary';
+    const left = document.createElement('span'); left.className = 'qaddons-party-left';
     const nick = document.createElement('span'); nick.className = 'qaddons-party-nick';
     const info = document.createElement('span'); info.className = 'qaddons-party-info';
     const hp = document.createElement('span'); hp.className = 'qaddons-party-hp';
-    summary.append(nick, hp, info);
+    left.append(nick, info); summary.append(left, hp);
     return summary;
 }
 
@@ -86,7 +87,7 @@ export function createCompactParty() {
         renderSettings(ctx) {
             const section = document.createElement('section'); section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Kompaktowa grupa</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Nick jest po lewej, procent życia pośrodku, a poziom, profesja i ikony akcji po prawej.</p>
+                <p>Poziom i profesja są obok nicku po lewej, procent życia pośrodku, a ikony akcji po prawej.</p>
                 <div class="ln-grid">
                     <label class="ln-switch"><input type="checkbox" data-setting="hideAvatars">Ukryj grafiki postaci</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="showHpPoints">Pokaż dokładne punkty życia</label>
