@@ -709,7 +709,7 @@
   var quesh_default = "data:image/png;base64,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";
 
   // src/version.js
-  var VERSION = "1.5.3";
+  var VERSION = "1.6.0";
 
   // src/core/updates.js
   var MANIFEST_URL = "https://xquesh.github.io/quesh-addons/dist/version.json";
@@ -5778,6 +5778,361 @@
     ctx.container.append(section);
   }
 
+  // src/addons/relogger/data.js
+  var defaults4 = { sort: "level-desc", compact: false, showTimers: true, hotkeys: false, selectedWorld: "", x: null, y: 80, collapsed: false };
+  function worldName(value) {
+    return typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value) ? value : "";
+  }
+  function characterList(data) {
+    if (!Array.isArray(data)) throw new Error("Serwer nie zwrócił listy postaci.");
+    const seen = /* @__PURE__ */ new Set();
+    return data.filter((hero) => hero && /^\d+$/.test(String(hero.id)) && worldName(hero.world) && typeof hero.nick === "string").filter((hero) => {
+      const key = `${hero.world}:${hero.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).map((hero) => ({ id: String(hero.id), world: hero.world, nick: hero.nick, lvl: Number(hero.lvl) || 0, prof: String(hero.prof || ""), icon: String(hero.icon || "") }));
+  }
+  function sortedHeroes(heroes, world, sort) {
+    return heroes.filter((hero) => hero.world === world).sort((a, b) => {
+      const order = sort === "name" ? a.nick.localeCompare(b.nick, "pl") : (a.lvl - b.lvl) * (sort === "level-asc" ? 1 : -1);
+      return order || a.id.localeCompare(b.id);
+    });
+  }
+  function countdown(seconds) {
+    const value = Math.max(0, Math.ceil(seconds));
+    const pad = (n) => String(n).padStart(2, "0");
+    return value >= 3600 ? `${Math.floor(value / 3600)}:${pad(Math.floor(value / 60) % 60)}:${pad(value % 60)}` : `${pad(Math.floor(value / 60))}:${pad(value % 60)}`;
+  }
+  function heroTimers(data, heroId, now, fadeout = 600) {
+    if (!Array.isArray(data)) return [];
+    const expiry = Number.isFinite(Number(fadeout)) && Number(fadeout) >= 0 ? Number(fadeout) : 600;
+    return data.filter((timer) => timer && String(timer.heroData?.id) === String(heroId) && (timer.type === 2 || timer.type === "hero" || timer.user === 1) && Number.isFinite(Number(timer.presp)) && Number(timer.presp) > 0 && now - Number(timer.presp) < expiry).map((timer) => {
+      const end = Number(timer.presp);
+      const min = Number(timer.minResp);
+      const state = end <= now ? "due" : min > 0 && min <= now ? "window" : "waiting";
+      return { name: String(timer.name || "Timer"), end, state, text: state === "due" ? "Czas minął" : countdown(end - now) };
+    }).sort((a, b) => a.end - b.end);
+  }
+  function relogTarget(hero, page2) {
+    const engine = page2.Engine;
+    if (engine?.allInit !== true) throw new Error("Poczekaj na załadowanie gry.");
+    if (engine.changePlayer?.id != null) throw new Error("Zmiana postaci już trwa.");
+    if (engine.dialogue && typeof engine.dialogue === "object") throw new Error("Najpierw zamknij rozmowę z NPC.");
+    if (String(engine.hero?.d?.id || page2.getCookie?.("mchar_id")) === String(hero.id)) throw new Error("Ta postać jest już zalogowana.");
+    const domain = page2.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
+    if (!domain || !worldName(hero.world) || !/^\d+$/.test(String(hero.id))) throw new Error("Nieprawidłowy świat lub postać.");
+    return { url: `https://${hero.world}.margonem.${domain}/`, cookieDomain: `margonem.${domain}`, id: String(hero.id) };
+  }
+  function changeCharacter(hero, page2, navigate = (url) => page2.location.replace(url)) {
+    const target = relogTarget(hero, page2);
+    if (typeof page2.setCookie !== "function") throw new Error("Gra nie udostępnia zmiany postaci.");
+    page2.setCookie("mchar_id", target.id, new Date(Date.now() + 30 * 864e5), "/", target.cookieDomain, true);
+    navigate(target.url);
+  }
+
+  // src/addons/relogger/style.js
+  var barStyle = `
+#qaddons-relogger{position:fixed;z-index:2147482990;width:510px;max-width:calc(100vw - 16px);color:#ddd;background:#050505;border:1px solid #444;box-shadow:0 5px 20px #0008;font:12px Arial,sans-serif;}
+#qaddons-relogger *{box-sizing:border-box;}
+#qaddons-relogger header{display:flex;align-items:center;gap:6px;padding:5px 7px;background:#101010;border-bottom:1px solid #333;cursor:move;touch-action:none;}
+#qaddons-relogger header strong{font-size:11px;letter-spacing:1px;margin-right:auto;}
+#qaddons-relogger button,#qaddons-relogger select{border:1px solid #444;border-radius:0;background:#080808;color:#ddd;font:12px Arial,sans-serif;cursor:pointer;padding:4px 6px;}
+#qaddons-relogger button:hover,#qaddons-relogger select:hover{border-color:#aaa;background:#1a1a1a;}
+#qaddons-relogger button:focus-visible,#qaddons-relogger select:focus-visible{outline:1px solid #fff;outline-offset:1px;}
+#qaddons-relogger button:disabled{cursor:default;opacity:.5;}
+#qaddons-relogger select{max-width:150px;}
+#qaddons-relogger .qr-cards{display:flex;gap:5px;padding:7px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#555 #080808;}
+#qaddons-relogger .qr-card{flex:0 0 117px;display:grid;grid-template-columns:32px minmax(0,1fr);gap:2px 5px;position:relative;min-height:65px;padding:5px;border-bottom:2px solid #454545;text-align:left;}
+#qaddons-relogger .qr-portrait{width:32px;height:48px;grid-row:1/4;background-position:0 0;background-repeat:no-repeat;background-color:#151515;text-align:center;line-height:48px;font-size:22px;color:#999;}
+#qaddons-relogger .qr-nick{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:bold;font-size:11px;}
+#qaddons-relogger .qr-level{font-size:10px;color:#aaa;}
+#qaddons-relogger .qr-time{font-size:10px;white-space:nowrap;}
+#qaddons-relogger .qr-card[data-state="window"]{border-bottom-color:#deb358;box-shadow:inset 0 -9px 13px -11px #deb358;}
+#qaddons-relogger .qr-card[data-state="window"] .qr-time{color:#deb358;}
+#qaddons-relogger .qr-card[data-state="due"]{border-bottom-color:#6ddb9a;box-shadow:inset 0 -9px 13px -10px #6ddb9a;}
+#qaddons-relogger .qr-card[data-state="due"] .qr-time{color:#6ddb9a;}
+#qaddons-relogger .qr-card[aria-current="true"]{border-top-color:#eee;}
+#qaddons-relogger .qr-card[aria-current="true"] .qr-level::after{content:' · TERAZ';font-size:8px;color:#eee;}
+#qaddons-relogger[data-compact="true"] .qr-card{flex-basis:83px;}
+#qaddons-relogger[data-compact="true"] .qr-nick{display:none;}
+#qaddons-relogger[data-compact="true"] .qr-time{grid-column:1/-1;text-align:center;}
+#qaddons-relogger[data-compact="true"] .qr-portrait{grid-row:1/3;}
+#qaddons-relogger .qr-status{font-size:10px;color:#999;padding:0 8px 6px;}
+#qaddons-relogger .qr-details{margin:0 7px 7px;padding:6px 8px;border:1px solid #333;background:#0b0b0b;font-size:11px;max-height:140px;overflow:auto;white-space:pre-line;line-height:1.5;}
+#qaddons-relogger [hidden]{display:none!important;}
+`;
+
+  // src/addons/relogger/runtime.js
+  function startRelogger(ctx) {
+    const page2 = ctx.game.page;
+    const { scheduler: scheduler2, settings } = ctx;
+    const bar = document.createElement("aside");
+    bar.id = "qaddons-relogger";
+    bar.setAttribute("aria-label", "Przelogawka QADDONS");
+    bar.innerHTML = `<header><strong>POSTACIE</strong><select aria-label="Świat"></select><button type="button" data-refresh title="Odśwież listę postaci">↻</button><button type="button" data-collapse aria-label="Zwiń belkę">−</button></header><div class="qr-body"><div class="qr-cards"></div><div class="qr-status" role="status"></div><div class="qr-details" hidden></div></div>`;
+    const select = bar.querySelector("select");
+    const cards = bar.querySelector(".qr-cards");
+    const status = bar.querySelector(".qr-status");
+    const details = bar.querySelector(".qr-details");
+    const refresh = bar.querySelector("[data-refresh]");
+    let heroes = [];
+    let visible = [];
+    let currentWorld = "";
+    let request = null;
+    let loading = false;
+    let loaded = false;
+    let error = "";
+    let account = "";
+    let selectedHero = "";
+    let relogging = false;
+    const entries = /* @__PURE__ */ new Map();
+    ctx.styles.set("bar", barStyle);
+    document.body.append(bar);
+    function position() {
+      const width = Math.min(512, page2.innerWidth - 16);
+      const x = Number.isFinite(settings.x) ? settings.x : page2.innerWidth - width - 16;
+      const y = Number.isFinite(settings.y) ? settings.y : 80;
+      bar.style.left = `${Math.max(0, Math.min(page2.innerWidth - width - 8, x))}px`;
+      bar.style.top = `${Math.max(0, Math.min(page2.innerHeight - 40, y))}px`;
+    }
+    bindDrag(bar, bar.querySelector("header"), scheduler2, (x, y) => ctx.changeSettings({ x, y }));
+    scheduler2.listen(page2, "resize", position);
+    function timersStore() {
+      try {
+        const name = page2.Engine?.windowsData?.name?.addon_17;
+        return name ? page2.Engine.serverStorage?.get?.(name) : null;
+      } catch {
+        return null;
+      }
+    }
+    function updateTimers() {
+      const store = settings.showTimers ? timersStore() : null;
+      const available = Array.isArray(store?.data);
+      const now = Date.now() / 1e3;
+      for (const hero of visible) {
+        const button = entries.get(hero.id);
+        if (!button) continue;
+        const timers = settings.showTimers ? heroTimers(store?.data, hero.id, now, store?.settings?.fadeout) : [];
+        const next = timers[0];
+        const state = next?.state || "none";
+        if (button.dataset.state !== state) button.dataset.state = state;
+        const label = next?.text || "—";
+        const time = button.querySelector(".qr-time");
+        if (time.textContent !== label) time.textContent = label;
+        const title = `${hero.nick} · ${hero.lvl}${hero.prof}
+${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.state === "window" ? " · możliwy respawn" : ""}`).join("\n") : settings.showTimers && !available ? "Dane timerów niedostępne" : "Brak aktywnych timerów"}`;
+        if (button.title !== title) button.title = title;
+        if (selectedHero === hero.id && details.textContent !== title) details.textContent = title;
+      }
+      const text = error || (loading ? "Pobieranie postaci…" : !loaded ? "Oczekiwanie na zalogowanie do gry…" : !heroes.length ? "Brak postaci na koncie." : settings.showTimers ? available ? "Zielony: czas minął · bursztynowy: możliwy respawn · najedź, aby zobaczyć timery." : "Timery niedostępne — przelogowanie działa niezależnie." : "Kliknij postać, aby się przelogować.");
+      if (status.textContent !== text) status.textContent = text;
+    }
+    function render() {
+      bar.dataset.compact = String(settings.compact === true);
+      bar.querySelector(".qr-body").hidden = settings.collapsed === true;
+      bar.querySelector("[data-collapse]").textContent = settings.collapsed ? "+" : "−";
+      bar.querySelector("[data-collapse]").setAttribute("aria-label", settings.collapsed ? "Rozwiń belkę" : "Zwiń belkę");
+      const worlds = [...new Set(heroes.map((hero) => hero.world))].sort();
+      currentWorld = worlds.includes(settings.selectedWorld) ? settings.selectedWorld : worlds.includes(currentWorld) ? currentWorld : worlds[0] || "";
+      select.replaceChildren(...worlds.map((world) => {
+        const option = document.createElement("option");
+        option.value = world;
+        option.textContent = world;
+        return option;
+      }));
+      select.value = currentWorld;
+      select.disabled = !worlds.length;
+      cards.replaceChildren();
+      entries.clear();
+      selectedHero = "";
+      details.hidden = true;
+      visible = sortedHeroes(heroes, currentWorld, settings.sort);
+      visible.forEach((hero, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "qr-card";
+        button.dataset.hero = hero.id;
+        button.innerHTML = '<span class="qr-portrait"></span><span class="qr-nick"></span><span class="qr-level"></span><span class="qr-time"></span>';
+        button.querySelector(".qr-nick").textContent = hero.nick;
+        button.querySelector(".qr-level").textContent = `${hero.lvl}${hero.prof}`;
+        button.setAttribute("aria-label", `Przeloguj na ${hero.nick}, ${hero.world}${settings.hotkeys && index < 9 ? `, Alt+${index + 1}` : ""}`);
+        button.setAttribute("aria-current", String(String(page2.Engine?.hero?.d?.id) === hero.id));
+        if (/^[a-zA-Z0-9_./-]+\.(gif|png|webp)$/i.test(hero.icon) && !hero.icon.includes("..")) button.querySelector(".qr-portrait").style.backgroundImage = `url("https://micc.garmory-cdn.cloud/obrazki/postacie/${hero.icon}")`;
+        else button.querySelector(".qr-portrait").textContent = [...hero.nick][0] || "?";
+        entries.set(hero.id, button);
+        cards.append(button);
+      });
+      updateTimers();
+      position();
+    }
+    async function load() {
+      const user = page2.getCookie?.("user_id");
+      const token = page2.getCookie?.("hs3");
+      if (loading || page2.Engine?.allInit !== true || !user || !token) return;
+      const controller = new AbortController();
+      request = controller;
+      loading = true;
+      error = "";
+      refresh.disabled = true;
+      updateTimers();
+      const timeout = scheduler2.timeout(() => controller.abort(), 12e3);
+      try {
+        const api = new URL(page2.Engine.worldConfig.getApiDomain());
+        if (api.protocol !== "https:" || !/(^|\.)margonem\.(pl|com)$/.test(api.hostname)) throw new Error("Nieprawidłowy adres API gry.");
+        const url = new URL("/account/charlist", api);
+        url.searchParams.set("hs3", token);
+        const response = await page2.fetch(url.href, { credentials: "include", signal: controller.signal });
+        if (!response.ok) throw new Error("Serwer nie udostępnił listy postaci.");
+        const list = characterList(await response.json());
+        if (scheduler2.disposed || page2.getCookie?.("user_id") !== user) return;
+        heroes = list;
+        loaded = true;
+        account = user;
+        currentWorld = worldName(page2.Engine.worldConfig.getWorldName());
+      } catch (cause) {
+        if (!scheduler2.disposed) error = cause.name === "AbortError" ? "Przekroczono czas pobierania. Użyj ↻, aby ponowić." : "Nie udało się pobrać postaci. Użyj ↻, aby ponowić.";
+      } finally {
+        scheduler2.clearTimeout(timeout);
+        request = null;
+        loading = false;
+        if (!scheduler2.disposed) {
+          refresh.disabled = false;
+          render();
+        }
+      }
+    }
+    function relog(hero) {
+      if (!hero || relogging) return;
+      if (page2.getCookie?.("user_id") !== account) {
+        error = "Konto się zmieniło. Odśwież listę postaci.";
+        updateTimers();
+        return;
+      }
+      try {
+        changeCharacter(hero, page2);
+        relogging = true;
+        entries.forEach((button) => {
+          button.disabled = true;
+        });
+      } catch (cause) {
+        error = cause.message;
+        updateTimers();
+      }
+    }
+    scheduler2.listen(cards, "click", (event) => relog(visible.find((hero) => hero.id === event.target.closest("[data-hero]")?.dataset.hero)));
+    const showDetails = (event) => {
+      const button = event.target.closest("[data-hero]");
+      if (!button) return;
+      selectedHero = button.dataset.hero;
+      details.textContent = button.title;
+      details.hidden = false;
+    };
+    scheduler2.listen(cards, "pointerover", showDetails);
+    scheduler2.listen(cards, "focusin", showDetails);
+    scheduler2.listen(bar, "pointerleave", () => {
+      if (!bar.contains(document.activeElement)) {
+        selectedHero = "";
+        details.hidden = true;
+      }
+    });
+    scheduler2.listen(bar, "focusout", (event) => {
+      if (!bar.contains(event.relatedTarget)) {
+        selectedHero = "";
+        details.hidden = true;
+      }
+    });
+    scheduler2.listen(select, "change", () => ctx.changeSettings({ selectedWorld: select.value }));
+    scheduler2.listen(refresh, "click", load);
+    scheduler2.listen(bar.querySelector("[data-collapse]"), "click", () => ctx.changeSettings({ collapsed: !settings.collapsed }));
+    scheduler2.listen(document, "keydown", (event) => {
+      if (!settings.hotkeys || !event.altKey || event.ctrlKey || event.shiftKey || event.metaKey || event.repeat || event.defaultPrevented || event.isComposing || event.target.closest?.('input,textarea,select,[contenteditable="true"]')) return;
+      const index = /^Digit[1-9]$/.test(event.code) ? Number(event.code.slice(-1)) - 1 : -1;
+      if (index < 0 || !visible[index]) return;
+      event.preventDefault();
+      relog(visible[index]);
+    });
+    ctx.events.on("reloggerChanged", render);
+    ctx.events.on("reloggerRefresh", load);
+    scheduler2.cleanup(() => {
+      request?.abort();
+      bar.remove();
+    });
+    let attemptedAccount = "";
+    const tick = () => {
+      const user = page2.getCookie?.("user_id") || "";
+      if (account && user !== account) {
+        heroes = [];
+        loaded = false;
+        account = "";
+        error = "";
+        attemptedAccount = "";
+        render();
+      }
+      if (!loading && attemptedAccount !== user && page2.Engine?.allInit === true && user && page2.getCookie?.("hs3")) {
+        attemptedAccount = user;
+        load();
+      }
+      updateTimers();
+      scheduler2.timeout(tick, 1e3);
+    };
+    render();
+    tick();
+  }
+
+  // src/addons/relogger/index.js
+  function createRelogger() {
+    return {
+      id: "relogger",
+      name: "Przelogawka",
+      description: "Belka postaci i światów z podglądem timerów oraz szybkim przelogowaniem.",
+      defaults: defaults4,
+      defaultEnabled: true,
+      enable: startRelogger,
+      onSettingsChange: (ctx) => ctx.events.emit("reloggerChanged"),
+      renderSettings(ctx) {
+        const section = document.createElement("section");
+        section.className = "mtk-addon-settings";
+        section.innerHTML = `<h2>Przelogawka</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
+                <p>Kliknij portret, aby przejść na postać. Listę światów znajdziesz w nagłówku belki. Nagłówek można przeciągać, a przycisk − zwija belkę.</p>
+                <h2>Belka postaci</h2><div class="ln-grid">
+                    <label class="ln-field">Kolejność<select data-setting="sort"><option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nazwa postaci</option></select></label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="compact">Kompaktowe karty</label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="showTimers">Podświetlenie i odliczanie timerów</label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="hotkeys">Skróty Alt+1…9</label>
+                </div><p>Skróty wybierają postacie w kolejności na belce, na wybranym świecie. Nie działają podczas wpisywania tekstu w polach formularzy i czacie.</p>
+                <h2>Podświetlenie timerów</h2><p><span style="color:#6ddb9a">▰ Zielony</span> — czas minął.<br><span style="color:#deb358">▰ Bursztynowy</span> — rozpoczęło się okno możliwego respawnu.<br>Szary — odliczanie trwa albo nie ma aktywnego timera.</p>
+                <p>Podświetlenie jest stałe. Na karcie zobaczysz najbliższy czas, po najechaniu lub wybraniu klawiaturą — nazwy i czasy wszystkich aktywnych timerów tej postaci. Upłynięcie czasu nie potwierdza pojawienia się potwora.</p>
+                <p>Dodatek odczytuje dostępne w grze dane timerów (addon_17). Nie tworzy własnych timerów i nie wymaga całego pakietu Essentials. Bez tych danych nadal możesz zmieniać postacie.</p>
+                <div class="ln-grid"><button class="ln-btn" type="button" data-refresh>Odśwież postacie</button><button class="ln-btn" type="button" data-reset>Przywróć pozycję belki</button></div>
+                <p data-status role="status"></p>`;
+        const enabled = section.querySelector("[data-enabled]");
+        const refresh = section.querySelector("[data-refresh]");
+        function syncEnabled() {
+          enabled.checked = ctx.enabled;
+          refresh.disabled = !ctx.enabled;
+        }
+        syncEnabled();
+        ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        ctx.events.on("addonChanged", (event) => {
+          if (event.id === ctx.id) syncEnabled();
+        });
+        for (const input of section.querySelectorAll("[data-setting]")) {
+          const key = input.dataset.setting;
+          if (input.type === "checkbox") input.checked = ctx.settings[key];
+          else input.value = ctx.settings[key];
+          ctx.scheduler.listen(input, "change", () => ctx.changeSettings({ [key]: input.type === "checkbox" ? input.checked : input.value }));
+        }
+        ctx.scheduler.listen(refresh, "click", () => ctx.events.emit("reloggerRefresh"));
+        ctx.scheduler.listen(section.querySelector("[data-reset]"), "click", () => {
+          ctx.changeSettings({ x: null, y: 80, collapsed: false });
+          section.querySelector("[data-status]").textContent = "Przywrócono pozycję i rozwinięto belkę.";
+        });
+        ctx.container.append(section);
+      }
+    };
+  }
+
   // src/main.js
   var page = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -5818,6 +6173,7 @@
       manager.register(createNotificationPosition());
       manager.register(createDetectorGlobal());
       manager.register(createItemTools());
+      manager.register(createRelogger());
       panel.connect(manager);
       manager.start();
       game.start();

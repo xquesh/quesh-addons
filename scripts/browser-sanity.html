@@ -75,6 +75,7 @@
 </script>
 <script src="./detector-sanity.js"></script>
 <script src="./item-tools-sanity.js"></script>
+<script src="./relogger-sanity.js"></script>
 <script src="../dist/installer.user.js"></script>
 <script>
     async function run() {
@@ -113,9 +114,10 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 4, 'Manager czterech addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 5, 'Manager pięciu addonów');
         await runDetectorChecks(manager, assert, wait);
         await runItemToolsChecks(manager, assert, wait);
+        await runReloggerChecks(manager, assert, wait);
         assert(getComputedStyle(document.querySelector('#mtk-panel')).backgroundColor === 'rgb(0, 0, 0)', 'Czarny panel');
         assert(getComputedStyle(document.querySelector('#mtk-button')).borderRadius === '0px', 'Kwadratowy przycisk');
         assert(document.querySelector('#mtk-button').getBoundingClientRect().width === 42, 'Mniejszy przycisk 42px');
@@ -245,7 +247,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: loader, four addons, item frames/overlays, legendary badges DOM/canvas, tooltips/settings/cleanup, detector channels, monochrome UI, 10 presets, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: five addons, relogger characters/worlds/timers/config/cleanup, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {
