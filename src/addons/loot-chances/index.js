@@ -25,10 +25,13 @@ export function createLootChances() {
                     <label class="ln-field">1–33%<input type="color" data-setting="colorLow"></label>
                     <label class="ln-field">50%<input type="color" data-setting="colorMid"></label>
                     <label class="ln-field">Powyżej 50%<input type="color" data-setting="colorHigh"></label>
-                </div><p>Przy podziale z przypisanymi właścicielami procent nie jest wyświetlany, ponieważ wynik jest już ustalony przez grę.</p>`;
+                </div><p>Przy podziale z przypisanymi właścicielami procent nie jest wyświetlany, ponieważ wynik jest już ustalony przez grę.</p>
+                <button type="button" class="mtk-action" data-test-loot>TESTUJ OKNO Z LEGENDĄ</button>`;
             const enabled = section.querySelector('[data-enabled]');
+            const test = section.querySelector('[data-test-loot]');
             const sync = () => {
                 enabled.checked = ctx.enabled;
+                test.disabled = !ctx.enabled;
                 for (const input of section.querySelectorAll('[data-setting]')) {
                     const value = ctx.settings[input.dataset.setting];
                     if (input.type === 'checkbox') input.checked = value !== false;
@@ -37,6 +40,7 @@ export function createLootChances() {
             };
             sync();
             ctx.scheduler.listen(enabled, 'change', () => ctx.setEnabled(enabled.checked));
+            ctx.scheduler.listen(test, 'click', () => ctx.events.emit('lootChancesTest'));
             for (const input of section.querySelectorAll('[data-setting]')) {
                 ctx.scheduler.listen(input, 'change', () => ctx.changeSettings({
                     [input.dataset.setting]: input.type === 'checkbox' ? input.checked : input.type === 'number' ? Number(input.value) : input.value

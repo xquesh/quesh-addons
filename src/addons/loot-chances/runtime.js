@@ -13,10 +13,15 @@ export function fightMembers(packet, page) {
     const fight = packet?.f;
     if (!fight?.w || typeof fight.w !== 'object') return null;
     const ownId = String(heroId(page) ?? '');
+    const fighters = Object.values(fight.w).filter(Boolean);
+    const ownFighter = fighters.find(fighter => String(fighter.originalId ?? fighter.id ?? '') === ownId);
+    const ownTeam = fight.myteam ?? ownFighter?.team;
     const unique = new Map();
-    for (const fighter of Object.values(fight.w)) {
-        if (!fighter || fighter.npc || fighter.team !== fight.myteam || fighter.originalId == null || !fighter.prof) continue;
-        const id = String(fighter.originalId);
+    for (const fighter of fighters) {
+        const originalId = fighter.originalId ?? fighter.id;
+        if (fighter.npc || originalId == null || !fighter.prof) continue;
+        if (ownTeam != null && String(fighter.team) !== String(ownTeam)) continue;
+        const id = String(originalId);
         if (!unique.has(id)) unique.set(id, {
             id, name: String(fighter.name || `Postać ${id}`), prof: String(fighter.prof).toLowerCase(), isHero: id === ownId
         });
@@ -51,6 +56,7 @@ function tooltip(chance, members) {
 export function startLootChances(ctx) {
     let members = [];
     let latest = null;
+    let testRoot = null;
 
     function applyStyles() {
         ctx.styles.set('runtime', chanceCss(ctx.settings));
@@ -61,18 +67,24 @@ export function startLootChances(ctx) {
         document.querySelectorAll('.qaddons-loot-chance-anchor').forEach(node => node.classList.remove('qaddons-loot-chance-anchor'));
     }
 
-    function render(packet = latest) {
-        latest = packet;
+    function currentMembers(source = members) {
+        const id = String(heroId(ctx.game.page) ?? '');
+        if (source.length) return source.map(member => ({ ...member, isHero: member.id === id }));
+        const hero = ctx.game.page.Engine?.hero?.d || ctx.game.page.Engine?.hero || ctx.game.page.hero || ctx.game.page.g?.hero || {};
+        return [{ id, name: String(hero.nick || hero.name || 'Twoja postać'), prof: String(hero.prof || '').toLowerCase(), isHero: true }];
+    }
+
+    function render(packet = latest, candidates = members, remember = true) {
+        if (remember) latest = packet;
         clear();
-        if (!packet || packet.loot?.owners || members.length <= 1) return;
+        if (!packet || packet.loot?.owners) return;
         const root = findLootRoot();
         if (!root) return;
-        const ownId = String(heroId(ctx.game.page) ?? '');
-        const currentMembers = members.map(member => ({ ...member, isHero: member.id === ownId }));
+        const participants = currentMembers(candidates);
         const entries = Object.entries(packet.item || packet.items || {}).map(([key, item]) => ({ key, item }));
         entries.forEach((entry, index) => {
             if (!isLegendary(entry.item)) return;
-            const chance = catchingChance(entry.item, currentMembers);
+            const chance = catchingChance(entry.item, participants);
             if (chance == null) return;
             const icon = findIcon(root, entry, index);
             if (!icon) return;
@@ -82,9 +94,33 @@ export function startLootChances(ctx) {
             overlay.dataset.level = chanceLevel(chance);
             overlay.dataset.itemId = itemId(entry);
             overlay.textContent = `${chance}%`;
-            overlay.title = tooltip(chance, eligibleMembers(entry.item, currentMembers));
+            overlay.title = tooltip(chance, eligibleMembers(entry.item, participants));
             icon.append(overlay);
         });
+    }
+
+    function closeTest() {
+        testRoot?.remove();
+        testRoot = null;
+        clear();
+        if (latest) render(latest);
+    }
+
+    function showTest() {
+        closeTest();
+        testRoot = document.createElement('div');
+        testRoot.className = 'loot-wnd qaddons-loot-test';
+        const heading = document.createElement('div'); heading.className = 'qaddons-loot-test-title'; heading.textContent = 'TEST — legendarny łup';
+        const close = document.createElement('button'); close.type = 'button'; close.className = 'qaddons-loot-test-close'; close.textContent = '×';
+        const windowNode = document.createElement('div'); windowNode.className = 'loot-window';
+        const card = document.createElement('div'); card.className = 'loot-item-wrapper';
+        const icon = document.createElement('div'); icon.className = 'item item-id-qaddons-test'; icon.dataset.itemId = 'qaddons-test'; icon.dataset.itemType = 't-leg';
+        const label = document.createElement('span'); label.className = 'qaddons-loot-test-label'; label.textContent = 'Przykładowa legenda';
+        card.append(icon, label); windowNode.append(card); testRoot.append(heading, close, windowNode); document.body.append(testRoot);
+        ctx.scheduler.listen(close, 'click', closeTest, { once: true });
+        const hero = currentMembers()[0];
+        const previewMembers = [hero, { id: 'qaddons-test-player', name: 'Drugi gracz', prof: hero.prof || 'w', isHero: false }];
+        render({ loot: { init: 1 }, item: { 'qaddons-test': { id: 'qaddons-test', stat: `rarity=legendary${hero.prof ? `;reqp=${hero.prof}` : ''}` } } }, previewMembers, false);
     }
 
     function schedule(packet) {
@@ -102,5 +138,6 @@ export function startLootChances(ctx) {
     ctx.events.on('lootOpened', schedule);
     ctx.events.on('lootClosed', () => { latest = null; clear(); });
     ctx.events.on('lootChancesChanged', () => { applyStyles(); render(); });
-    ctx.scheduler.cleanup(clear);
+    ctx.events.on('lootChancesTest', showTest);
+    ctx.scheduler.cleanup(() => { clear(); testRoot?.remove(); });
 }

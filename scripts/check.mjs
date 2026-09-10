@@ -33,8 +33,8 @@ import { calendarReminder, expiredItems, freePromotions, resultSignature } from 
 import { compactPartyCss } from '../src/addons/compact-party/style.js';
 
 const compactCss = compactPartyCss({ hideAvatars: true, showHpPoints: false, rowHeight: 2, fontSize: 99 });
-assert.match(compactCss, /height:20px!important/);
-assert.match(compactCss, /font-size:14px!important/);
+assert.match(compactCss, /height:16px!important/);
+assert.match(compactCss, /font-size:12px!important/);
 assert.match(compactCss, /\.avatar\{display:none!important\}/);
 assert.match(compactCss, /\.hp-points\{display:none!important\}/);
 console.log('OK: kompaktowa grupa ogranicza wymiary i ukrywa tylko wybrane elementy');

@@ -279,8 +279,8 @@
   ];
   function readObject(storage, key) {
     try {
-      const value = JSON.parse(storage.getItem(key));
-      return value && typeof value === "object" && !Array.isArray(value) ? value : null;
+      const value2 = JSON.parse(storage.getItem(key));
+      return value2 && typeof value2 === "object" && !Array.isArray(value2) ? value2 : null;
     } catch {
       return null;
     }
@@ -327,10 +327,10 @@
     }
     function settleRequests(packet) {
       let parsed = packet;
-      const stripPacket = (value, keys) => {
-        if (Array.isArray(value)) return value.map((entry) => stripPacket(entry, keys));
-        if (!value || typeof value !== "object") return value;
-        const clone = { ...value };
+      const stripPacket = (value2, keys) => {
+        if (Array.isArray(value2)) return value2.map((entry) => stripPacket(entry, keys));
+        if (!value2 || typeof value2 !== "object") return value2;
+        const clone = { ...value2 };
         keys.forEach((key) => delete clone[key]);
         return clone;
       };
@@ -612,7 +612,7 @@
   }
 
   // src/core/ui/controls.js
-  function rangeControl({ label, value, min, max, step = 1, onInput, onChange }, scheduler2) {
+  function rangeControl({ label, value: value2, min, max, step = 1, onInput, onChange }, scheduler2) {
     const wrapper = document.createElement("label");
     wrapper.className = "mtk-range";
     const title = document.createElement("span");
@@ -620,8 +620,8 @@
     const input = document.createElement("input");
     title.textContent = label;
     input.type = "range";
-    Object.assign(input, { min, max, step, value });
-    output.textContent = `${value} px`;
+    Object.assign(input, { min, max, step, value: value2 });
+    output.textContent = `${value2} px`;
     scheduler2.listen(input, "input", () => {
       output.textContent = `${input.value} px`;
       onInput?.(Number(input.value));
@@ -761,18 +761,18 @@
   var quesh_default = "data:image/png;base64,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";
 
   // src/version.js
-  var VERSION = "1.11.0";
+  var VERSION = "1.11.1";
 
   // src/core/updates.js
   var MANIFEST_URL = "https://xquesh.github.io/quesh-addons/dist/version.json";
   var CHECK_INTERVAL = 5 * 60 * 1e3;
   var REQUEST_TIMEOUT = 1e4;
   function compareVersions(left, right) {
-    const parse = (value) => {
-      if (typeof value !== "string" || !/^\d+\.\d+\.\d+$/.test(value)) {
+    const parse = (value2) => {
+      if (typeof value2 !== "string" || !/^\d+\.\d+\.\d+$/.test(value2)) {
         throw new Error("Niepoprawny numer wersji");
       }
-      const parts = value.split(".").map(Number);
+      const parts = value2.split(".").map(Number);
       if (!parts.every(Number.isSafeInteger)) throw new Error("Niepoprawny numer wersji");
       return parts;
     };
@@ -1205,12 +1205,12 @@
     function getPerformanceProfile() {
       return PERFORMANCE_PROFILES[state.settings.performanceMode] || PERFORMANCE_PROFILES.balanced;
     }
-    function clamp(value, min, max) {
-      value = Number(value);
-      if (!Number.isFinite(value)) {
+    function clamp(value2, min, max) {
+      value2 = Number(value2);
+      if (!Number.isFinite(value2)) {
         return min;
       }
-      return Math.max(min, Math.min(max, value));
+      return Math.max(min, Math.min(max, value2));
     }
     function isVisible(element) {
       if (!element || !element.isConnected) {
@@ -1232,11 +1232,11 @@
       return id;
     }
     function hexToRgb(hex) {
-      let value = String(hex || "").replace("#", "").trim();
-      if (value.length === 3) {
-        value = value.split("").map((c) => c + c).join("");
+      let value2 = String(hex || "").replace("#", "").trim();
+      if (value2.length === 3) {
+        value2 = value2.split("").map((c) => c + c).join("");
       }
-      if (!/^[0-9a-f]{6}$/i.test(value)) {
+      if (!/^[0-9a-f]{6}$/i.test(value2)) {
         return {
           r: 66,
           g: 238,
@@ -1244,17 +1244,17 @@
         };
       }
       return {
-        r: parseInt(value.slice(0, 2), 16),
-        g: parseInt(value.slice(2, 4), 16),
-        b: parseInt(value.slice(4, 6), 16)
+        r: parseInt(value2.slice(0, 2), 16),
+        g: parseInt(value2.slice(2, 4), 16),
+        b: parseInt(value2.slice(4, 6), 16)
       };
     }
     function rgba(hex, alpha) {
       const c = hexToRgb(hex);
       return `rgba(${c.r},${c.g},${c.b},${clamp(alpha, 0, 1)})`;
     }
-    function effectiveBlur(value) {
-      return Math.max(1, Math.round(Number(value) * getPerformanceProfile().blurScale));
+    function effectiveBlur(value2) {
+      return Math.max(1, Math.round(Number(value2) * getPerformanceProfile().blurScale));
     }
     return { getPerformanceProfile, clamp, isVisible, getElementId, hexToRgb, rgba, effectiveBlur };
   }
@@ -1279,21 +1279,21 @@
     }
     const NEON_OPACITY_TABLE = [0, 0.06, 0.1, 0.16, 0.24, 0.34, 0.47, 0.62, 0.77, 0.9, 1];
     const NEON_SPATIAL_TABLE = [0, 0.35, 0.55, 0.8, 1.1, 1.5, 2, 2.65, 3.45, 4.4, 5.5];
-    function neonLevel(value) {
-      return Math.max(0, Math.min(5, Math.round(Number(value) || 0)));
+    function neonLevel(value2) {
+      return Math.max(0, Math.min(5, Math.round(Number(value2) || 0)));
     }
-    function neonInternalLevel(value) {
-      return neonLevel(value) * 2;
+    function neonInternalLevel(value2) {
+      return neonLevel(value2) * 2;
     }
-    function neonOpacityLevel(value) {
-      const level = neonInternalLevel(value);
+    function neonOpacityLevel(value2) {
+      const level = neonInternalLevel(value2);
       if (level === 0) {
         return 0;
       }
       return NEON_OPACITY_TABLE[level] || 0;
     }
-    function neonSpatialLevel(value) {
-      return NEON_SPATIAL_TABLE[neonInternalLevel(value)] || 0;
+    function neonSpatialLevel(value2) {
+      return NEON_SPATIAL_TABLE[neonInternalLevel(value2)] || 0;
     }
     function getNeonLayerRuntime(index, config) {
       const palette = getNeonPalette(config);
@@ -2063,7 +2063,7 @@
         }
         radius = entry._radius;
       }
-      const round = (value) => Math.round(Number(value) * 10) / 10;
+      const round = (value2) => Math.round(Number(value2) * 10) / 10;
       const geometry = [round(left), round(top), round(width), round(height), round(radius), config.width].join("|");
       if (entry._geometry === geometry && entry.overlay.style.display === "block") {
         return;
@@ -2413,8 +2413,8 @@
         height: bottom - top
       };
     }
-    function parseCssColor(value) {
-      const text = String(value || "");
+    function parseCssColor(value2) {
+      const text = String(value2 || "");
       const match = text.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)/i);
       if (!match) {
         return null;
@@ -4507,8 +4507,8 @@
   var SHADOWS = { game: "", none: "none", soft: "0 1px 4px #000", outline: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000" };
   function normalize(settings) {
     const number2 = (key, min, max) => {
-      const value = Number(settings[key] ?? defaults[key]);
-      return Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : defaults[key];
+      const value2 = Number(settings[key] ?? defaults[key]);
+      return Number.isFinite(value2) ? Math.max(min, Math.min(max, value2)) : defaults[key];
     };
     return {
       bottom: number2("bottom", 0, 300),
@@ -4525,17 +4525,17 @@
     };
   }
   function typographyCss(settings) {
-    const value = normalize(settings);
-    if (!value.customTypography) return "";
+    const value2 = normalize(settings);
+    if (!value2.customTypography) return "";
     return [
-      FONTS[value.fontFamily].css && `font-family: ${FONTS[value.fontFamily].css}`,
-      `font-size: ${value.fontSize}px`,
-      value.fontWeight !== "game" && `font-weight: ${value.fontWeight}`,
-      `font-style: ${value.italic ? "italic" : "normal"}`,
-      `letter-spacing: ${value.letterSpacing}px`,
-      `line-height: ${value.lineHeight}`,
-      value.customColor && `color: ${value.color}`,
-      SHADOWS[value.shadow] && `text-shadow: ${SHADOWS[value.shadow]}`
+      FONTS[value2.fontFamily].css && `font-family: ${FONTS[value2.fontFamily].css}`,
+      `font-size: ${value2.fontSize}px`,
+      value2.fontWeight !== "game" && `font-weight: ${value2.fontWeight}`,
+      `font-style: ${value2.italic ? "italic" : "normal"}`,
+      `letter-spacing: ${value2.letterSpacing}px`,
+      `line-height: ${value2.lineHeight}`,
+      value2.customColor && `color: ${value2.color}`,
+      SHADOWS[value2.shadow] && `text-shadow: ${SHADOWS[value2.shadow]}`
     ].filter(Boolean).map((property) => `${property} !important;`).join("\n");
   }
 
@@ -4591,21 +4591,21 @@
     }
     const controls = [...appearance.querySelectorAll("[data-notification-setting]")];
     const preview = appearance.querySelector("[data-notification-preview]");
-    function syncPreview(value) {
-      preview.style.cssText = typographyCss(value);
+    function syncPreview(value2) {
+      preview.style.cssText = typographyCss(value2);
       for (const output of appearance.querySelectorAll("[data-output]")) {
-        output.textContent = `${value[output.dataset.output]} ${output.dataset.unit}`;
+        output.textContent = `${value2[output.dataset.output]} ${output.dataset.unit}`;
       }
     }
     function sync() {
-      const value = normalize(ctx.settings);
+      const value2 = normalize(ctx.settings);
       for (const input of controls) {
         const key = input.dataset.notificationSetting;
-        if (input.type === "checkbox") input.checked = value[key];
-        else input.value = value[key];
-        input.disabled = key !== "customTypography" && (!value.customTypography || key === "color" && !value.customColor);
+        if (input.type === "checkbox") input.checked = value2[key];
+        else input.value = value2[key];
+        input.disabled = key !== "customTypography" && (!value2.customTypography || key === "color" && !value2.customColor);
       }
-      syncPreview(value);
+      syncPreview(value2);
     }
     for (const input of controls) {
       const key = input.dataset.notificationSetting;
@@ -4633,9 +4633,9 @@
     let queued = 0;
     const read = (style, key) => [style.getPropertyValue(key), style.getPropertyPriority(key)];
     const equal = (a, b) => a[0] === b[0] && a[1] === b[1];
-    const write = (style, key, value) => value[0] ? style.setProperty(key, ...value) : style.removeProperty(key);
+    const write = (style, key, value2) => value2[0] ? style.setProperty(key, ...value2) : style.removeProperty(key);
     function restore(element, values) {
-      for (const [key, value] of values) if (equal(read(element.style, key), value.applied)) write(element.style, key, value.previous);
+      for (const [key, value2] of values) if (equal(read(element.style, key), value2.applied)) write(element.style, key, value2.previous);
     }
     function sync() {
       queued = 0;
@@ -4657,8 +4657,8 @@
         }
         for (const [key, applied] of properties) {
           const current = read(element.style, key);
-          const value = values.get(key);
-          if (!value || !equal(current, value.applied)) values.set(key, { previous: current, applied });
+          const value2 = values.get(key);
+          if (!value2 || !equal(current, value2.applied)) values.set(key, { previous: current, applied });
           if (!equal(current, applied)) write(element.style, key, applied);
         }
       }
@@ -4738,7 +4738,7 @@
   function selectedChannels(settings) {
     const values = settings.channels === void 0 ? defaults2.channels : settings.channels;
     if (!Array.isArray(values)) return [];
-    return [...new Set(values.filter((value) => typeof value === "string" && Object.hasOwn(CHANNELS, value)))];
+    return [...new Set(values.filter((value2) => typeof value2 === "string" && Object.hasOwn(CHANNELS, value2)))];
   }
   function channelLabel(channels) {
     return channels.map((channel) => CHANNELS[channel].label).join(", ");
@@ -5071,7 +5071,7 @@
         section.className = "mtk-addon-settings";
         section.innerHTML = `<h2>Wykrywacz → czat</h2><label class="mtk-enabled"><input type="checkbox" data-detector-enabled> Dodatek aktywny</label>
                 <h2>Kanały docelowe</h2><p>Do testów zostaw zaznaczony tylko <strong>Lokalny</strong>. Każde kliknięcie przycisku w wykrywaczu wysyła wiadomość na wszystkie zaznaczone kanały.</p>
-                <div class="ln-grid">${Object.entries(CHANNELS).map(([key, value]) => `<label class="ln-switch"><input type="checkbox" data-detector-channel="${key}"> ${value.label}</label>`).join("")}</div>
+                <div class="ln-grid">${Object.entries(CHANNELS).map(([key, value2]) => `<label class="ln-switch"><input type="checkbox" data-detector-channel="${key}"> ${value2.label}</label>`).join("")}</div>
                 <p data-selected-channels></p>
                 <h2>Ostatnia próba</h2><p data-detector-result role="status" aria-live="polite"></p>
                 <p>Treść jest kopiowana z natywnej ikony przy nazwie mapy w wykrywaczu. Dodatek nie zmienia wiadomości i przywraca poprzedni kanał czatu.</p>
@@ -5180,20 +5180,20 @@
     const legendary = type ? type === "t-leg" : Object.hasOwn(stats, "legendary") || stats.rarity === "legendary" || legendaryDom;
     if (!legendary) return null;
     const values = [item?.getLegbonStat?.(), stats.legbon, stats.socket_injection_legbon, stats.socket_fleeting_legbon];
-    const codes = [...new Set(values.filter((value) => typeof value === "string").map((value) => value.split(",")[0].trim()).filter((code) => Object.hasOwn(BONUSES, code)))];
+    const codes = [...new Set(values.filter((value2) => typeof value2 === "string").map((value2) => value2.split(",")[0].trim()).filter((code) => Object.hasOwn(BONUSES, code)))];
     if (!codes.length) return null;
     return { name: codes.map((code) => BONUSES[code]).join(" / "), short: codes.map((code) => abbreviation(BONUSES[code])).join("/") };
   }
-  function imageUrl(value) {
+  function imageUrl(value2) {
     try {
-      const url = new URL(String(value));
+      const url = new URL(String(value2));
       return url.protocol === "https:" ? url.href : "";
     } catch {
       return "";
     }
   }
-  function cssImage(value) {
-    return JSON.stringify(imageUrl(value)).replace(/</g, "\\3c ");
+  function cssImage(value2) {
+    return JSON.stringify(imageUrl(value2)).replace(/</g, "\\3c ");
   }
 
   // src/addons/item-tools/tooltip.js
@@ -5365,7 +5365,7 @@
       const timestamp = parseInt(parts[3], 10);
       if (!Number.isFinite(groupSize) || !Number.isFinite(timestamp)) return null;
       const date = new Date(timestamp * 1e3);
-      const pad = (value) => String(value).padStart(2, "0");
+      const pad = (value2) => String(value2).padStart(2, "0");
       return {
         groupSize,
         formattedDate: `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
@@ -5382,8 +5382,8 @@
         groupSizeText
       };
     }
-    function formatNumber(value) {
-      return Number(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    function formatNumber(value2) {
+      return Number(value2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     }
     function upgradeHtml(info) {
       const rarityMap = {
@@ -5628,7 +5628,7 @@
     function queue() {
       if (!pending) pending = scheduler2.timeout(scan, 80);
     }
-    function apply3() {
+    function apply2() {
       const frame = imageUrl(settings.activeFrame);
       const overlay = imageUrl(settings.activeOverlay);
       ctx.styles.set("items", `
@@ -5650,7 +5650,7 @@
       queue();
       scheduler2.timeout(poll, 500);
     };
-    ctx.events.on("itemToolsChanged", apply3);
+    ctx.events.on("itemToolsChanged", apply2);
     scheduler2.cleanup(() => {
       groundDraws.forEach((restore) => restore());
       groundDraws.clear();
@@ -5658,7 +5658,7 @@
       document.querySelectorAll(".qaddons-item-bonus,[data-qaddons-item-extra]").forEach((node) => node.remove());
       document.querySelectorAll(".qaddons-bonus-static").forEach((node) => node.classList.remove("qaddons-bonus-static"));
     });
-    apply3();
+    apply2();
     poll();
   }
 
@@ -5767,10 +5767,10 @@
     }
     ctx.scheduler.listen(section.querySelector("[data-reset-bonus]"), "click", () => {
       ctx.changeSettings({ ...bonusDefaults });
-      for (const [key, value] of Object.entries(bonusDefaults)) {
+      for (const [key, value2] of Object.entries(bonusDefaults)) {
         const input = section.querySelector(`[data-setting="${key}"]`);
-        if (input.type === "checkbox") input.checked = value;
-        else input.value = value;
+        if (input.type === "checkbox") input.checked = value2;
+        else input.value = value2;
       }
       preview();
     });
@@ -5845,8 +5845,8 @@
 
   // src/addons/relogger/data.js
   var defaults4 = { sort: "level-desc", barPosition: "bottom", horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: "" };
-  function worldName(value) {
-    return typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value) ? value : "";
+  function worldName(value2) {
+    return typeof value2 === "string" && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value2) ? value2 : "";
   }
   function characterList(data) {
     if (!Array.isArray(data)) throw new Error("Serwer nie zwrócił listy postaci.");
@@ -5870,9 +5870,9 @@
     return `${level}${profession}`;
   }
   function countdown(seconds) {
-    const value = Math.max(0, Math.ceil(seconds));
+    const value2 = Math.max(0, Math.ceil(seconds));
     const pad = (n) => String(n).padStart(2, "0");
-    return value >= 3600 ? `${Math.floor(value / 3600)}:${pad(Math.floor(value / 60) % 60)}:${pad(value % 60)}` : `${pad(Math.floor(value / 60))}:${pad(value % 60)}`;
+    return value2 >= 3600 ? `${Math.floor(value2 / 3600)}:${pad(Math.floor(value2 / 60) % 60)}:${pad(value2 % 60)}` : `${pad(Math.floor(value2 / 60))}:${pad(value2 % 60)}`;
   }
   function heroTimers(data, heroId3, now, fadeout = 600) {
     if (!Array.isArray(data)) return [];
@@ -5974,8 +5974,8 @@
       const height = anchorRect?.height > 0 ? Math.max(36, Math.min(60, anchorRect.height)) : 52;
       bar.style.setProperty("--qr-height", `${height}px`);
       const width = Math.min(bar.getBoundingClientRect().width, right - left - 8);
-      const value = Number(settings.horizontal);
-      const horizontal = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 100;
+      const value2 = Number(settings.horizontal);
+      const horizontal = Number.isFinite(value2) ? Math.min(100, Math.max(0, value2)) : 100;
       const vertical = anchorRect?.height > 0 ? dock === "top" ? anchorRect.top : anchorRect.bottom : dock === "top" ? 0 : page2.innerHeight;
       bar.dataset.dock = dock;
       bar.style.left = `${Math.max(0, left + 4 + Math.max(0, right - left - width - 8) * horizontal / 100)}px`;
@@ -6483,8 +6483,8 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
   }
   function elementItemId(element) {
     const node = element?.closest?.('[data-id],[data-item-id],[class*="item-id-"]');
-    const value = node?.dataset?.id || node?.dataset?.itemId || String(node?.className || "").match(/(?:^|\s)item-id-(\d+)/)?.[1];
-    return Number(value) || null;
+    const value2 = node?.dataset?.id || node?.dataset?.itemId || String(node?.className || "").match(/(?:^|\s)item-id-(\d+)/)?.[1];
+    return Number(value2) || null;
   }
   function heroId(page2) {
     return String(page2.Engine?.hero?.d?.id || "0");
@@ -6871,9 +6871,9 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
         function sync() {
           enabled.checked = ctx.enabled;
           section.querySelectorAll("[data-setting]").forEach((input) => {
-            const value = ctx.settings[input.dataset.setting];
-            if (input.type === "checkbox") input.checked = Boolean(value);
-            else input.value = value;
+            const value2 = ctx.settings[input.dataset.setting];
+            if (input.type === "checkbox") input.checked = Boolean(value2);
+            else input.value = value2;
           });
           section.querySelectorAll("[data-rarity]").forEach((input) => {
             input.checked = Boolean(ctx.settings.rarity[input.dataset.rarity]);
@@ -6887,8 +6887,8 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
         sync();
         ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
         section.querySelectorAll("[data-setting]").forEach((input) => ctx.scheduler.listen(input, input.type === "range" ? "input" : "change", () => {
-          const value = input.type === "checkbox" ? input.checked : input.type === "range" ? Number(input.value) : input.value;
-          ctx.changeSettings({ [input.dataset.setting]: value });
+          const value2 = input.type === "checkbox" ? input.checked : input.type === "range" ? Number(input.value) : input.value;
+          ctx.changeSettings({ [input.dataset.setting]: value2 });
           sync();
         }));
         section.querySelectorAll("[data-rarity]").forEach((input) => ctx.scheduler.listen(input, "change", () => {
@@ -6944,9 +6944,9 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
     return /^(?:legendary|legend|l)$/i.test(String(rarity || "")) || Object.hasOwn(stats, "legendary") || Object.keys(stats).some((key) => /^legbon(?:_|$)/i.test(key));
   }
   function requiredProfessions(item) {
-    const value = itemStats2(item).reqp ?? item?._cachedStats?.reqp ?? item?.cachedStats?.reqp;
-    if (Array.isArray(value)) return value.map(String);
-    return String(value || "").toLowerCase().match(/[a-z]/g) || [];
+    const value2 = itemStats2(item).reqp ?? item?._cachedStats?.reqp ?? item?.cachedStats?.reqp;
+    if (Array.isArray(value2)) return value2.map(String);
+    return String(value2 || "").toLowerCase().match(/[a-z]/g) || [];
   }
   function eligibleMembers(item, members) {
     const professions = requiredProfessions(item);
@@ -6969,12 +6969,12 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
   }
 
   // src/addons/loot-chances/style.js
-  function safeNumber(value, fallback, minimum, maximum) {
-    const parsed = Number(value);
+  function safeNumber(value2, fallback, minimum, maximum) {
+    const parsed = Number(value2);
     return Number.isFinite(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback;
   }
-  function safeColor(value, fallback) {
-    return /^#[0-9a-f]{6}$/i.test(String(value || "")) ? value : fallback;
+  function safeColor(value2, fallback) {
+    return /^#[0-9a-f]{6}$/i.test(String(value2 || "")) ? value2 : fallback;
   }
   function chanceCss(settings) {
     const positions = {
@@ -7002,6 +7002,13 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
 .qaddons-loot-chance[data-level="low"]{color:${colors.low}}
 .qaddons-loot-chance[data-level="mid"]{color:${colors.mid}}
 .qaddons-loot-chance[data-level="high"]{color:${colors.high}}
+.qaddons-loot-test{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:230px!important;height:118px!important;z-index:10020!important;box-sizing:border-box!important;padding:8px!important;border:1px solid #fff!important;background:#050505!important;color:#fff!important;font:11px Arial,sans-serif!important;box-shadow:0 0 0 1px #333,0 6px 25px #000!important}
+.qaddons-loot-test-title{height:18px!important;border-bottom:1px solid #555!important;font-weight:700!important;line-height:15px!important;text-align:left!important}
+.qaddons-loot-test-close{position:absolute!important;right:5px!important;top:3px!important;width:20px!important;height:20px!important;padding:0!important;border:0!important;background:transparent!important;color:#fff!important;font-size:18px!important;line-height:18px!important;cursor:pointer!important}
+.qaddons-loot-test .loot-window{width:auto!important;height:auto!important;margin:8px 0 0!important;text-align:center!important}
+.qaddons-loot-test .loot-item-wrapper{display:inline-flex!important;align-items:center!important;gap:8px!important;width:auto!important;height:48px!important;margin:0!important}
+.qaddons-loot-test .item{position:relative!important;display:block!important;width:32px!important;height:32px!important;flex:none!important;border:2px solid #d5a526!important;background:radial-gradient(circle,#6a5218,#171105)!important;box-shadow:0 0 6px #c99218!important}
+.qaddons-loot-test-label{color:#ddd!important;white-space:nowrap!important}
 `;
   }
 
@@ -7016,10 +7023,15 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
     const fight = packet?.f;
     if (!fight?.w || typeof fight.w !== "object") return null;
     const ownId = String(heroId2(page2) ?? "");
+    const fighters = Object.values(fight.w).filter(Boolean);
+    const ownFighter = fighters.find((fighter) => String(fighter.originalId ?? fighter.id ?? "") === ownId);
+    const ownTeam = fight.myteam ?? ownFighter?.team;
     const unique = /* @__PURE__ */ new Map();
-    for (const fighter of Object.values(fight.w)) {
-      if (!fighter || fighter.npc || fighter.team !== fight.myteam || fighter.originalId == null || !fighter.prof) continue;
-      const id = String(fighter.originalId);
+    for (const fighter of fighters) {
+      const originalId = fighter.originalId ?? fighter.id;
+      if (fighter.npc || originalId == null || !fighter.prof) continue;
+      if (ownTeam != null && String(fighter.team) !== String(ownTeam)) continue;
+      const id = String(originalId);
       if (!unique.has(id)) unique.set(id, {
         id,
         name: String(fighter.name || `Postać ${id}`),
@@ -7051,6 +7063,7 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
   function startLootChances(ctx) {
     let members = [];
     let latest = null;
+    let testRoot = null;
     function applyStyles() {
       ctx.styles.set("runtime", chanceCss(ctx.settings));
     }
@@ -7058,18 +7071,23 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
       document.querySelectorAll(".qaddons-loot-chance").forEach((node) => node.remove());
       document.querySelectorAll(".qaddons-loot-chance-anchor").forEach((node) => node.classList.remove("qaddons-loot-chance-anchor"));
     }
-    function render(packet = latest) {
-      latest = packet;
+    function currentMembers(source = members) {
+      const id = String(heroId2(ctx.game.page) ?? "");
+      if (source.length) return source.map((member) => ({ ...member, isHero: member.id === id }));
+      const hero = ctx.game.page.Engine?.hero?.d || ctx.game.page.Engine?.hero || ctx.game.page.hero || ctx.game.page.g?.hero || {};
+      return [{ id, name: String(hero.nick || hero.name || "Twoja postać"), prof: String(hero.prof || "").toLowerCase(), isHero: true }];
+    }
+    function render(packet = latest, candidates = members, remember = true) {
+      if (remember) latest = packet;
       clear();
-      if (!packet || packet.loot?.owners || members.length <= 1) return;
+      if (!packet || packet.loot?.owners) return;
       const root = findLootRoot();
       if (!root) return;
-      const ownId = String(heroId2(ctx.game.page) ?? "");
-      const currentMembers = members.map((member) => ({ ...member, isHero: member.id === ownId }));
+      const participants = currentMembers(candidates);
       const entries = Object.entries(packet.item || packet.items || {}).map(([key, item]) => ({ key, item }));
       entries.forEach((entry, index) => {
         if (!isLegendary(entry.item)) return;
-        const chance = catchingChance(entry.item, currentMembers);
+        const chance = catchingChance(entry.item, participants);
         if (chance == null) return;
         const icon = findIcon(root, entry, index);
         if (!icon) return;
@@ -7079,9 +7097,46 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
         overlay.dataset.level = chanceLevel(chance);
         overlay.dataset.itemId = itemId(entry);
         overlay.textContent = `${chance}%`;
-        overlay.title = tooltip(chance, eligibleMembers(entry.item, currentMembers));
+        overlay.title = tooltip(chance, eligibleMembers(entry.item, participants));
         icon.append(overlay);
       });
+    }
+    function closeTest() {
+      testRoot?.remove();
+      testRoot = null;
+      clear();
+      if (latest) render(latest);
+    }
+    function showTest() {
+      closeTest();
+      testRoot = document.createElement("div");
+      testRoot.className = "loot-wnd qaddons-loot-test";
+      const heading = document.createElement("div");
+      heading.className = "qaddons-loot-test-title";
+      heading.textContent = "TEST — legendarny łup";
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "qaddons-loot-test-close";
+      close.textContent = "×";
+      const windowNode = document.createElement("div");
+      windowNode.className = "loot-window";
+      const card = document.createElement("div");
+      card.className = "loot-item-wrapper";
+      const icon = document.createElement("div");
+      icon.className = "item item-id-qaddons-test";
+      icon.dataset.itemId = "qaddons-test";
+      icon.dataset.itemType = "t-leg";
+      const label = document.createElement("span");
+      label.className = "qaddons-loot-test-label";
+      label.textContent = "Przykładowa legenda";
+      card.append(icon, label);
+      windowNode.append(card);
+      testRoot.append(heading, close, windowNode);
+      document.body.append(testRoot);
+      ctx.scheduler.listen(close, "click", closeTest, { once: true });
+      const hero = currentMembers()[0];
+      const previewMembers = [hero, { id: "qaddons-test-player", name: "Drugi gracz", prof: hero.prof || "w", isHero: false }];
+      render({ loot: { init: 1 }, item: { "qaddons-test": { id: "qaddons-test", stat: `rarity=legendary${hero.prof ? `;reqp=${hero.prof}` : ""}` } } }, previewMembers, false);
     }
     function schedule(packet) {
       latest = packet;
@@ -7103,7 +7158,11 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
       applyStyles();
       render();
     });
-    ctx.scheduler.cleanup(clear);
+    ctx.events.on("lootChancesTest", showTest);
+    ctx.scheduler.cleanup(() => {
+      clear();
+      testRoot?.remove();
+    });
   }
 
   // src/addons/loot-chances/index.js
@@ -7123,7 +7182,7 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
                 <p>W oknie łupu pokazuje szansę Twojej postaci na legendę. Obliczenie uwzględnia członków tej samej drużyny i profesje wymagane przez przedmiot. Najedź na procent, aby zobaczyć listę losujących.</p>
                 <div class="ln-grid">
                     <label class="ln-field">Pozycja<select data-setting="position"><option value="top-right">Prawy górny róg</option><option value="top-left">Lewy górny róg</option><option value="bottom-right">Prawy dolny róg</option><option value="bottom-left">Lewy dolny róg</option></select></label>
-                    <label class="ln-field">Czcionka<select data-setting="fontFamily">${["Arial", "Verdana", "Tahoma", "Georgia", "monospace"].map((value) => `<option>${value}</option>`).join("")}</select></label>
+                    <label class="ln-field">Czcionka<select data-setting="fontFamily">${["Arial", "Verdana", "Tahoma", "Georgia", "monospace"].map((value2) => `<option>${value2}</option>`).join("")}</select></label>
                     <label class="ln-field">Rozmiar (8–20 px)<input type="number" min="8" max="20" step="1" data-setting="fontSize"></label>
                     <label class="ln-field">Cień<select data-setting="shadow"><option value="outline">Czarny obrys</option><option value="soft">Miękki cień</option><option value="none">Brak</option></select></label>
                     <label class="ln-switch"><input type="checkbox" data-setting="bold">Pogrubienie</label>
@@ -7133,18 +7192,22 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
                     <label class="ln-field">1–33%<input type="color" data-setting="colorLow"></label>
                     <label class="ln-field">50%<input type="color" data-setting="colorMid"></label>
                     <label class="ln-field">Powyżej 50%<input type="color" data-setting="colorHigh"></label>
-                </div><p>Przy podziale z przypisanymi właścicielami procent nie jest wyświetlany, ponieważ wynik jest już ustalony przez grę.</p>`;
+                </div><p>Przy podziale z przypisanymi właścicielami procent nie jest wyświetlany, ponieważ wynik jest już ustalony przez grę.</p>
+                <button type="button" class="mtk-action" data-test-loot>TESTUJ OKNO Z LEGENDĄ</button>`;
         const enabled = section.querySelector("[data-enabled]");
+        const test = section.querySelector("[data-test-loot]");
         const sync = () => {
           enabled.checked = ctx.enabled;
+          test.disabled = !ctx.enabled;
           for (const input of section.querySelectorAll("[data-setting]")) {
-            const value = ctx.settings[input.dataset.setting];
-            if (input.type === "checkbox") input.checked = value !== false;
-            else input.value = value;
+            const value2 = ctx.settings[input.dataset.setting];
+            if (input.type === "checkbox") input.checked = value2 !== false;
+            else input.value = value2;
           }
         };
         sync();
         ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        ctx.scheduler.listen(test, "click", () => ctx.events.emit("lootChancesTest"));
         for (const input of section.querySelectorAll("[data-setting]")) {
           ctx.scheduler.listen(input, "change", () => ctx.changeSettings({
             [input.dataset.setting]: input.type === "checkbox" ? input.checked : input.type === "number" ? Number(input.value) : input.value
@@ -7237,8 +7300,8 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
     if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14)) return `${count} ${few}`;
     return `${count} ${many}`;
   }
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+  function escapeHtml(value2) {
+    return String(value2).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   }
   function calendarAvailable() {
     const icon = document.querySelector(".widget-rewards-calendar-icon");
@@ -7447,9 +7510,9 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
         const sync = () => {
           enabled.checked = ctx.enabled;
           for (const input of section.querySelectorAll("[data-setting]")) {
-            const value = ctx.settings[input.dataset.setting];
-            if (input.type === "checkbox") input.checked = Boolean(value);
-            else input.value = String(value);
+            const value2 = ctx.settings[input.dataset.setting];
+            if (input.type === "checkbox") input.checked = Boolean(value2);
+            else input.value = String(value2);
           }
           section.querySelector("[data-check]").disabled = !ctx.enabled;
         };
@@ -7471,72 +7534,142 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
   }
 
   // src/addons/compact-party/style.js
-  function number(value, fallback, minimum, maximum) {
-    const parsed = Number(value);
+  function number(value2, fallback, minimum, maximum) {
+    const parsed = Number(value2);
     return Number.isFinite(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback;
   }
   function compactPartyCss(settings) {
-    const rowHeight = number(settings.rowHeight, 23, 20, 32);
-    const fontSize = number(settings.fontSize, 11, 9, 14);
+    const rowHeight = number(settings.rowHeight, 18, 16, 28);
+    const fontSize = number(settings.fontSize, 9, 8, 12);
+    const summaryLeft = settings.hideAvatars === false ? 34 : 4;
     const avatar = settings.hideAvatars === false ? `
-.party .party__list .party-member .avatar{display:flex!important;flex:0 0 32px!important;width:32px!important;height:${rowHeight}px!important;overflow:hidden!important}
-.party .party__list .party-member .img-avatar-correct{transform:translateY(-2px) scale(.82);transform-origin:top left}` : `
+.party .party__list .party-member .avatar{display:flex!important;position:absolute!important;left:1px!important;top:0!important;width:32px!important;height:${rowHeight}px!important;overflow:hidden!important;z-index:3!important}
+.party .party__list .party-member .img-avatar-correct{transform:translateY(-4px) scale(.72);transform-origin:top left}` : `
 .party .party__list .party-member .avatar{display:none!important}`;
-    const hpPoints = settings.showHpPoints ? `
-.party .party__list .party-member .hp-points{display:block!important;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}` : `
-.party .party__list .party-member .hp-points{display:none!important}`;
     return `
-.party .party__list .party-member{box-sizing:border-box!important;height:${rowHeight}px!important;min-height:${rowHeight}px!important;margin:1px 0!important;padding:0 3px!important;font-size:${fontSize}px!important;line-height:${rowHeight - 2}px!important;overflow:hidden!important}
-.party .party__list .party-member>.table-wrapper{display:flex!important;align-items:center!important;width:100%!important;height:100%!important;min-height:0!important}
+.party .party__list .party-member{position:relative!important;box-sizing:border-box!important;height:${rowHeight}px!important;min-height:${rowHeight}px!important;margin:1px 0!important;padding:0!important;font-size:${fontSize}px!important;line-height:${rowHeight}px!important;overflow:hidden!important}
+.party .party__list .party-member>.table-wrapper{display:block!important;width:100%!important;height:100%!important;min-height:0!important}
 ${avatar}
-.party .party__list .party-member .info-wrapper{position:relative!important;inset:auto!important;display:flex!important;align-items:center!important;flex:1 1 auto!important;width:auto!important;min-width:0!important;height:100%!important;padding:0!important;margin:0!important}
-.party .party__list .party-member .top-row,.party .party__list .party-member .bottom-row{position:static!important;inset:auto!important;display:flex!important;align-items:center!important;width:auto!important;height:100%!important;min-width:0!important;margin:0!important;padding:0!important;line-height:inherit!important}
-.party .party__list .party-member .top-row{flex:1 1 auto!important;gap:5px!important}
-.party .party__list .party-member .bottom-row{flex:0 0 auto!important;gap:4px!important}
-.party .party__list .party-member .nickname{position:static!important;flex:1 1 auto!important;min-width:0!important;width:auto!important;margin:0!important;padding:0!important}
-.party .party__list .party-member .nickname-text{display:block!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;line-height:inherit!important}
-.party .party__list .party-member .character-info,.party .party__list .party-member .hp-percent{position:static!important;display:block!important;flex:none!important;width:auto!important;margin:0!important;padding:0!important;white-space:nowrap!important;line-height:inherit!important}
-${hpPoints}
-.party .party__list .party-member .info-icons{position:static!important;display:flex!important;align-items:center!important;flex:none!important;width:auto!important;height:${Math.min(18, rowHeight - 2)}px!important;margin:0!important;padding:0!important}
-.party .party__list .party-member .info-icons>div{margin:0 1px!important;transform:scale(.82);transform-origin:center!important}
+.party .party__list .party-member .info-wrapper{position:static!important;width:100%!important;height:100%!important;padding:0!important;margin:0!important}
+.party .party__list .party-member .top-row{display:none!important}
+.party .party__list .party-member .bottom-row{position:absolute!important;inset:0 2px 0 auto!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;width:auto!important;height:${rowHeight}px!important;margin:0!important;padding:0!important;z-index:5!important;line-height:${rowHeight}px!important}
+.party .party__list .party-member .bottom-row>.hp-percent,.party .party__list .party-member .bottom-row>.hp-points{display:none!important}
+.party .party__list .party-member .info-icons{position:static!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;width:auto!important;height:${Math.min(16, rowHeight)}px!important;margin:0!important;padding:0!important}
+.party .party__list .party-member .info-icons>div{margin:0!important;transform:scale(.72);transform-origin:center!important}
+.party .party__list .party-member .qaddons-party-summary{position:absolute!important;left:${summaryLeft}px!important;right:34px!important;top:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;align-items:center!important;height:${rowHeight}px!important;gap:3px!important;z-index:4!important;font-size:${fontSize}px!important;line-height:${rowHeight}px!important;pointer-events:none!important;white-space:nowrap!important}
+.party .party__list .party-member .qaddons-party-nick{grid-column:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:left!important}
+.party .party__list .party-member .qaddons-party-info{grid-column:3!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:right!important}
+.party .party__list .party-member .qaddons-party-hp{grid-column:2!important;text-align:center!important;font-weight:700!important}
 .party .party__list .party-member .member-hp-bar,.party .party__list .party-member .border-blink{height:100%!important}
 .party .party__list{padding:0 2px!important}
-.party .party__professions{margin-top:3px!important}
+.party .party__professions{margin-top:2px!important;font-size:9px!important;line-height:12px!important}
 `;
   }
 
   // src/addons/compact-party/index.js
-  var DEFAULTS5 = { hideAvatars: true, showHpPoints: false, rowHeight: 23, fontSize: 11 };
-  function apply2(ctx) {
-    ctx.styles.set("layout", compactPartyCss(ctx.settings));
+  var DEFAULTS5 = { hideAvatars: true, showHpPoints: false, rowHeight: 18, fontSize: 9 };
+  function value(node) {
+    return String(node?.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function createSummary() {
+    const summary = document.createElement("div");
+    summary.className = "qaddons-party-summary";
+    const nick = document.createElement("span");
+    nick.className = "qaddons-party-nick";
+    const info = document.createElement("span");
+    info.className = "qaddons-party-info";
+    const hp = document.createElement("span");
+    hp.className = "qaddons-party-hp";
+    summary.append(nick, hp, info);
+    return summary;
+  }
+  function startCompactParty(ctx) {
+    let frame = 0;
+    function applyStyles() {
+      ctx.styles.set("layout", compactPartyCss(ctx.settings));
+    }
+    function syncMember(member) {
+      const sourceNick = member.querySelector(".nickname-text");
+      const sourceInfo = member.querySelector(".character-info");
+      const sourcePercent = member.querySelector(".hp-percent");
+      const sourcePoints = member.querySelector(".hp-points");
+      if (!sourceNick && !sourceInfo && !sourcePercent) return;
+      let summary = member.querySelector(".qaddons-party-summary");
+      if (!summary) {
+        summary = createSummary();
+        member.append(summary);
+      }
+      const nick = value(sourceNick);
+      const info = value(sourceInfo);
+      const percent = value(sourcePercent);
+      const points = value(sourcePoints);
+      const displayedHp = ctx.settings.showHpPoints && points ? points : percent;
+      const nickNode = summary.querySelector(".qaddons-party-nick");
+      const infoNode = summary.querySelector(".qaddons-party-info");
+      const hpNode = summary.querySelector(".qaddons-party-hp");
+      if (nickNode.textContent !== nick) nickNode.textContent = nick;
+      if (infoNode.textContent !== info) infoNode.textContent = info;
+      if (hpNode.textContent !== displayedHp) hpNode.textContent = displayedHp;
+      const color = sourceNick ? getComputedStyle(sourceNick).color : "";
+      if (color && nickNode.style.color !== color) nickNode.style.color = color;
+      const title = [nick, info, percent, points].filter(Boolean).join(" ");
+      if (summary.title !== title) summary.title = title;
+    }
+    function sync() {
+      frame = 0;
+      document.querySelectorAll(".party .party__list .party-member").forEach(syncMember);
+    }
+    function requestSync(records = []) {
+      if (records.length && records.every((record) => record.target.parentElement?.closest?.(".qaddons-party-summary"))) return;
+      if (!frame) frame = ctx.scheduler.frame(sync);
+    }
+    applyStyles();
+    sync();
+    ctx.scheduler.observer(MutationObserver, requestSync).observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "bar-percent"]
+    });
+    ctx.events.on("compactPartyChanged", () => {
+      applyStyles();
+      requestSync();
+    });
+    ctx.scheduler.cleanup(() => document.querySelectorAll(".qaddons-party-summary").forEach((node) => node.remove()));
   }
   function createCompactParty() {
     return {
       id: "compact-party",
       name: "Kompaktowa grupa",
-      description: "Układa każdego członka grupy w jednym wierszu i zmniejsza wysokość okna drużyny.",
+      description: "Układa każdego członka grupy w jednym niskim wierszu.",
       defaultEnabled: true,
       defaults: DEFAULTS5,
-      enable: apply2,
-      onSettingsChange: apply2,
+      init(ctx) {
+        if (ctx.settings.compactLayoutVersion === 2) return;
+        Object.assign(ctx.settings, DEFAULTS5, { compactLayoutVersion: 2 });
+        ctx.storage.save();
+      },
+      enable: startCompactParty,
+      onSettingsChange: (ctx) => ctx.events.emit("compactPartyChanged"),
       renderSettings(ctx) {
         const section = document.createElement("section");
         section.className = "mtk-addon-settings";
         section.innerHTML = `<h2>Kompaktowa grupa</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Nick, poziom i profesja, procent życia oraz ikony akcji mieszczą się w jednym wierszu. Kolory i pasek życia pozostają z gry.</p>
+                <p>Nick jest po lewej, procent życia pośrodku, a poziom, profesja i ikony akcji po prawej.</p>
                 <div class="ln-grid">
                     <label class="ln-switch"><input type="checkbox" data-setting="hideAvatars">Ukryj grafiki postaci</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="showHpPoints">Pokaż dokładne punkty życia</label>
-                    <label class="ln-field">Wysokość wiersza (20–32 px)<input type="range" min="20" max="32" step="1" data-setting="rowHeight"><output data-row-height></output></label>
-                    <label class="ln-field">Rozmiar tekstu (9–14 px)<input type="range" min="9" max="14" step="1" data-setting="fontSize"><output data-font-size></output></label>
+                    <label class="ln-field">Wysokość wiersza (16–28 px)<input type="range" min="16" max="28" step="1" data-setting="rowHeight"><output data-row-height></output></label>
+                    <label class="ln-field">Rozmiar tekstu (8–12 px)<input type="range" min="8" max="12" step="1" data-setting="fontSize"><output data-font-size></output></label>
                 </div><p>Podsumowanie profesji pod listą pozostaje widoczne.</p>`;
         const enabled = section.querySelector("[data-enabled]");
         const sync = () => {
           enabled.checked = ctx.enabled;
           for (const input of section.querySelectorAll("[data-setting]")) {
-            const value = ctx.settings[input.dataset.setting];
-            if (input.type === "checkbox") input.checked = Boolean(value);
-            else input.value = value;
+            const current = ctx.settings[input.dataset.setting];
+            if (input.type === "checkbox") input.checked = Boolean(current);
+            else input.value = current;
           }
           section.querySelector("[data-row-height]").textContent = `${ctx.settings.rowHeight}px`;
           section.querySelector("[data-font-size]").textContent = `${ctx.settings.fontSize}px`;
