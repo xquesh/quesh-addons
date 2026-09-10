@@ -27,6 +27,28 @@ import { LEGENDARY_DOM_SELECTOR } from '../src/addons/legendary-notificator/cons
 import { installEffectStyles } from '../src/addons/legendary-notificator/effect-styles.js';
 import './check-updates.mjs';
 import { normalize as normalizeTypography, typographyCss } from '../src/addons/notification-position/typography.js';
+import { catchingChance, chanceLevel, eligibleMembers, isLegendary, requiredProfessions } from '../src/addons/loot-chances/data.js';
+import { fightMembers } from '../src/addons/loot-chances/runtime.js';
+
+const chanceParty = [
+    { id: '1', name: 'Quesh', prof: 'w', isHero: true },
+    { id: '2', name: 'Łowca', prof: 'h', isHero: false },
+    { id: '3', name: 'Drugi wojownik', prof: 'w', isHero: false }
+];
+assert.equal(catchingChance({ stat: 'rarity=legendary' }, chanceParty), 33);
+assert.equal(catchingChance({ stat: 'rarity=legendary;reqp=w' }, chanceParty), 50);
+assert.equal(catchingChance({ stat: 'rarity=legendary;reqp=h' }, chanceParty), 0);
+assert.equal(catchingChance({ stat: 'rarity=legendary;reqp=p' }, chanceParty), 33);
+assert.deepEqual(requiredProfessions({ stat: 'reqp=wt' }), ['w', 't']);
+assert.deepEqual(eligibleMembers({ stat: 'reqp=w' }, chanceParty).map(member => member.id), ['1', '3']);
+assert.equal(chanceLevel(0), 'none'); assert.equal(chanceLevel(33), 'low'); assert.equal(chanceLevel(50), 'mid'); assert.equal(chanceLevel(100), 'high');
+assert.equal(isLegendary({ stat: 'rarity=legendary;reqp=w' }), true);
+assert.equal(isLegendary({ stat: 'rarity=heroic' }), false);
+assert.deepEqual(fightMembers({ f: { myteam: 1, w: {
+    a: { originalId: 7, team: 1, prof: 'w', name: 'Quesh' }, b: { originalId: 8, team: 1, prof: 'h', name: 'Łowca' },
+    summon: { originalId: 9, team: 1, prof: 'm', name: 'Przywołanie', npc: 1 }, enemy: { originalId: 10, team: 2, prof: 'p', name: 'Wróg' }
+} } }, { Engine: { hero: { d: { id: 7 } } } }).map(member => [member.name, member.isHero]), [['Quesh', true], ['Łowca', false]]);
+console.log('OK: Kto złapie? liczy szanse według drużyny, reqp i profesji bohatera');
 
 async function listFiles(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
