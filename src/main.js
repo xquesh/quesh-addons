@@ -12,6 +12,8 @@ import { VERSION } from './version.js';
 import { createDetectorGlobal } from './addons/detector-global/index.js';
 import { createItemTools } from './addons/item-tools/index.js';
 import { createRelogger } from './addons/relogger/index.js';
+import { createQuickSeller } from './addons/quick-seller/index.js';
+import { createEnhancer } from './addons/enhancer/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -54,6 +56,8 @@ function start() {
         manager.register(createDetectorGlobal());
         manager.register(createItemTools());
         manager.register(createRelogger());
+        manager.register(createQuickSeller());
+        manager.register(createEnhancer());
         panel.connect(manager);
         manager.start();
         game.start();

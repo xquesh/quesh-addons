@@ -6,11 +6,37 @@ export function createGame(page, events, scheduler, host = window) {
     let started = false;
     let retry = 0;
     let layoutFrame = 0;
+    const pending = new Set();
+
+    function packets(packet) {
+        return Array.isArray(packet) ? packet.flat(Infinity) : [packet];
+    }
+
+    function settleRequests(packet) {
+        let parsed = packet;
+        const stripPacket = (value, keys) => {
+            if (Array.isArray(value)) return value.map(entry => stripPacket(entry, keys));
+            if (!value || typeof value !== 'object') return value;
+            const clone = { ...value };
+            keys.forEach(key => delete clone[key]);
+            return clone;
+        };
+        for (const request of [...pending]) {
+            const match = packets(packet).find(data => {
+                try { return request.match(data); } catch { return false; }
+            });
+            if (!match) continue;
+            pending.delete(request);
+            scheduler.clearTimeout(request.timeout);
+            request.resolve(match);
+            if (request.strip.length) parsed = stripPacket(parsed, request.strip);
+        }
+        return parsed;
+    }
 
     function publish(packet) {
         events.emit('gamePacket', packet);
-        const packets = Array.isArray(packet) ? packet.flat(Infinity) : [packet];
-        for (const data of packets) {
+        for (const data of packets(packet)) {
             if (!data?.loot) continue;
             if (data.loot.init !== undefined) {
                 events.emit(data.loot.init ? 'lootOpened' : 'lootClosed', data);
@@ -29,7 +55,8 @@ export function createGame(page, events, scheduler, host = window) {
         original = candidate.parseJSON;
         const parser = original;
         wrapper = function (...args) {
-            const result = parser.apply(this, args);
+            const forwarded = settleRequests(args[0]);
+            const result = parser.apply(this, [forwarded, ...args.slice(1)]);
             if (!stopped) publish(args[0]);
             return result;
         };
@@ -61,10 +88,33 @@ export function createGame(page, events, scheduler, host = window) {
     function destroy() {
         stopped = true;
         scheduler.clearTimeout(retry);
+        for (const request of pending) {
+            scheduler.clearTimeout(request.timeout);
+            request.reject(new Error('Komunikacja gry została zatrzymana.'));
+        }
+        pending.clear();
         if (communication?.parseJSON === wrapper) communication.parseJSON = original;
         communication = null;
         scheduler.destroy();
     }
 
-    return { page, start, destroy, get hooked() { return Boolean(communication); } };
+    function request(command, match, options = {}) {
+        return new Promise((resolve, reject) => {
+            if (stopped || typeof page._g !== 'function') return reject(new Error('Gra nie jest jeszcze gotowa.'));
+            const entry = { match, resolve, reject, strip: Array.isArray(options.strip) ? options.strip : [] };
+            entry.timeout = scheduler.timeout(() => {
+                pending.delete(entry);
+                reject(new Error('Serwer gry nie odpowiedział na czas.'));
+            }, options.timeout || 6000);
+            pending.add(entry);
+            try { page._g(command); }
+            catch (error) {
+                pending.delete(entry);
+                scheduler.clearTimeout(entry.timeout);
+                reject(error);
+            }
+        });
+    }
+
+    return { page, start, destroy, request, get hooked() { return Boolean(communication); } };
 }
