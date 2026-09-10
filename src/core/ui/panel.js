@@ -12,7 +12,7 @@ export function createPanel(settings, styles, scheduler, events) {
     installSettingsStyles(style);
     style.set('panel', `
         #mtk-button, #mtk-panel { color:#ddd; font:13px Arial,sans-serif; z-index:2147483001; }
-        #mtk-button { position:fixed; box-sizing:border-box; width:42px; height:42px; padding:2px; display:grid; place-items:center; border:1px solid #444; border-radius:0; background:#050505; cursor:grab; touch-action:none; transition:box-shadow .15s,border-color .15s; }
+        #mtk-button { position:relative; flex:0 0 44px; box-sizing:border-box; width:44px; height:44px; padding:3px; display:grid; place-items:center; border:1px solid #444; border-radius:0; background:#050505; cursor:pointer; pointer-events:auto; touch-action:manipulation; transition:box-shadow .15s,border-color .15s; }
         #mtk-button:hover, #mtk-button:focus-visible { border-color:#bbb; box-shadow:0 0 12px #ffffff60; outline:none; }
         #mtk-button img { display:block; width:36px; height:36px; object-fit:contain; image-rendering:pixelated; pointer-events:none; user-select:none; }
         #mtk-panel { position:fixed; width:760px; height:570px; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px); display:flex; flex-direction:column; border:1px solid #333; border-radius:0; background:#000; box-shadow:0 12px 40px #0009; overflow:hidden; }
@@ -49,8 +49,6 @@ export function createPanel(settings, styles, scheduler, events) {
     icon.alt = '';
     icon.draggable = false;
     button.append(icon);
-    button.style.right = `${settings.data.core.buttonRight ?? 20}px`;
-    button.style.top = `${settings.data.core.buttonTop ?? 120}px`;
     const panel = document.createElement('section');
     panel.id = 'mtk-panel';
     panel.hidden = true;
@@ -135,13 +133,19 @@ export function createPanel(settings, styles, scheduler, events) {
     }, { capture: true, passive: false });
     bindDrag(panel, panel.querySelector('header'), scheduler,
         (panelX, panelY) => settings.updateCore({ panelX, panelY }));
-    bindDrag(button, button, scheduler,
-        (panelX, panelY) => settings.updateCore({ buttonRight: innerWidth - panelX - button.getBoundingClientRect().width, buttonTop: panelY }),
-        { button: true, click: () => panel.hidden ? open() : close() });
+    scheduler.listen(button, 'click', () => panel.hidden ? open() : close());
     scheduler.cleanup(events.on('addonChanged', () => {
         if (!panel.hidden && currentView === 'addons') showAddons();
     }));
-    document.body.append(button, panel);
+    const buttonHostSelector = '.interface-layer .top.positioner .top-left.main-buttons-container, .positioner.top .top-left.main-buttons-container, .top-left.main-buttons-container';
+    function mountButton() {
+        const host = document.querySelector(buttonHostSelector);
+        if (host && button.parentElement !== host) host.append(button);
+    }
+    document.body.append(panel);
+    mountButton();
+    const buttonHostObserver = scheduler.observer(MutationObserver, mountButton);
+    buttonHostObserver.observe(document.body, { childList: true, subtree: true });
     updates.check();
 
     return {

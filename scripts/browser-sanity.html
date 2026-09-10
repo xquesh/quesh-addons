@@ -9,6 +9,7 @@
     #GAME_CANVAS { width:600px; height:400px; background:#182f26; }
     .interface-layer { position:absolute; inset:0; pointer-events:none; }
     .positioner.top { position:absolute; width:1000px; height:60px; }
+    .top-left.main-buttons-container { display:flex; gap:5px; height:44px; pointer-events:auto; }
     .left-column { position:absolute; width:150px; height:550px; }
     .right-column { position:absolute; right:0; width:150px; height:550px; }
     .positioner.bottom { position:absolute; top:550px; width:1000px; height:100px; }
@@ -23,7 +24,7 @@
 <div class="game-window-positioner">
     <div class="game-layer"><canvas id="GAME_CANVAS"></canvas></div>
     <div class="interface-layer">
-        <div class="positioner top"></div>
+        <div class="positioner top"><div class="top-left main-buttons-container"><button class="widget-button">GRA</button></div></div>
         <div class="left-column main-column"></div>
         <div class="right-column main-column"></div>
         <div class="positioner bottom"><div class="bottom-panel-of-bottom-positioner"><div class="hp-indicator-wrapper"></div></div></div>
@@ -150,7 +151,13 @@
         manager.setEnabled('reminder', true);
         assert(getComputedStyle(document.querySelector('#mtk-panel')).backgroundColor === 'rgb(0, 0, 0)', 'Czarny panel');
         assert(getComputedStyle(document.querySelector('#mtk-button')).borderRadius === '0px', 'Kwadratowy przycisk');
-        assert(document.querySelector('#mtk-button').getBoundingClientRect().width === 42, 'Mniejszy przycisk 42px');
+        assert(document.querySelector('#mtk-button').getBoundingClientRect().width === 44, 'Przycisk dopasowany do przycisków gry');
+        assert(document.querySelector('#mtk-button').parentElement.matches('.top-left.main-buttons-container'), 'Przycisk QADDONS osadzony w górnej belce gry');
+        const oldButtonHost = document.querySelector('.top-left.main-buttons-container');
+        const rebuiltButtonHost = oldButtonHost.cloneNode(false);
+        oldButtonHost.replaceWith(rebuiltButtonHost);
+        await wait(40);
+        assert(document.querySelector('#mtk-button')?.parentElement === rebuiltButtonHost, 'Przycisk wraca po przebudowie belki gry');
         document.querySelector('.mtk-addon button').click();
         assert(document.querySelectorAll('.ln-tab-button').length === 11, '11 zakładek');
         assert(document.querySelector('.ln-tab-content').getBoundingClientRect().width > 300, 'Ustawienia wykorzystują szerokość panelu');
