@@ -24,6 +24,10 @@ export function startRelogger(ctx) {
     let account = '';
     let selectedHero = '';
     let relogging = false;
+    let reloggingFrom = '';
+    let reloggingObserved = false;
+    let relogStartedAt = 0;
+    let relogTimeout = 0;
     const entries = new Map();
     ctx.styles.set('bar', barStyle);
     document.body.append(bar);
@@ -72,7 +76,7 @@ export function startRelogger(ctx) {
             if (button.title !== title) button.title = title;
             if (selectedHero === hero.id && details.textContent !== title) details.textContent = title;
         }
-        const text = error || (loading ? 'Pobieranie postaci…' : !loaded ? 'Oczekiwanie na zalogowanie do gry…' : !heroes.length ? 'Brak postaci na koncie.' :
+        const text = error || (relogging ? 'Zmienianie postaci…' : loading ? 'Pobieranie postaci…' : !loaded ? 'Oczekiwanie na zalogowanie do gry…' : !heroes.length ? 'Brak postaci na koncie.' :
             settings.showTimers ? available ? 'Zielony: czas minął · bursztynowy: możliwy respawn · najedź, aby zobaczyć timery.' : 'Timery niedostępne — przelogowanie działa niezależnie.' : 'Kliknij postać, aby się przelogować.');
         if (status.textContent !== text) status.textContent = text;
         bar.dataset.notice = String(!!error || !loaded);
@@ -89,6 +93,7 @@ export function startRelogger(ctx) {
         visible = sortedHeroes(heroes, currentWorld, settings.sort);
         visible.forEach((hero, index) => {
             const button = document.createElement('button'); button.type = 'button'; button.className = 'qr-card'; button.dataset.hero = hero.id;
+            button.disabled = relogging;
             button.innerHTML = '<span class="qr-portrait"></span><span class="qr-nick"></span><span class="qr-level"></span>';
             button.querySelector('.qr-nick').textContent = hero.nick;
             button.querySelector('.qr-level').textContent = heroLevel(hero);
@@ -126,11 +131,28 @@ export function startRelogger(ctx) {
             if (!scheduler.disposed) { refresh.disabled = false; render(); }
         }
     }
+    function unlockRelog(message = '') {
+        scheduler.clearTimeout(relogTimeout); relogTimeout = 0;
+        relogging = false; reloggingFrom = ''; reloggingObserved = false; relogStartedAt = 0;
+        entries.forEach(button => { button.disabled = false; });
+        if (message) error = message;
+        updateTimers();
+    }
     function relog(hero) {
         if (!hero || relogging) return;
         if (page.getCookie?.('user_id') !== account) { error = 'Konto się zmieniło. Odśwież listę postaci.'; updateTimers(); return; }
-        try { changeCharacter(hero, page); relogging = true; entries.forEach(button => { button.disabled = true; }); }
-        catch (cause) { error = cause.message; updateTimers(); }
+        try {
+            reloggingFrom = String(page.Engine?.hero?.d?.id || '');
+            changeCharacter(hero, page); relogging = true; error = '';
+            reloggingObserved = page.Engine?.changePlayer?.id != null;
+            relogStartedAt = Date.now();
+            entries.forEach(button => { button.disabled = true; }); updateTimers();
+            relogTimeout = scheduler.timeout(() => unlockRelog('Zmiana postaci nie zakończyła się. Możesz spróbować ponownie.'), 10000);
+        }
+        catch (cause) {
+            reloggingFrom = ''; reloggingObserved = false; relogStartedAt = 0;
+            error = cause.message; updateTimers();
+        }
     }
     scheduler.listen(cards, 'click', event => relog(visible.find(hero => hero.id === event.target.closest('[data-hero]')?.dataset.hero)));
     scheduler.listen(cards, 'wheel', event => {
@@ -171,7 +193,12 @@ export function startRelogger(ctx) {
     let attemptedAccount = '';
     const tick = () => {
         const user = page.getCookie?.('user_id') || '';
-        if (account && user !== account) { heroes = []; loaded = false; account = ''; error = ''; attemptedAccount = ''; render(); }
+        const activeHero = String(page.Engine?.hero?.d?.id || '');
+        const changePending = page.Engine?.changePlayer?.id != null;
+        if (relogging && changePending) reloggingObserved = true;
+        if (relogging && activeHero && activeHero !== reloggingFrom) { unlockRelog(); render(); }
+        else if (relogging && !changePending && (reloggingObserved || Date.now() - relogStartedAt >= 1500)) unlockRelog();
+        if (account && user !== account) { unlockRelog(); heroes = []; loaded = false; account = ''; error = ''; attemptedAccount = ''; render(); }
         if (!loading && attemptedAccount !== user && page.Engine?.allInit === true && user && page.getCookie?.('hs3')) { attemptedAccount = user; load(); }
         updateTimers(); position(); scheduler.timeout(tick, 1000);
     };

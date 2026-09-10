@@ -41,7 +41,11 @@ export function relogTarget(hero, page) {
     if (engine.changePlayer?.id != null) throw new Error('Zmiana postaci już trwa.');
     if (engine.dialogue && typeof engine.dialogue === 'object') throw new Error('Najpierw zamknij rozmowę z NPC.');
     if (String(engine.hero?.d?.id || page.getCookie?.('mchar_id')) === String(hero.id)) throw new Error('Ta postać jest już zalogowana.');
-    const domain = page.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
+    let domain = page.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
+    if (!domain) {
+        try { domain = new URL(engine.worldConfig?.getApiDomain?.()).hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1]; }
+        catch {}
+    }
     if (!domain || !worldName(hero.world) || !/^\d+$/.test(String(hero.id))) throw new Error('Nieprawidłowy świat lub postać.');
     return { url: `https://${hero.world}.margonem.${domain}/`, cookieDomain: `margonem.${domain}`, id: String(hero.id) };
 }

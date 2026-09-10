@@ -1,5 +1,5 @@
 window.runReloggerChecks = async function(manager, assert, wait) {
-    const previous = { fetch: window.fetch, cookie: window.getCookie, allInit: Engine.allInit, worldConfig: Engine.worldConfig, hero: Engine.hero, serverStorage: Engine.serverStorage, windowsData: Engine.windowsData };
+    const previous = { fetch: window.fetch, cookie: window.getCookie, allInit: Engine.allInit, worldConfig: Engine.worldConfig, hero: Engine.hero, changePlayer: Engine.changePlayer, serverStorage: Engine.serverStorage, windowsData: Engine.windowsData };
     const now = Date.now() / 1000;
     const timers = [{ type: 2, heroData: { id: 1 }, name: '<b>Heros A</b>', presp: now - 1 }, { type: 2, heroData: { id: 2 }, name: 'E2 B', presp: now + 300, minResp: now - 1 }];
     const heroes = [{ id: 1, nick: 'Quesh', lvl: 80, prof: 'w', world: 'fobos' }, { id: 2, nick: 'Druga', lvl: 320, prof: 'm', world: 'fobos' }, { id: 3, nick: 'Inny świat', lvl: 200, prof: 'h', world: 'katahha' }];
@@ -82,6 +82,17 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         Engine.serverStorage = { get: () => undefined };
         manager.changeSettings('relogger', { selectedWorld: 'fobos' });
         assert(bar().querySelectorAll('.qr-card').length === 9, 'Brak timerów nie blokuje postaci');
+        Engine.changePlayer = { id: null, changePlayerRequest(id) { this.id = id; setTimeout(() => { Engine.hero = { d: { id } }; this.id = null; }, 10); } };
+        bar().querySelector('[data-hero="2"]').click();
+        const disabledDuringRelog = [...bar().querySelectorAll('.qr-card')].map(button => button.disabled);
+        assert(disabledDuringRelog.every(Boolean), `Kafelki są blokowane tylko podczas zmiany postaci: ${disabledDuringRelog.join(',')} / ${bar().querySelector('.qr-status').textContent}`);
+        await wait(1050);
+        assert([...bar().querySelectorAll('.qr-card')].every(button => !button.disabled) && bar().querySelector('[data-hero="2"]')?.getAttribute('aria-current') === 'true', 'Kafelki odblokowują się po zmianie postaci');
+        Engine.changePlayer = { id: null, changePlayerRequest() { this.id = 5; setTimeout(() => { this.id = null; }, 10); } };
+        bar().querySelector('[data-hero="5"]').click();
+        assert([...bar().querySelectorAll('.qr-card')].every(button => button.disabled), 'Kafelki są zablokowane, gdy okno zmiany postaci jest otwarte');
+        await wait(1050);
+        assert([...bar().querySelectorAll('.qr-card')].every(button => !button.disabled) && Engine.hero.d.id === 2, 'Anulowanie zmiany postaci odblokowuje kafelki bez F5');
         // Błąd pobrania nie usuwa poprawnie pobranej listy.
         window.fetch = async () => { throw new Error('fixture offline'); };
         bar().querySelector('[data-refresh]').click(); await wait(50);
@@ -97,7 +108,7 @@ window.runReloggerChecks = async function(manager, assert, wait) {
     } finally {
         close?.(); view.remove(); manager.setEnabled('relogger', false);
         window.fetch = previous.fetch; window.getCookie = previous.cookie;
-        for (const key of ['allInit', 'worldConfig', 'hero', 'serverStorage', 'windowsData']) Engine[key] = previous[key];
+        for (const key of ['allInit', 'worldConfig', 'hero', 'changePlayer', 'serverStorage', 'windowsData']) Engine[key] = previous[key];
         anchor.style.cssText = anchorStyle;
         topAnchor.style.cssText = topAnchorStyle;
         manager.changeSettings('relogger', { barPosition: 'bottom', horizontal: 100, selectedWorld: '', showWorldButton: true });
