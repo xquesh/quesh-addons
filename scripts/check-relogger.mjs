@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
-import { characterList, sortedHeroes, heroTimers, countdown, changeCharacter, relogTarget } from '../src/addons/relogger/data.js';
+import { characterList, sortedHeroes, heroTimers, countdown, changeCharacter, relogTarget, heroLevel } from '../src/addons/relogger/data.js';
 const list = characterList([{ id: 1, nick: 'A', lvl: 30, world: 'fobos' }, { id: 2, nick: 'B', lvl: 200, world: 'fobos' }, { id: 3, nick: 'C', world: 'katahha' }, { id: 4, nick: 'Bad', world: 'example.org' }]);
 assert.equal(list.length, 3);
 assert.deepEqual(sortedHeroes(list, 'fobos', 'level-desc').map(hero => hero.id), ['2', '1']);
 assert.equal(countdown(3661), '1:01:01');
 assert.equal(countdown(-1), '00:00');
+assert.equal(heroLevel({ lvl: 190, prof: 'tropiciel' }), '190t');
+assert.equal(heroLevel({ lvl: 244, prof: 'Wojownik' }), '244w');
 const timer = (presp, rest = {}) => ({ type: 2, heroData: { id: 1 }, name: 'E2', presp, ...rest });
 assert.deepEqual(heroTimers([timer(900), timer(1100, { minResp: 950 }), timer(1200), timer(100, {}), timer(1001, { heroData: { id: 2 } })], '1', 1000).map(value => value.state), ['due', 'window', 'waiting']);
 assert.equal(heroTimers(undefined, 1, 1000).length, 0);

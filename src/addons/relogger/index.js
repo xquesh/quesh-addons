@@ -11,9 +11,10 @@ export function createRelogger() {
         renderSettings(ctx) {
             const section = document.createElement('section'); section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Przelogawka</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Kliknij portret, aby przejść na postać. Wysokość portretów dopasowuje się do dolnej belki gry. Dziewięć postaci zajmuje 340 px; dalsze przewiniesz poziomo. Nazwy, poziomy i timery zobaczysz po najechaniu.</p>
+                <p>Kliknij portret, aby przejść na postać. Pasek ma maksymalnie 60 px wysokości i dopasowuje się do wybranej belki gry. Widać górną połowę postaci, a pod nią poziom i skrót profesji, np. 190t lub 244w. Dziewięć postaci mieści się w jednym rzędzie; dalsze przewiniesz poziomo.</p>
                 <h2>Belka postaci</h2><div class="ln-grid">
                     <label class="ln-field">Kolejność<select data-setting="sort"><option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nazwa postaci</option></select></label>
+                    <label class="ln-field">Miejsce paska<select data-setting="barPosition"><option value="bottom">Dolna belka</option><option value="top">Górna belka</option></select></label>
                     <label class="ln-field">Położenie w poziomie (0% lewo — 100% prawo)<input type="range" min="0" max="100" step="1" data-setting="horizontal"><output data-position-value></output></label>
                     <label class="ln-switch"><input type="checkbox" data-setting="showWorldButton">Pokaż przycisk wyboru świata</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="showTimers">Podświetlenie i podgląd timerów</label>

@@ -5,7 +5,9 @@ window.runReloggerChecks = async function(manager, assert, wait) {
     const heroes = [{ id: 1, nick: 'Quesh', lvl: 80, prof: 'w', world: 'fobos' }, { id: 2, nick: 'Druga', lvl: 320, prof: 'm', world: 'fobos' }, { id: 3, nick: 'Inny świat', lvl: 200, prof: 'h', world: 'katahha' }];
     for (let index = 0; index < 7; index++) heroes.push({ id: index + 5, nick: `Postać ${index + 3}`, lvl: 30 + index, prof: 'w', world: 'fobos' });
     const anchor = document.querySelector('.bottom-panel-of-bottom-positioner');
+    const topAnchor = document.querySelector('.positioner.top');
     const anchorStyle = anchor.style.cssText;
+    const topAnchorStyle = topAnchor.style.cssText;
     anchor.style.cssText = 'position:fixed;bottom:50px;left:0;width:100%;height:48px;';
     let requests = 0;
     let close;
@@ -31,11 +33,22 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         manager.changeSettings('relogger', { collapsed: true }); // Stare ustawienie nie może ukrywać nowego paska.
         manager.setEnabled('relogger', true); await ready();
         assert(requests === 1 && bar().querySelectorAll('.qr-card').length === 9, 'Jedno pobranie, dziewięć postaci');
-        assert(bar().getBoundingClientRect().height === 44 && bar().getBoundingClientRect().width <= 365, 'Większe portrety dopasowane do wysokości belki');
-        assert(bar().querySelector('.qr-cards').scrollWidth <= 340, 'Dziewięć portretów mieści się bez przewijania');
+        assert(bar().getBoundingClientRect().height === 48 && bar().getBoundingClientRect().width <= 385, 'Pasek wykorzystuje wysokość belki');
+        assert(bar().querySelector('.qr-cards').scrollWidth <= 358, 'Dziewięć szerszych portretów mieści się bez przewijania');
+        assert(bar().querySelector('[data-hero="1"] .qr-level').textContent === '80w', 'Poziom i skrót profesji pod postacią');
+        assert(bar().querySelector('.qr-portrait').getBoundingClientRect().height <= 24, 'Widoczna tylko górna połowa postaci');
+        anchor.style.height = '75px'; window.dispatchEvent(new Event('resize'));
+        assert(bar().getBoundingClientRect().height === 60, 'Maksymalna wysokość paska to 60 px');
+        anchor.style.height = '48px'; window.dispatchEvent(new Event('resize'));
+        topAnchor.style.cssText = 'position:fixed;top:20px;left:0;width:100%;height:54px;';
+        manager.changeSettings('relogger', { barPosition: 'top' });
+        assert(bar().dataset.dock === 'top' && bar().getBoundingClientRect().top === topAnchor.getBoundingClientRect().top, 'Osadzenie w górnej belce');
+        bar().querySelector('[data-hero="1"]').dispatchEvent(new Event('pointerover', { bubbles: true }));
+        assert(getComputedStyle(bar().querySelector('.qr-details')).top !== 'auto', 'Timery otwierają się w dół z górnej belki');
+        manager.changeSettings('relogger', { barPosition: 'bottom' });
         assert(!bar().querySelector('[data-collapse]') && !bar().querySelector('.qr-body').hidden, 'Usunięte zwijanie i ignorowana stara konfiguracja');
         assert(!bar().querySelector('.qr-time') && bar().querySelector('.qr-details').hidden, 'Timery dopiero po najechaniu');
-        assert(Math.abs(bar().getBoundingClientRect().bottom - (anchor.getBoundingClientRect().bottom - 2)) < 1, 'Pasek podąża za dolną belką gry');
+        assert(Math.abs(bar().getBoundingClientRect().bottom - anchor.getBoundingClientRect().bottom) < 1, 'Pasek podąża za dolną belką gry');
         assert(bar().querySelector('[data-hero="1"]').dataset.state === 'due', 'Zielony stan po końcu timera');
         assert(bar().querySelector('[data-hero="2"]').dataset.state === 'window', 'Bursztynowy stan okna respawnu');
         assert(getComputedStyle(bar().querySelector('.qr-card')).animationName === 'none', 'Brak migania kart');
@@ -51,6 +64,10 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         assert(bar().querySelector('.qr-world-menu').hidden, 'Wybór zamyka menu');
         document.querySelector('#mtk-content').append(view);
         close = manager.renderSettings('relogger', view);
+        const dockSelect = view.querySelector('[data-setting="barPosition"]');
+        dockSelect.value = 'top'; dockSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        assert(bar().dataset.dock === 'top', 'Zmiana belki z konfiguracji');
+        dockSelect.value = 'bottom'; dockSelect.dispatchEvent(new Event('change', { bubbles: true }));
         view.querySelector('[data-setting="showWorldButton"]').click();
         assert(bar().querySelector('header').hidden && !bar().querySelector('.qr-body').hidden, 'Ukrywanie tylko przycisku świata');
         view.querySelector('[data-setting="showWorldButton"]').click();
@@ -81,7 +98,8 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         window.fetch = previous.fetch; window.getCookie = previous.cookie;
         for (const key of ['allInit', 'worldConfig', 'hero', 'serverStorage', 'windowsData']) Engine[key] = previous[key];
         anchor.style.cssText = anchorStyle;
-        manager.changeSettings('relogger', { horizontal: 100, selectedWorld: '', showWorldButton: true });
+        topAnchor.style.cssText = topAnchorStyle;
+        manager.changeSettings('relogger', { barPosition: 'bottom', horizontal: 100, selectedWorld: '', showWorldButton: true });
         manager.setEnabled('relogger', true);
     }
 };

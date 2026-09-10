@@ -1,4 +1,4 @@
-export const defaults = { sort: 'level-desc', horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: '' };
+export const defaults = { sort: 'level-desc', barPosition: 'bottom', horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: '' };
 export function worldName(value) { return typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value) ? value : ''; }
 export function characterList(data) {
     if (!Array.isArray(data)) throw new Error('Serwer nie zwrócił listy postaci.');
@@ -12,6 +12,11 @@ export function sortedHeroes(heroes, world, sort) {
         const order = sort === 'name' ? a.nick.localeCompare(b.nick, 'pl') : (a.lvl - b.lvl) * (sort === 'level-asc' ? 1 : -1);
         return order || a.id.localeCompare(b.id);
     });
+}
+export function heroLevel(hero) {
+    const level = Math.max(0, Math.trunc(Number(hero?.lvl) || 0));
+    const profession = [...String(hero?.prof || '').trim().toLocaleLowerCase('pl-PL')][0] || '';
+    return `${level}${profession}`;
 }
 export function countdown(seconds) {
     const value = Math.max(0, Math.ceil(seconds));

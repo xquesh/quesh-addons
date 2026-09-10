@@ -1,4 +1,4 @@
-import { characterList, worldName, sortedHeroes, heroTimers, changeCharacter } from './data.js';
+import { characterList, worldName, sortedHeroes, heroTimers, changeCharacter, heroLevel } from './data.js';
 import { barStyle } from './style.js';
 
 export function startRelogger(ctx) {
@@ -29,19 +29,23 @@ export function startRelogger(ctx) {
     document.body.append(bar);
 
     function position() {
-        const anchorRect = document.querySelector('.bottom-panel-of-bottom-positioner')?.getBoundingClientRect();
+        const dock = settings.barPosition === 'top' ? 'top' : 'bottom';
+        const anchor = dock === 'top'
+            ? document.querySelector('.interface-layer .positioner.top, .positioner.top')
+            : document.querySelector('.bottom-panel-of-bottom-positioner');
+        const anchorRect = anchor?.getBoundingClientRect();
         const gameRect = document.querySelector('.game-window-positioner')?.getBoundingClientRect();
         const left = gameRect?.width > 0 ? Math.max(0, gameRect.left) : 0;
         const right = gameRect?.width > 0 ? Math.min(page.innerWidth, gameRect.right) : page.innerWidth;
-        const height = anchorRect?.height > 0 ? Math.max(20, Math.min(72, anchorRect.height - 4)) : 52;
+        const height = anchorRect?.height > 0 ? Math.max(36, Math.min(60, anchorRect.height)) : 52;
         bar.style.setProperty('--qr-height', `${height}px`);
-        bar.style.setProperty('--qr-portrait-scale', String(Math.min(34 / 32, (height - 4) / 48)));
         const width = Math.min(bar.getBoundingClientRect().width, right - left - 8);
         const value = Number(settings.horizontal);
         const horizontal = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 100;
-        const bottom = anchorRect?.height > 0 ? anchorRect.bottom : page.innerHeight;
+        const vertical = anchorRect?.height > 0 ? (dock === 'top' ? anchorRect.top : anchorRect.bottom) : (dock === 'top' ? 0 : page.innerHeight);
+        bar.dataset.dock = dock;
         bar.style.left = `${Math.max(0, left + 4 + Math.max(0, right - left - width - 8) * horizontal / 100)}px`;
-        bar.style.top = `${Math.max(0, Math.min(page.innerHeight - height, bottom - height - 2))}px`;
+        bar.style.top = `${Math.max(0, Math.min(page.innerHeight - height, dock === 'top' ? vertical : vertical - height))}px`;
         const barLeft = parseFloat(bar.style.left);
         details.style.left = `${Math.max(-barLeft, Math.min(0, page.innerWidth - barLeft - 264))}px`;
         details.style.right = 'auto';
@@ -87,7 +91,7 @@ export function startRelogger(ctx) {
             const button = document.createElement('button'); button.type = 'button'; button.className = 'qr-card'; button.dataset.hero = hero.id;
             button.innerHTML = '<span class="qr-portrait"></span><span class="qr-nick"></span><span class="qr-level"></span>';
             button.querySelector('.qr-nick').textContent = hero.nick;
-            button.querySelector('.qr-level').textContent = `${hero.lvl}${hero.prof}`;
+            button.querySelector('.qr-level').textContent = heroLevel(hero);
             button.setAttribute('aria-label', `Przeloguj na ${hero.nick}, ${hero.world}${settings.hotkeys && index < 9 ? `, Alt+${index + 1}` : ''}`);
             button.setAttribute('aria-current', String(String(page.Engine?.hero?.d?.id) === hero.id));
             if (/^[a-zA-Z0-9_./-]+\.(gif|png|webp)$/i.test(hero.icon) && !hero.icon.includes('..')) button.querySelector('.qr-portrait').style.backgroundImage = `url("https://micc.garmory-cdn.cloud/obrazki/postacie/${hero.icon}")`;
