@@ -47,7 +47,12 @@ export function relogTarget(hero, page) {
 }
 export function changeCharacter(hero, page, navigate = url => page.location.replace(url)) {
     const target = relogTarget(hero, page);
+    if (typeof page.Engine?.changePlayer?.changePlayerRequest === 'function') {
+        page.Engine.changePlayer.changePlayerRequest(Number(target.id));
+        return 'native';
+    }
     if (typeof page.setCookie !== 'function') throw new Error('Gra nie udostępnia zmiany postaci.');
     page.setCookie('mchar_id', target.id, new Date(Date.now() + 30 * 86400000), '/', target.cookieDomain, true);
     navigate(target.url);
+    return 'reload';
 }

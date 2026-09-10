@@ -36,7 +36,7 @@ export function startEnhancer(ctx) {
     const bufferLabel = windowElement.querySelector('[data-buffer]');
     const limitLabel = windowElement.querySelector('[data-limit]');
     let active = settings.rememberActive ? Boolean(settings.active) : false;
-    let choosing = '';
+    let draggedItemId = null;
     let busy = false;
     let buffer = [];
     let usage = null;
@@ -69,8 +69,8 @@ export function startEnhancer(ctx) {
         slots.replaceChildren(...modeSlots().map(slot => {
             const item = target(slot);
             const button = document.createElement('button'); button.type = 'button'; button.className = 'qe-slot'; button.dataset.slot = slot;
-            button.dataset.filled = String(Boolean(item)); button.dataset.picking = String(choosing === slot);
-            button.innerHTML = `<small>${SLOT_LABELS[slot]}</small><strong></strong><small>${item ? 'PPM: usuń · klik: zmień' : 'Kliknij, potem wybierz item'}</small>`;
+            button.dataset.filled = String(Boolean(item));
+            button.innerHTML = `<small>${SLOT_LABELS[slot]}</small><strong></strong><small>${item ? 'Przeciągnij inny · PPM: usuń' : 'Przeciągnij przedmiot tutaj'}</small>`;
             button.querySelector('strong').textContent = item ? itemName(item) : 'PUSTY SLOT';
             return button;
         }));
@@ -115,9 +115,9 @@ export function startEnhancer(ctx) {
             const enhancement = packet?.enhancement;
             const up = enhancement?.upgradable;
             if (enhancement?.completed === 1 || (up && Number(up.upgradeLevel) >= 4 && Number(up.current) >= Number(up.max))) throw new Error('Ten przedmiot jest już maksymalnie ulepszony.');
-            targetMap()[slot] = Number(item.id); ctx.storage.save(); choosing = ''; renderProgress(up); refresh();
+            targetMap()[slot] = Number(item.id); ctx.storage.save(); renderProgress(up); refresh();
             message(`Wybrano: ${itemName(item)}.`);
-        } catch (error) { choosing = ''; refresh(); message(error.message || 'Nie można ulepszyć tego przedmiotu.', true); }
+        } catch (error) { refresh(); message(error.message || 'Nie można ulepszyć tego przedmiotu.', true); }
     }
     async function usageReached() {
         await updateUsage(); return usage && Number(usage.count) >= Number(usage.limit);
@@ -162,17 +162,59 @@ export function startEnhancer(ctx) {
     ctx.scheduler.listen(toggle, 'click', () => { windowElement.hidden = !windowElement.hidden; if (!windowElement.hidden) { refresh(); updateUsage(); } });
     ctx.scheduler.listen(windowElement.querySelector('[data-close]'), 'click', () => { windowElement.hidden = true; });
     ctx.scheduler.listen(windowElement.querySelector('[data-active]'), 'click', () => { active = !active; persistActive(); refresh(); });
-    ctx.scheduler.listen(windowElement.querySelector('[data-mode]'), 'change', event => { ctx.changeSettings({ mode: event.target.value }); choosing = ''; refresh(); });
+    ctx.scheduler.listen(windowElement.querySelector('[data-mode]'), 'change', event => { ctx.changeSettings({ mode: event.target.value }); refresh(); });
     ctx.scheduler.listen(windowElement.querySelector('[data-enhance]'), 'click', enhance);
     ctx.scheduler.listen(windowElement.querySelector('[data-rescan]'), 'click', () => { scan(); message('Bufor został odświeżony.'); });
-    ctx.scheduler.listen(slots, 'click', event => { const slot = event.target.closest('[data-slot]')?.dataset.slot; if (slot) { choosing = slot; renderSlots(); status.textContent = 'Kliknij przedmiot w ekwipunku.'; } });
     ctx.scheduler.listen(slots, 'contextmenu', event => { const slot = event.target.closest('[data-slot]')?.dataset.slot; if (!slot) return; event.preventDefault(); delete targetMap()[slot]; ctx.storage.save(); renderProgress(null); refresh(); });
-    ctx.scheduler.listen(document, 'click', event => {
-        if (!choosing || windowElement.contains(event.target) || toggle.contains(event.target)) return;
-        const id = elementItemId(event.target); if (!id) return;
-        const item = allItems(page).find(entry => Number(entry.id) === id); if (!item) return;
-        event.preventDefault(); event.stopPropagation(); validateAndSet(choosing, item);
+    function markDropTarget(event) {
+        const slot = event.target.closest?.('[data-slot]');
+        slots.querySelectorAll('.qe-slot').forEach(node => node.dataset.drop = String(node === slot));
+        return slot;
+    }
+    function clearDrag() {
+        draggedItemId = null;
+        delete slots.dataset.dragging;
+        slots.querySelectorAll('.qe-slot').forEach(node => delete node.dataset.drop);
+    }
+    function dropOn(slot, id) {
+        const item = allItems(page).find(entry => Number(entry.id) === Number(id));
+        if (!slot || !item) { clearDrag(); return; }
+        const slotName = slot.dataset.slot;
+        clearDrag();
+        validateAndSet(slotName, item);
+    }
+    ctx.scheduler.listen(document, 'pointerdown', event => {
+        if (windowElement.hidden || windowElement.contains(event.target) || event.button !== 0) return;
+        draggedItemId = elementItemId(event.target);
+        if (draggedItemId) slots.dataset.dragging = 'true';
     }, { capture: true });
+    ctx.scheduler.listen(document, 'pointermove', event => {
+        if (!draggedItemId) return;
+        const hovered = document.elementFromPoint?.(event.clientX, event.clientY) || event.target;
+        markDropTarget({ target: hovered });
+    }, { capture: true });
+    ctx.scheduler.listen(document, 'pointerup', event => {
+        if (!draggedItemId) return;
+        const hovered = event.target.closest?.('[data-slot]') || document.elementFromPoint?.(event.clientX, event.clientY)?.closest?.('[data-slot]');
+        const id = draggedItemId;
+        delete slots.dataset.dragging;
+        dropOn(hovered, id);
+    }, { capture: true });
+    ctx.scheduler.listen(document, 'dragstart', event => {
+        if (windowElement.hidden || windowElement.contains(event.target)) return;
+        const id = elementItemId(event.target);
+        if (!id) return;
+        draggedItemId = id; slots.dataset.dragging = 'true';
+        try { event.dataTransfer?.setData('text/qaddons-item-id', String(id)); } catch {}
+    }, { capture: true });
+    ctx.scheduler.listen(slots, 'dragover', event => { if (draggedItemId) { event.preventDefault(); markDropTarget(event); } });
+    ctx.scheduler.listen(slots, 'dragleave', event => { if (!slots.contains(event.relatedTarget)) slots.querySelectorAll('.qe-slot').forEach(node => delete node.dataset.drop); });
+    ctx.scheduler.listen(slots, 'drop', event => {
+        const id = draggedItemId || Number(event.dataTransfer?.getData('text/qaddons-item-id'));
+        if (!id) return;
+        event.preventDefault(); delete slots.dataset.dragging; dropOn(event.target.closest('[data-slot]'), id);
+    });
+    ctx.scheduler.listen(document, 'dragend', clearDrag, { capture: true });
     ctx.scheduler.listen(document, 'keydown', event => { if (event.code === settings.hotkey && !event.repeat && !event.target.closest?.('input,textarea,select,[contenteditable="true"]')) { event.preventDefault(); enhance(); } }, { capture: true });
     let drag = null;
     ctx.scheduler.listen(windowElement.querySelector('header'), 'pointerdown', event => { if (event.target.closest('button')) return; const rect = windowElement.getBoundingClientRect(); drag = { x: event.clientX - rect.left, y: event.clientY - rect.top }; event.currentTarget.setPointerCapture?.(event.pointerId); });
@@ -180,7 +222,7 @@ export function startEnhancer(ctx) {
     ctx.scheduler.listen(windowElement.querySelector('header'), 'pointerup', () => { drag = null; });
     ctx.events.on('enhancerChanged', refresh);
     ctx.events.on('gamePacket', packet => { const data = Array.isArray(packet) ? packet.flat(Infinity) : [packet]; const update = data.find(entry => entry?.enhancement?.progressing || entry?.enhancement?.upgradable); if (update) renderProgress(update.enhancement.progressing || update.enhancement.upgradable); });
-    ctx.scheduler.cleanup(() => { document.querySelectorAll('.qaddons-enhancer-buffer').forEach(node => node.classList.remove('qaddons-enhancer-buffer')); toggle.remove(); windowElement.remove(); });
+    ctx.scheduler.cleanup(() => { clearDrag(); document.querySelectorAll('.qaddons-enhancer-buffer').forEach(node => node.classList.remove('qaddons-enhancer-buffer')); toggle.remove(); windowElement.remove(); });
     const tick = () => {
         if (active && !busy) {
             const count = scan().length;

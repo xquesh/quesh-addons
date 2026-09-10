@@ -17,6 +17,10 @@ assert.throws(() => relogTarget({ id: 2, world: 'evil.example' }, page), /Niepra
 changeCharacter(list[1], page, url => calls.push(url));
 assert.equal(calls[0][0], 'mchar_id'); assert.equal(calls[0][1], '2'); assert.equal(calls[0][4], 'margonem.pl'); assert.equal(calls[0][5], true);
 assert.equal(calls[1], 'https://fobos.margonem.pl/');
+const nativeCalls = [];
+const nativePage = { Engine: { allInit: true, hero: { d: { id: 1 } }, changePlayer: { id: null, changePlayerRequest: id => nativeCalls.push(id) } }, location: { hostname: 'fobos.margonem.pl' } };
+assert.equal(changeCharacter(list[1], nativePage), 'native');
+assert.deepEqual(nativeCalls, [2]);
 page.Engine.changePlayer = { id: 2 };
 assert.throws(() => relogTarget(list[1], page), /już trwa/);
-console.log('OK: lista postaci, sortowanie, stany timerów, walidacja przelogowania i cookie — bez nawigacji do gry');
+console.log('OK: lista postaci, timery i natywna zmiana gracza; cookie tylko jako fallback');

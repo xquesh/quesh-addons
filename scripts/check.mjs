@@ -30,6 +30,14 @@ import { normalize as normalizeTypography, typographyCss } from '../src/addons/n
 import { catchingChance, chanceLevel, eligibleMembers, isLegendary, requiredProfessions } from '../src/addons/loot-chances/data.js';
 import { fightMembers } from '../src/addons/loot-chances/runtime.js';
 import { calendarReminder, expiredItems, freePromotions, resultSignature } from '../src/addons/reminder/data.js';
+import { compactPartyCss } from '../src/addons/compact-party/style.js';
+
+const compactCss = compactPartyCss({ hideAvatars: true, showHpPoints: false, rowHeight: 2, fontSize: 99 });
+assert.match(compactCss, /height:20px!important/);
+assert.match(compactCss, /font-size:14px!important/);
+assert.match(compactCss, /\.avatar\{display:none!important\}/);
+assert.match(compactCss, /\.hp-points\{display:none!important\}/);
+console.log('OK: kompaktowa grupa ogranicza wymiary i ukrywa tylko wybrane elementy');
 
 const calendar = { start_ts: Date.parse('2026-09-08T10:00:00Z') / 1000, days: [{ isOpened: true }, { isOpened: false }, { isOpened: false }] };
 assert.deepEqual(calendarReminder(calendar, new Date('2026-09-09T12:00:00Z')), { dayNo: 2 });
