@@ -39,6 +39,7 @@ assert.match(compactCss, /\.avatar\{display:none!important\}/);
 assert.match(compactCss, /\.hp-points\{display:none!important\}/);
 assert.match(compactCss, /max-height:170px!important/);
 assert.match(compactCss, /grid-template-columns:minmax\(0,1fr\) auto!important/);
+assert.match(compactCss, /right:var\(--qaddons-party-actions-width,34px\)!important/);
 assert.match(compactPartyCss({ hpPosition: 'center' }), /grid-template-columns:minmax\(0,1fr\) auto minmax\(0,1fr\)!important/);
 console.log('OK: kompaktowa grupa ogranicza wymiary i ukrywa tylko wybrane elementy');
 

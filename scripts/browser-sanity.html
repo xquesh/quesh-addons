@@ -21,6 +21,7 @@
     .item { width:32px; height:32px; background:#a58626; }
     .accept-button .button { width:80px; height:25px; }
     .mAlert-layer .big-messages { position:fixed; top:20px; }
+    .party .info-icons > div { display:inline-block; width:16px; height:16px; }
 </style>
 <div class="game-window-positioner">
     <div class="game-layer"><canvas id="GAME_CANVAS"></canvas></div>
@@ -124,7 +125,7 @@
         assert(document.querySelector('#qaddons-enhancer-toggle')?.textContent === 'UL', 'Przycisk Ulepszarki');
         const partyFixture = document.createElement('div');
         partyFixture.className = 'party'; partyFixture.style.cssText = 'position:fixed;left:0;top:70px;width:290px';
-        partyFixture.innerHTML = '<div class="party__list"><div class="party-member yellow" style="width:290px"><div class="member-hp-bar"></div><div class="table-wrapper"><div class="avatar"><div class="img-avatar-correct"></div></div><div class="info-wrapper"><div class="top-row"><div class="nickname"><div class="nickname-text">Bardzo długi nick postaci</div></div><div class="character-info">(492h|334h)</div></div><div class="bottom-row"><div class="hp-percent">(95%)</div><div class="hp-points">76 237 / 81 020</div><div class="info-icons"><div class="party__crown"></div></div></div></div></div></div></div><div class="party__professions">2b 1p 1m 1t 1h</div>';
+        partyFixture.innerHTML = '<div class="party__list"><div class="party-member yellow" style="width:290px"><div class="member-hp-bar"></div><div class="table-wrapper"><div class="avatar"><div class="img-avatar-correct"></div></div><div class="info-wrapper"><div class="top-row"><div class="nickname"><div class="nickname-text">Bardzo długi nick postaci</div></div><div class="character-info">(492h|334h)</div></div><div class="bottom-row"><div class="hp-percent">(95%)</div><div class="hp-points">76 237 / 81 020</div><div class="info-icons"><div class="status-test"></div><div class="party__crown"></div></div></div></div></div></div></div><div class="party__professions">2b 1p 1m 1t 1h</div>';
         document.body.append(partyFixture); await wait(50);
         const partyMember = partyFixture.querySelector('.party-member');
         const partySummary = partyFixture.querySelector('.qaddons-party-summary');
@@ -139,6 +140,11 @@
         const summaryRect = partySummary.getBoundingClientRect();
         assert(infoRect.left - nickRect.right <= 6, 'Poziom i profesja są bezpośrednio obok nicku');
         assert(Math.abs(hpRect.right - summaryRect.right) < 2, 'Domyślny procent HP jest wyrównany do prawej');
+        const reservedForTwoIcons = parseFloat(partyMember.style.getPropertyValue('--qaddons-party-actions-width'));
+        assert(reservedForTwoIcons >= 28, 'Wiersz rezerwuje miejsce dla wszystkich widocznych ikon');
+        partyFixture.querySelector('.status-test').style.display = 'none'; await wait(30);
+        assert(parseFloat(partyMember.style.getPropertyValue('--qaddons-party-actions-width')) < reservedForTwoIcons, 'Margines reaguje na ukrycie ikony stanu');
+        partyFixture.querySelector('.status-test').style.display = 'inline-block'; await wait(30);
         assert(partySummary.querySelector('.qaddons-party-nick').scrollWidth <= partySummary.querySelector('.qaddons-party-nick').clientWidth, 'Szerszy układ mieści testowy długi nick');
         manager.changeSettings('compact-party', { hpPosition: 'center' }); await wait(30);
         const centeredHp = partySummary.querySelector('.qaddons-party-hp').getBoundingClientRect();

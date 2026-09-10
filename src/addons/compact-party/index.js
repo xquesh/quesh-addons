@@ -50,6 +50,17 @@ function startCompactParty(ctx) {
         if (color && nickNode.style.color !== color) nickNode.style.color = color;
         const title = [nick, info, percent, points].filter(Boolean).join(' ');
         if (summary.title !== title) summary.title = title;
+        const visibleIcons = [...member.querySelectorAll('.info-icons > *')]
+            .filter(node => getComputedStyle(node).display !== 'none');
+        const iconWidth = visibleIcons.reduce((sum, node) => {
+            const rectWidth = node.getBoundingClientRect().width;
+            const cssWidth = Number.parseFloat(getComputedStyle(node).width);
+            return sum + Math.ceil(rectWidth || cssWidth || node.offsetWidth || 14);
+        }, 0);
+        const actionsWidth = `${visibleIcons.length ? iconWidth + 6 : 4}px`;
+        if (member.style.getPropertyValue('--qaddons-party-actions-width') !== actionsWidth) {
+            member.style.setProperty('--qaddons-party-actions-width', actionsWidth);
+        }
     }
 
     function sync() {
@@ -69,7 +80,10 @@ function startCompactParty(ctx) {
         attributeFilter: ['class', 'style', 'bar-percent']
     });
     ctx.events.on('compactPartyChanged', () => { applyStyles(); requestSync(); });
-    ctx.scheduler.cleanup(() => document.querySelectorAll('.qaddons-party-summary').forEach(node => node.remove()));
+    ctx.scheduler.cleanup(() => document.querySelectorAll('.qaddons-party-summary').forEach(node => {
+        node.parentElement?.style.removeProperty('--qaddons-party-actions-width');
+        node.remove();
+    }));
 }
 
 export function createCompactParty() {
