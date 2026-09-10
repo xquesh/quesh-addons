@@ -12,7 +12,7 @@ export function createPanel(settings, styles, scheduler, events) {
     installSettingsStyles(style);
     style.set('panel', `
         #mtk-button, #mtk-panel { color:#ddd; font:13px Arial,sans-serif; z-index:2147483001; }
-        #mtk-button { position:relative; flex:0 0 44px; box-sizing:border-box; width:44px; height:44px; padding:3px; display:grid; place-items:center; border:1px solid #444; border-radius:0; background:#050505; cursor:pointer; pointer-events:auto; touch-action:manipulation; transition:box-shadow .15s,border-color .15s; }
+        #mtk-button { position:relative; vertical-align:top; flex:0 0 44px; box-sizing:border-box; width:44px; height:44px; padding:3px; display:inline-grid; place-items:center; border:1px solid #444; border-radius:0; background:#050505; cursor:pointer; pointer-events:auto; touch-action:manipulation; transition:box-shadow .15s,border-color .15s; }
         #mtk-button:hover, #mtk-button:focus-visible { border-color:#bbb; box-shadow:0 0 12px #ffffff60; outline:none; }
         #mtk-button img { display:block; width:36px; height:36px; object-fit:contain; image-rendering:pixelated; pointer-events:none; user-select:none; }
         #mtk-panel { position:fixed; width:760px; height:570px; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px); display:flex; flex-direction:column; border:1px solid #333; border-radius:0; background:#000; box-shadow:0 12px 40px #0009; overflow:hidden; }

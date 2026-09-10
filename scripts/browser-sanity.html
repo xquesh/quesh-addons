@@ -9,7 +9,8 @@
     #GAME_CANVAS { width:600px; height:400px; background:#182f26; }
     .interface-layer { position:absolute; inset:0; pointer-events:none; }
     .positioner.top { position:absolute; width:1000px; height:60px; }
-    .top-left.main-buttons-container { display:flex; gap:5px; height:44px; pointer-events:auto; }
+    .top-left.main-buttons-container { position:absolute; white-space:nowrap; height:44px; pointer-events:auto; }
+    .top-left.main-buttons-container .widget-button { display:inline-block; vertical-align:top; box-sizing:border-box; width:44px; height:44px; }
     .left-column { position:absolute; width:150px; height:550px; }
     .right-column { position:absolute; right:0; width:150px; height:550px; }
     .positioner.bottom { position:absolute; top:550px; width:1000px; height:100px; }
@@ -208,6 +209,8 @@
         assert(getComputedStyle(document.querySelector('#mtk-panel')).backgroundColor === 'rgb(0, 0, 0)', 'Czarny panel');
         assert(getComputedStyle(document.querySelector('#mtk-button')).borderRadius === '0px', 'Kwadratowy przycisk');
         assert(document.querySelector('#mtk-button').getBoundingClientRect().width === 44, 'Przycisk dopasowany do przycisków gry');
+        assert(getComputedStyle(document.querySelector('#mtk-button')).display === 'inline-grid', 'Przycisk uczestniczy w liniowym układzie belki');
+        assert(document.querySelector('#mtk-button').getBoundingClientRect().top === document.querySelector('.widget-button').getBoundingClientRect().top, 'Przycisk QADDONS jest na równi z przyciskami gry');
         assert(document.querySelector('#mtk-button').parentElement.matches('.top-left.main-buttons-container'), 'Przycisk QADDONS osadzony w górnej belce gry');
         const oldButtonHost = document.querySelector('.top-left.main-buttons-container');
         const rebuiltButtonHost = oldButtonHost.cloneNode(false);

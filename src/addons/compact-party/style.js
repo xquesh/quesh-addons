@@ -29,5 +29,9 @@ ${avatar}
 .party .party__list .party-member .member-hp-bar,.party .party__list .party-member .border-blink{height:100%!important}
 .party .party__list{padding:0 2px!important}
 .party .party__professions{margin-top:2px!important;font-size:9px!important;line-height:12px!important}
+.party{height:auto!important;min-height:0!important}
+.party .party__container,.party .party__container .tabs-content-option.active,.party .party__content{flex:0 0 auto!important;height:auto!important;min-height:0!important}
+.party .party__content .scroll-wrapper{flex:0 0 auto!important;height:auto!important;max-height:${10 * (rowHeight + 1)}px!important}
+.party .party__content .scroll-wrapper .scroll-pane{height:auto!important;max-height:${10 * (rowHeight + 1)}px!important}
 `;
 }
