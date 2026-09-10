@@ -6,6 +6,9 @@ function number(value, fallback, minimum, maximum) {
 export function compactPartyCss(settings) {
     const rowHeight = number(settings.rowHeight, 18, 16, 28);
     const fontSize = number(settings.fontSize, 9, 8, 12);
+    const hpColumns = settings.hpPosition === 'center'
+        ? 'minmax(0,1fr) auto minmax(0,1fr)'
+        : 'minmax(0,1fr) auto';
     const summaryLeft = settings.hideAvatars === false ? 34 : 4;
     const avatar = settings.hideAvatars === false ? `
 .party .party__list .party-member .avatar{display:flex!important;position:absolute!important;left:1px!important;top:0!important;width:32px!important;height:${rowHeight}px!important;overflow:hidden!important;z-index:3!important}
@@ -21,11 +24,11 @@ ${avatar}
 .party .party__list .party-member .bottom-row>.hp-percent,.party .party__list .party-member .bottom-row>.hp-points{display:none!important}
 .party .party__list .party-member .info-icons{position:static!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;width:auto!important;height:${Math.min(16, rowHeight)}px!important;margin:0!important;padding:0!important}
 .party .party__list .party-member .info-icons>div{margin:0!important;transform:scale(.72);transform-origin:center!important}
-.party .party__list .party-member .qaddons-party-summary{position:absolute!important;left:${summaryLeft}px!important;right:34px!important;top:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;align-items:center!important;height:${rowHeight}px!important;gap:3px!important;z-index:4!important;font-size:${fontSize}px!important;line-height:${rowHeight}px!important;pointer-events:none!important;white-space:nowrap!important}
+.party .party__list .party-member .qaddons-party-summary{position:absolute!important;left:${summaryLeft}px!important;right:34px!important;top:0!important;display:grid!important;grid-template-columns:${hpColumns}!important;align-items:center!important;height:${rowHeight}px!important;gap:5px!important;z-index:4!important;font-size:${fontSize}px!important;line-height:${rowHeight}px!important;pointer-events:none!important;white-space:nowrap!important}
 .party .party__list .party-member .qaddons-party-left{grid-column:1!important;display:flex!important;align-items:center!important;min-width:0!important;gap:3px!important;overflow:hidden!important}
 .party .party__list .party-member .qaddons-party-nick{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:left!important}
 .party .party__list .party-member .qaddons-party-info{flex:none!important;text-align:left!important}
-.party .party__list .party-member .qaddons-party-hp{grid-column:2!important;text-align:center!important;font-weight:700!important}
+.party .party__list .party-member .qaddons-party-hp{grid-column:2!important;text-align:right!important;font-weight:700!important}
 .party .party__list .party-member .member-hp-bar,.party .party__list .party-member .border-blink{height:100%!important}
 .party .party__list{padding:0 2px!important}
 .party .party__professions{margin-top:2px!important;font-size:9px!important;line-height:12px!important}

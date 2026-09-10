@@ -38,6 +38,8 @@ assert.match(compactCss, /font-size:12px!important/);
 assert.match(compactCss, /\.avatar\{display:none!important\}/);
 assert.match(compactCss, /\.hp-points\{display:none!important\}/);
 assert.match(compactCss, /max-height:170px!important/);
+assert.match(compactCss, /grid-template-columns:minmax\(0,1fr\) auto!important/);
+assert.match(compactPartyCss({ hpPosition: 'center' }), /grid-template-columns:minmax\(0,1fr\) auto minmax\(0,1fr\)!important/);
 console.log('OK: kompaktowa grupa ogranicza wymiary i ukrywa tylko wybrane elementy');
 
 const calendar = { start_ts: Date.parse('2026-09-08T10:00:00Z') / 1000, days: [{ isOpened: true }, { isOpened: false }, { isOpened: false }] };

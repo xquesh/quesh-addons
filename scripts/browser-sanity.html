@@ -137,8 +137,12 @@
         const infoRect = partySummary.querySelector('.qaddons-party-info').getBoundingClientRect();
         const hpRect = partySummary.querySelector('.qaddons-party-hp').getBoundingClientRect();
         const summaryRect = partySummary.getBoundingClientRect();
-        assert(infoRect.left - nickRect.right <= 4, 'Poziom i profesja są bezpośrednio obok nicku');
-        assert(Math.abs((hpRect.left + hpRect.width / 2) - (summaryRect.left + summaryRect.width / 2)) < 2, 'Procent HP jest wyśrodkowany');
+        assert(infoRect.left - nickRect.right <= 6, 'Poziom i profesja są bezpośrednio obok nicku');
+        assert(Math.abs(hpRect.right - summaryRect.right) < 2, 'Domyślny procent HP jest wyrównany do prawej');
+        assert(partySummary.querySelector('.qaddons-party-nick').scrollWidth <= partySummary.querySelector('.qaddons-party-nick').clientWidth, 'Szerszy układ mieści testowy długi nick');
+        manager.changeSettings('compact-party', { hpPosition: 'center' }); await wait(30);
+        const centeredHp = partySummary.querySelector('.qaddons-party-hp').getBoundingClientRect();
+        assert(Math.abs((centeredHp.left + centeredHp.width / 2) - (summaryRect.left + summaryRect.width / 2)) < 2, 'Opcja pozwala wyśrodkować procent HP');
         assert(getComputedStyle(partySummary).fontSize === '9px', 'Kompaktowy tekst ma 9 px');
         assert(getComputedStyle(partyFixture.querySelector('.party__professions')).display !== 'none', 'Podsumowanie profesji pozostaje widoczne');
         partyFixture.querySelector('.nickname-text').textContent = 'Nowy nick';
@@ -146,7 +150,7 @@
         assert(partySummary.textContent.includes('Nowy nick') && partySummary.textContent.includes('(73%)'), 'Wiersz reaguje na aktualizacje danych grupy');
         manager.changeSettings('compact-party', { hideAvatars: false, showHpPoints: true, rowHeight: 24 }); await wait(30);
         assert(getComputedStyle(partyFixture.querySelector('.avatar')).display === 'flex' && partySummary.textContent.includes('76 237 / 81 020'), 'Opcje przywracają avatar i pokazują dokładne HP');
-        manager.changeSettings('compact-party', { hideAvatars: true, showHpPoints: false, rowHeight: 18, fontSize: 9 }); partyFixture.remove();
+        manager.changeSettings('compact-party', { hideAvatars: true, showHpPoints: false, hpPosition: 'right', rowHeight: 18, fontSize: 9 }); partyFixture.remove();
         await runDetectorChecks(manager, assert, wait);
         await runItemToolsChecks(manager, assert, wait);
         await runReloggerChecks(manager, assert, wait);

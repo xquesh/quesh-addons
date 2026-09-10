@@ -1,6 +1,6 @@
 import { compactPartyCss } from './style.js';
 
-const DEFAULTS = { hideAvatars: true, showHpPoints: false, rowHeight: 18, fontSize: 9 };
+const DEFAULTS = { hideAvatars: true, showHpPoints: false, hpPosition: 'right', rowHeight: 18, fontSize: 9 };
 
 function value(node) {
     return String(node?.textContent || '').replace(/\s+/g, ' ').trim();
@@ -78,8 +78,8 @@ export function createCompactParty() {
         description: 'Układa każdego członka grupy w jednym niskim wierszu.',
         defaultEnabled: true, defaults: DEFAULTS,
         init(ctx) {
-            if (ctx.settings.compactLayoutVersion === 2) return;
-            Object.assign(ctx.settings, DEFAULTS, { compactLayoutVersion: 2 });
+            if (ctx.settings.compactLayoutVersion === 3) return;
+            Object.assign(ctx.settings, { hpPosition: 'right', compactLayoutVersion: 3 });
             ctx.storage.save();
         },
         enable: startCompactParty,
@@ -87,10 +87,11 @@ export function createCompactParty() {
         renderSettings(ctx) {
             const section = document.createElement('section'); section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Kompaktowa grupa</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Poziom i profesja są obok nicku po lewej, procent życia pośrodku, a ikony akcji po prawej.</p>
+                <p>Poziom i profesja są obok nicku. Ustawienie HP po prawej daje długim nickom więcej miejsca.</p>
                 <div class="ln-grid">
                     <label class="ln-switch"><input type="checkbox" data-setting="hideAvatars">Ukryj grafiki postaci</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="showHpPoints">Pokaż dokładne punkty życia</label>
+                    <label class="ln-field">Pozycja HP<select data-setting="hpPosition"><option value="right">Po prawej</option><option value="center">Na środku</option></select></label>
                     <label class="ln-field">Wysokość wiersza (16–28 px)<input type="range" min="16" max="28" step="1" data-setting="rowHeight"><output data-row-height></output></label>
                     <label class="ln-field">Rozmiar tekstu (8–12 px)<input type="range" min="8" max="12" step="1" data-setting="fontSize"><output data-font-size></output></label>
                 </div><p>Podsumowanie profesji pod listą pozostaje widoczne.</p>`;
@@ -107,7 +108,8 @@ export function createCompactParty() {
             sync();
             ctx.scheduler.listen(enabled, 'change', () => ctx.setEnabled(enabled.checked));
             for (const input of section.querySelectorAll('[data-setting]')) ctx.scheduler.listen(input, input.type === 'range' ? 'input' : 'change', () => {
-                ctx.changeSettings({ [input.dataset.setting]: input.type === 'checkbox' ? input.checked : Number(input.value) }); sync();
+                const next = input.type === 'checkbox' ? input.checked : input.type === 'range' ? Number(input.value) : input.value;
+                ctx.changeSettings({ [input.dataset.setting]: next }); sync();
             });
             ctx.events.on('addonChanged', event => { if (event.id === ctx.id) sync(); });
             ctx.container.append(section);
