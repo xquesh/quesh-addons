@@ -118,6 +118,12 @@ export function startItemTools(ctx) {
                 const textStyle = bonusStyle(settings);
                 canvas.font = bonusFont(textStyle);
                 canvas.fillStyle = textStyle.color; canvas.textAlign = 'right'; canvas.textBaseline = 'bottom';
+                canvas.shadowColor = '#000'; canvas.shadowBlur = textStyle.shadow === 'soft' ? 3 : 0;
+                canvas.shadowOffsetX = 0; canvas.shadowOffsetY = textStyle.shadow === 'soft' ? 1 : 0;
+                if (textStyle.shadow === 'outline') {
+                    canvas.strokeStyle = '#000'; canvas.lineWidth = 2; canvas.lineJoin = 'round';
+                    canvas.strokeText(bonus.short, x - 2, y);
+                }
                 canvas.fillText(bonus.short, x - 2, y);
                 canvas.restore();
                 return result;
@@ -140,7 +146,7 @@ export function startItemTools(ctx) {
             .qaddons-bonus-static{position:relative!important}
             .qaddons-item-bonus{position:absolute!important;right:1px!important;bottom:1px!important;z-index:6;pointer-events:none!important;
                 padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#fff!important;box-shadow:none!important;
-                ${bonusCss(bonusStyle(settings))}text-shadow:none!important;letter-spacing:0!important;white-space:nowrap!important;}
+                ${bonusCss(bonusStyle(settings))}letter-spacing:0!important;white-space:nowrap!important;}
             [data-qaddons-item-extra]{pointer-events:none;background:#080808;color:#ddd;border:1px solid #333;padding:6px 8px;margin:6px 0;font:11px/1.55 Arial,sans-serif;}
             [data-qaddons-item-extra]>div:first-child{border-top:0!important;margin-top:0!important;padding-top:0!important;}
         `);

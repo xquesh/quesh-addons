@@ -3,6 +3,10 @@ window.runReloggerChecks = async function(manager, assert, wait) {
     const now = Date.now() / 1000;
     const timers = [{ type: 2, heroData: { id: 1 }, name: '<b>Heros A</b>', presp: now - 1 }, { type: 2, heroData: { id: 2 }, name: 'E2 B', presp: now + 300, minResp: now - 1 }];
     const heroes = [{ id: 1, nick: 'Quesh', lvl: 80, prof: 'w', world: 'fobos' }, { id: 2, nick: 'Druga', lvl: 320, prof: 'm', world: 'fobos' }, { id: 3, nick: 'Inny świat', lvl: 200, prof: 'h', world: 'katahha' }];
+    for (let index = 0; index < 7; index++) heroes.push({ id: index + 5, nick: `Postać ${index + 3}`, lvl: 30 + index, prof: 'w', world: 'fobos' });
+    const anchor = document.querySelector('.bottom-panel-of-bottom-positioner');
+    const anchorStyle = anchor.style.cssText;
+    anchor.style.cssText = 'position:fixed;bottom:50px;left:0;width:100%;height:48px;';
     let requests = 0;
     let close;
     const view = document.createElement('div');
@@ -25,7 +29,10 @@ window.runReloggerChecks = async function(manager, assert, wait) {
             return { ok: true, json: async () => heroes };
         };
         manager.setEnabled('relogger', true); await ready();
-        assert(requests === 1 && bar().querySelectorAll('.qr-card').length === 2, 'Jedno pobranie, karty wybranego świata');
+        assert(requests === 1 && bar().querySelectorAll('.qr-card').length === 9, 'Jedno pobranie, dziewięć postaci');
+        assert(bar().getBoundingClientRect().height === 38 && bar().getBoundingClientRect().width <= 310, 'Wąski pasek dziewięciu postaci');
+        assert(bar().querySelector('.qr-cards').scrollWidth <= 250, 'Dziewięć portretów mieści się bez przewijania');
+        assert(Math.abs(bar().getBoundingClientRect().bottom - (anchor.getBoundingClientRect().bottom - 2)) < 1, 'Pasek podąża za dolną belką gry');
         assert(bar().querySelector('[data-hero="1"]').dataset.state === 'due', 'Zielony stan po końcu timera');
         assert(bar().querySelector('[data-hero="2"]').dataset.state === 'window', 'Bursztynowy stan okna respawnu');
         assert(getComputedStyle(bar().querySelector('.qr-card')).animationName === 'none', 'Brak migania kart');
@@ -40,15 +47,18 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         bar().querySelector('[data-collapse]').click();
         document.querySelector('#mtk-content').append(view);
         close = manager.renderSettings('relogger', view);
-        view.querySelector('[data-setting="compact"]').click();
-        assert(bar().dataset.compact === 'true', 'Kompaktowa belka z konfiguracji');
+        const horizontal = view.querySelector('[data-setting="horizontal"]');
+        horizontal.value = '0'; horizontal.dispatchEvent(new Event('input', { bubbles: true }));
+        const left = bar().getBoundingClientRect().left;
+        horizontal.value = '100'; horizontal.dispatchEvent(new Event('input', { bubbles: true }));
+        assert(bar().getBoundingClientRect().left > left, 'Suwak przesuwa pasek poziomo');
         Engine.serverStorage = { get: () => undefined };
         manager.changeSettings('relogger', { selectedWorld: 'fobos' });
-        assert(bar().querySelectorAll('.qr-card').length === 2, 'Brak timerów nie blokuje postaci');
+        assert(bar().querySelectorAll('.qr-card').length === 9, 'Brak timerów nie blokuje postaci');
         // Błąd pobrania nie usuwa poprawnie pobranej listy.
         window.fetch = async () => { throw new Error('fixture offline'); };
         bar().querySelector('[data-refresh]').click(); await wait(50);
-        assert(bar().querySelector('.qr-status').textContent.includes('Nie udało') && bar().querySelectorAll('.qr-card').length === 2, 'Błąd i zachowana lista po nieudanym odświeżeniu');
+        assert(bar().querySelector('.qr-status').textContent.includes('Nie udało') && bar().querySelectorAll('.qr-card').length === 9, 'Błąd i zachowana lista po nieudanym odświeżeniu');
         manager.setEnabled('relogger', false);
         assert(!bar(), 'Wyłączenie usuwa belkę');
         let aborted = false;
@@ -61,7 +71,8 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         close?.(); view.remove(); manager.setEnabled('relogger', false);
         window.fetch = previous.fetch; window.getCookie = previous.cookie;
         for (const key of ['allInit', 'worldConfig', 'hero', 'serverStorage', 'windowsData']) Engine[key] = previous[key];
-        manager.changeSettings('relogger', { compact: false, selectedWorld: '', collapsed: false });
+        anchor.style.cssText = anchorStyle;
+        manager.changeSettings('relogger', { horizontal: 100, selectedWorld: '', collapsed: false });
         manager.setEnabled('relogger', true);
     }
 };

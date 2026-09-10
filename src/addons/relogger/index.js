@@ -11,10 +11,10 @@ export function createRelogger() {
         renderSettings(ctx) {
             const section = document.createElement('section'); section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Przelogawka</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Kliknij portret, aby przejść na postać. Listę światów znajdziesz w nagłówku belki. Nagłówek można przeciągać, a przycisk − zwija belkę.</p>
+                <p>Kliknij portret, aby przejść na postać. Pasek jest osadzony przy dolnej belce gry. Dziewięć portretów zajmuje 250 px; dalsze postacie przewiniesz poziomo. Nazwy i poziomy zobaczysz po najechaniu.</p>
                 <h2>Belka postaci</h2><div class="ln-grid">
                     <label class="ln-field">Kolejność<select data-setting="sort"><option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nazwa postaci</option></select></label>
-                    <label class="ln-switch"><input type="checkbox" data-setting="compact">Kompaktowe karty</label>
+                    <label class="ln-field">Położenie w poziomie (0% lewo — 100% prawo)<input type="range" min="0" max="100" step="1" data-setting="horizontal"><output data-position-value></output></label>
                     <label class="ln-switch"><input type="checkbox" data-setting="showTimers">Podświetlenie i odliczanie timerów</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="hotkeys">Skróty Alt+1…9</label>
                 </div><p>Skróty wybierają postacie w kolejności na belce, na wybranym świecie. Nie działają podczas wpisywania tekstu w polach formularzy i czacie.</p>
@@ -32,10 +32,14 @@ export function createRelogger() {
             for (const input of section.querySelectorAll('[data-setting]')) {
                 const key = input.dataset.setting;
                 if (input.type === 'checkbox') input.checked = ctx.settings[key]; else input.value = ctx.settings[key];
-                ctx.scheduler.listen(input, 'change', () => ctx.changeSettings({ [key]: input.type === 'checkbox' ? input.checked : input.value }));
+                ctx.scheduler.listen(input, input.type === 'range' ? 'input' : 'change', () => {
+                    ctx.changeSettings({ [key]: input.type === 'checkbox' ? input.checked : input.type === 'range' ? Number(input.value) : input.value });
+                    section.querySelector('[data-position-value]').textContent = `${ctx.settings.horizontal}%`;
+                });
             }
             ctx.scheduler.listen(refresh, 'click', () => ctx.events.emit('reloggerRefresh'));
-            ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => { ctx.changeSettings({ x: null, y: 80, collapsed: false }); section.querySelector('[data-status]').textContent = 'Przywrócono pozycję i rozwinięto belkę.'; });
+            section.querySelector('[data-position-value]').textContent = `${ctx.settings.horizontal}%`;
+            ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => { ctx.changeSettings({ horizontal: 100, collapsed: false }); section.querySelector('[data-setting="horizontal"]').value = 100; section.querySelector('[data-position-value]').textContent = '100%'; section.querySelector('[data-status]').textContent = 'Przywrócono pozycję po prawej stronie.'; });
             ctx.container.append(section);
         }
     };

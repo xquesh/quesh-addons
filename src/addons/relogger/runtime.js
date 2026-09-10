@@ -1,6 +1,5 @@
 import { characterList, worldName, sortedHeroes, heroTimers, changeCharacter } from './data.js';
 import { barStyle } from './style.js';
-import { bindDrag } from '../../core/ui/controls.js';
 
 export function startRelogger(ctx) {
     const page = ctx.game.page;
@@ -29,13 +28,20 @@ export function startRelogger(ctx) {
     document.body.append(bar);
 
     function position() {
-        const width = Math.min(512, page.innerWidth - 16);
-        const x = Number.isFinite(settings.x) ? settings.x : page.innerWidth - width - 16;
-        const y = Number.isFinite(settings.y) ? settings.y : 80;
-        bar.style.left = `${Math.max(0, Math.min(page.innerWidth - width - 8, x))}px`;
-        bar.style.top = `${Math.max(0, Math.min(page.innerHeight - 40, y))}px`;
+        const anchorRect = document.querySelector('.bottom-panel-of-bottom-positioner')?.getBoundingClientRect();
+        const gameRect = document.querySelector('.game-window-positioner')?.getBoundingClientRect();
+        const left = gameRect?.width > 0 ? Math.max(0, gameRect.left) : 0;
+        const right = gameRect?.width > 0 ? Math.min(page.innerWidth, gameRect.right) : page.innerWidth;
+        const width = Math.min(bar.getBoundingClientRect().width, right - left - 8);
+        const value = Number(settings.horizontal);
+        const horizontal = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 100;
+        const bottom = anchorRect?.height > 0 ? anchorRect.bottom : page.innerHeight;
+        bar.style.left = `${Math.max(0, left + 4 + Math.max(0, right - left - width - 8) * horizontal / 100)}px`;
+        bar.style.top = `${Math.max(0, Math.min(page.innerHeight - 38, bottom - 40))}px`;
+        const barLeft = parseFloat(bar.style.left);
+        details.style.left = `${Math.max(-barLeft, Math.min(0, page.innerWidth - barLeft - 264))}px`;
+        details.style.right = 'auto';
     }
-    bindDrag(bar, bar.querySelector('header'), scheduler, (x, y) => ctx.changeSettings({ x, y }));
     scheduler.listen(page, 'resize', position);
     function timersStore() {
         try {
@@ -54,7 +60,7 @@ export function startRelogger(ctx) {
             const next = timers[0];
             const state = next?.state || 'none';
             if (button.dataset.state !== state) button.dataset.state = state;
-            const label = next?.text || '—';
+            const label = next?.state === 'due' ? '●' : next?.text || '';
             const time = button.querySelector('.qr-time');
             if (time.textContent !== label) time.textContent = label;
             const title = `${hero.nick} · ${hero.lvl}${hero.prof}\n${timers.length ? timers.map(timer => `${timer.name}: ${timer.text}${timer.state === 'window' ? ' · możliwy respawn' : ''}`).join('\n') : settings.showTimers && !available ? 'Dane timerów niedostępne' : 'Brak aktywnych timerów'}`;
@@ -64,9 +70,10 @@ export function startRelogger(ctx) {
         const text = error || (loading ? 'Pobieranie postaci…' : !loaded ? 'Oczekiwanie na zalogowanie do gry…' : !heroes.length ? 'Brak postaci na koncie.' :
             settings.showTimers ? available ? 'Zielony: czas minął · bursztynowy: możliwy respawn · najedź, aby zobaczyć timery.' : 'Timery niedostępne — przelogowanie działa niezależnie.' : 'Kliknij postać, aby się przelogować.');
         if (status.textContent !== text) status.textContent = text;
+        bar.dataset.notice = String(!!error || !loaded);
+        select.title = `${currentWorld || 'Świat'} — ${text}`;
     }
     function render() {
-        bar.dataset.compact = String(settings.compact === true);
         bar.querySelector('.qr-body').hidden = settings.collapsed === true;
         bar.querySelector('[data-collapse]').textContent = settings.collapsed ? '+' : '−';
         bar.querySelector('[data-collapse]').setAttribute('aria-label', settings.collapsed ? 'Rozwiń belkę' : 'Zwiń belkę');
@@ -122,6 +129,10 @@ export function startRelogger(ctx) {
         catch (cause) { error = cause.message; updateTimers(); }
     }
     scheduler.listen(cards, 'click', event => relog(visible.find(hero => hero.id === event.target.closest('[data-hero]')?.dataset.hero)));
+    scheduler.listen(cards, 'wheel', event => {
+        if (cards.scrollWidth <= cards.clientWidth) return;
+        cards.scrollLeft += event.deltaY || event.deltaX; event.preventDefault();
+    }, { passive: false });
     const showDetails = event => {
         const button = event.target.closest('[data-hero]');
         if (!button) return;
@@ -147,7 +158,7 @@ export function startRelogger(ctx) {
         const user = page.getCookie?.('user_id') || '';
         if (account && user !== account) { heroes = []; loaded = false; account = ''; error = ''; attemptedAccount = ''; render(); }
         if (!loading && attemptedAccount !== user && page.Engine?.allInit === true && user && page.getCookie?.('hs3')) { attemptedAccount = user; load(); }
-        updateTimers(); scheduler.timeout(tick, 1000);
+        updateTimers(); position(); scheduler.timeout(tick, 1000);
     };
     render(); tick();
 }

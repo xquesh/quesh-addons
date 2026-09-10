@@ -44,7 +44,7 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         const canvas = document.createElement('canvas'); canvas.width = canvas.height = 32;
         const context = canvas.getContext('2d');
         assert(drawable.draw(context) === 42 && context.getImageData(0, 0, 32, 32).data.some((value, index) => index % 4 === 3 && value > 0), 'Tekst na canvas z zachowaniem wyniku rysowania');
-        assert(context.getImageData(30, 30, 1, 1).data[3] === 0, 'Brak prostokątnego tła na canvas');
+        assert(context.getImageData(0, 0, 1, 1).data[3] === 0, 'Brak tła ikony na canvas');
         item.stat = 'rarity=legendary;socket_injection_legbon=verycrit,17';
         await wait(650);
         assert(badge()?.textContent === 'CBK', 'Bonus CBK z gniazda zbroi bez zwykłego legbon');
@@ -75,6 +75,18 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         context.fillText = function(...args) { drawn = { font: this.font, color: this.fillStyle }; return fillText.apply(this, args); };
         drawable.draw(context); context.fillText = fillText;
         assert(drawn.font.includes('14px') && drawn.font.includes('Verdana') && drawn.color === '#ff9900', 'Ten sam wygląd na mapie');
+        const shadowInput = settings.querySelector('[data-setting="bonusShadow"]');
+        shadowInput.value = 'outline'; shadowInput.dispatchEvent(new Event('change', { bubbles: true }));
+        await wait(150);
+        assert(getComputedStyle(badge()).textShadow !== 'none', 'Obrys w CSS');
+        let outlined = false;
+        const strokeText = context.strokeText;
+        context.strokeText = function(...args) { outlined = this.lineWidth === 2 && this.strokeStyle === '#000000'; return strokeText.apply(this, args); };
+        drawable.draw(context); context.strokeText = strokeText;
+        assert(outlined, 'Obrys bonusu na mapie');
+        shadowInput.value = 'none'; shadowInput.dispatchEvent(new Event('change', { bubbles: true }));
+        await wait(150);
+        assert(getComputedStyle(badge()).textShadow === 'none', 'Można wyłączyć cień');
         settings.querySelector('[data-reset-bonus]').click();
         await wait(150);
         assert(getComputedStyle(badge()).fontSize === '9px' && getComputedStyle(badge()).color === 'rgb(255, 255, 255)', 'Reset tylko wyglądu skrótów');
