@@ -11,15 +11,16 @@ export function createRelogger() {
         renderSettings(ctx) {
             const section = document.createElement('section'); section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Przelogawka</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Kliknij portret, aby przejść na postać. Pasek jest osadzony przy dolnej belce gry. Dziewięć portretów zajmuje 250 px; dalsze postacie przewiniesz poziomo. Nazwy i poziomy zobaczysz po najechaniu.</p>
+                <p>Kliknij portret, aby przejść na postać. Wysokość portretów dopasowuje się do dolnej belki gry. Dziewięć postaci zajmuje 340 px; dalsze przewiniesz poziomo. Nazwy, poziomy i timery zobaczysz po najechaniu.</p>
                 <h2>Belka postaci</h2><div class="ln-grid">
                     <label class="ln-field">Kolejność<select data-setting="sort"><option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nazwa postaci</option></select></label>
                     <label class="ln-field">Położenie w poziomie (0% lewo — 100% prawo)<input type="range" min="0" max="100" step="1" data-setting="horizontal"><output data-position-value></output></label>
-                    <label class="ln-switch"><input type="checkbox" data-setting="showTimers">Podświetlenie i odliczanie timerów</label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="showWorldButton">Pokaż przycisk wyboru świata</label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="showTimers">Podświetlenie i podgląd timerów</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="hotkeys">Skróty Alt+1…9</label>
                 </div><p>Skróty wybierają postacie w kolejności na belce, na wybranym świecie. Nie działają podczas wpisywania tekstu w polach formularzy i czacie.</p>
                 <h2>Podświetlenie timerów</h2><p><span style="color:#6ddb9a">▰ Zielony</span> — czas minął.<br><span style="color:#deb358">▰ Bursztynowy</span> — rozpoczęło się okno możliwego respawnu.<br>Szary — odliczanie trwa albo nie ma aktywnego timera.</p>
-                <p>Podświetlenie jest stałe. Na karcie zobaczysz najbliższy czas, po najechaniu lub wybraniu klawiaturą — nazwy i czasy wszystkich aktywnych timerów tej postaci. Upłynięcie czasu nie potwierdza pojawienia się potwora.</p>
+                <p>Podświetlenie jest stałe. Nazwy i czasy timerów pokazują się dopiero po najechaniu lub wybraniu postaci klawiaturą. Upłynięcie czasu nie potwierdza pojawienia się potwora.</p>
                 <p>Dodatek odczytuje dostępne w grze dane timerów (addon_17). Nie tworzy własnych timerów i nie wymaga całego pakietu Essentials. Bez tych danych nadal możesz zmieniać postacie.</p>
                 <div class="ln-grid"><button class="ln-btn" type="button" data-refresh>Odśwież postacie</button><button class="ln-btn" type="button" data-reset>Przywróć pozycję belki</button></div>
                 <p data-status role="status"></p>`;
@@ -39,7 +40,7 @@ export function createRelogger() {
             }
             ctx.scheduler.listen(refresh, 'click', () => ctx.events.emit('reloggerRefresh'));
             section.querySelector('[data-position-value]').textContent = `${ctx.settings.horizontal}%`;
-            ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => { ctx.changeSettings({ horizontal: 100, collapsed: false }); section.querySelector('[data-setting="horizontal"]').value = 100; section.querySelector('[data-position-value]').textContent = '100%'; section.querySelector('[data-status]').textContent = 'Przywrócono pozycję po prawej stronie.'; });
+            ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => { ctx.changeSettings({ horizontal: 100 }); section.querySelector('[data-setting="horizontal"]').value = 100; section.querySelector('[data-position-value]').textContent = '100%'; section.querySelector('[data-status]').textContent = 'Przywrócono pozycję po prawej stronie.'; });
             ctx.container.append(section);
         }
     };

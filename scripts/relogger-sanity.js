@@ -28,10 +28,13 @@ window.runReloggerChecks = async function(manager, assert, wait) {
             assert(url.includes('/account/charlist?') && options.credentials === 'include', 'Odczyt listy przez API gry z sesją');
             return { ok: true, json: async () => heroes };
         };
+        manager.changeSettings('relogger', { collapsed: true }); // Stare ustawienie nie może ukrywać nowego paska.
         manager.setEnabled('relogger', true); await ready();
         assert(requests === 1 && bar().querySelectorAll('.qr-card').length === 9, 'Jedno pobranie, dziewięć postaci');
-        assert(bar().getBoundingClientRect().height === 38 && bar().getBoundingClientRect().width <= 310, 'Wąski pasek dziewięciu postaci');
-        assert(bar().querySelector('.qr-cards').scrollWidth <= 250, 'Dziewięć portretów mieści się bez przewijania');
+        assert(bar().getBoundingClientRect().height === 44 && bar().getBoundingClientRect().width <= 365, 'Większe portrety dopasowane do wysokości belki');
+        assert(bar().querySelector('.qr-cards').scrollWidth <= 340, 'Dziewięć portretów mieści się bez przewijania');
+        assert(!bar().querySelector('[data-collapse]') && !bar().querySelector('.qr-body').hidden, 'Usunięte zwijanie i ignorowana stara konfiguracja');
+        assert(!bar().querySelector('.qr-time') && bar().querySelector('.qr-details').hidden, 'Timery dopiero po najechaniu');
         assert(Math.abs(bar().getBoundingClientRect().bottom - (anchor.getBoundingClientRect().bottom - 2)) < 1, 'Pasek podąża za dolną belką gry');
         assert(bar().querySelector('[data-hero="1"]').dataset.state === 'due', 'Zielony stan po końcu timera');
         assert(bar().querySelector('[data-hero="2"]').dataset.state === 'window', 'Bursztynowy stan okna respawnu');
@@ -40,13 +43,19 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         assert(bar().querySelector('.qr-details').textContent.includes('<b>Heros A</b>') && !bar().querySelector('.qr-details b'), 'Nazwy timerów wyświetlane jako tekst');
         bar().querySelector('[data-hero="1"]').click();
         assert(bar().querySelector('.qr-status').textContent.includes('już zalogowana'), 'Kliknięcie bieżącej postaci nie przelogowuje');
-        const select = bar().querySelector('select'); select.value = 'katahha'; select.dispatchEvent(new Event('change'));
+        const worldButton = bar().querySelector('[data-world-toggle]');
+        worldButton.click();
+        assert(!bar().querySelector('.qr-world-menu').hidden, 'Mały przycisk otwiera wybór świata');
+        bar().querySelector('[data-world="katahha"]').click();
         assert(bar().querySelectorAll('.qr-card').length === 1 && requests === 1, 'Zmiana świata bez ponownego pobierania');
-        bar().querySelector('[data-collapse]').click();
-        assert(bar().querySelector('.qr-body').hidden, 'Zwijanie belki');
-        bar().querySelector('[data-collapse]').click();
+        assert(bar().querySelector('.qr-world-menu').hidden, 'Wybór zamyka menu');
         document.querySelector('#mtk-content').append(view);
         close = manager.renderSettings('relogger', view);
+        view.querySelector('[data-setting="showWorldButton"]').click();
+        assert(bar().querySelector('header').hidden && !bar().querySelector('.qr-body').hidden, 'Ukrywanie tylko przycisku świata');
+        view.querySelector('[data-setting="showWorldButton"]').click();
+        worldButton.click(); worldButton.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        assert(bar().querySelector('.qr-world-menu').hidden, 'Escape zamyka wybór świata');
         const horizontal = view.querySelector('[data-setting="horizontal"]');
         horizontal.value = '0'; horizontal.dispatchEvent(new Event('input', { bubbles: true }));
         const left = bar().getBoundingClientRect().left;
@@ -72,7 +81,7 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         window.fetch = previous.fetch; window.getCookie = previous.cookie;
         for (const key of ['allInit', 'worldConfig', 'hero', 'serverStorage', 'windowsData']) Engine[key] = previous[key];
         anchor.style.cssText = anchorStyle;
-        manager.changeSettings('relogger', { horizontal: 100, selectedWorld: '', collapsed: false });
+        manager.changeSettings('relogger', { horizontal: 100, selectedWorld: '', showWorldButton: true });
         manager.setEnabled('relogger', true);
     }
 };

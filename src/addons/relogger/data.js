@@ -1,4 +1,4 @@
-export const defaults = { sort: 'level-desc', horizontal: 100, showTimers: true, hotkeys: false, selectedWorld: '', collapsed: false };
+export const defaults = { sort: 'level-desc', horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: '' };
 export function worldName(value) { return typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value) ? value : ''; }
 export function characterList(data) {
     if (!Array.isArray(data)) throw new Error('Serwer nie zwrócił listy postaci.');
