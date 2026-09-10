@@ -17,6 +17,7 @@ import { createEnhancer } from './addons/enhancer/index.js';
 import { createLootChances } from './addons/loot-chances/index.js';
 import { createReminder } from './addons/reminder/index.js';
 import { createCompactParty } from './addons/compact-party/index.js';
+import { createNightMode } from './addons/night-mode/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -64,6 +65,7 @@ function start() {
         manager.register(createLootChances());
         manager.register(createReminder());
         manager.register(createCompactParty());
+        manager.register(createNightMode());
         panel.connect(manager);
         manager.start();
         game.start();

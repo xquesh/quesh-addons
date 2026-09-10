@@ -120,9 +120,16 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 10, 'Manager dziesięciu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 11, 'Manager jedenastu addonów');
         assert(document.querySelector('#qaddons-quick-seller')?.textContent === 'SPR', 'Przycisk Sprzedawczyka');
         assert(document.querySelector('#qaddons-enhancer-toggle')?.textContent === 'UL', 'Przycisk Ulepszarki');
+        manager.setEnabled('night-mode', true); await wait(20);
+        const nightOverlay = document.querySelector('.qaddons-night-mode');
+        assert(nightOverlay?.parentElement === gameLayer && getComputedStyle(nightOverlay).opacity === '0.45', 'Tryb nocny przyciemnia tylko mapę');
+        manager.changeSettings('night-mode', { strength: 70, color: '#102030', vignette: false }); await wait(20);
+        assert(getComputedStyle(nightOverlay).opacity === '0.7' && getComputedStyle(nightOverlay).backgroundColor === 'rgb(16, 32, 48)', 'Konfiguracja Trybu nocnego działa');
+        manager.setEnabled('night-mode', false);
+        assert(!document.querySelector('.qaddons-night-mode'), 'Wyłączenie usuwa warstwę Trybu nocnego');
         const partyFixture = document.createElement('div');
         partyFixture.className = 'party'; partyFixture.style.cssText = 'position:fixed;left:0;top:70px;width:290px';
         partyFixture.innerHTML = '<div class="party__list"><div class="party-member yellow" style="width:290px"><div class="member-hp-bar"></div><div class="table-wrapper"><div class="avatar"><div class="img-avatar-correct"></div></div><div class="info-wrapper"><div class="top-row"><div class="nickname"><div class="nickname-text">Bardzo długi nick postaci</div></div><div class="character-info">(492h|334h)</div></div><div class="bottom-row"><div class="hp-percent">(95%)</div><div class="hp-points">76 237 / 81 020</div><div class="info-icons"><div class="status-test"></div><div class="party__crown"></div></div></div></div></div></div></div><div class="party__professions">2b 1p 1m 1t 1h</div>';
@@ -169,13 +176,14 @@
             if (command.startsWith('enhancement&action=open')) setTimeout(() => Engine.communication.parseJSON({ enhancement: { itemId: id, upgradable: { upgradeLevel: 1, current: 5, max: 20 } } }), 0);
             if (command.startsWith('artisanship&action=open')) setTimeout(() => Engine.communication.parseJSON({ artisanship: { open: true } }), 0);
         };
-        const draggedItem = document.createElement('div'); draggedItem.className = 'item item-id-990'; document.body.append(draggedItem);
+        const draggedItem = document.createElement('div'); draggedItem.className = 'item item-id-990'; draggedItem.style.backgroundImage = 'url("test-item.png")'; document.body.append(draggedItem);
         document.querySelector('#qaddons-enhancer-toggle').click();
         const enhancerSlot = document.querySelector('#qaddons-enhancer [data-slot="all"]');
         draggedItem.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, buttons: 1 }));
         enhancerSlot.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }));
         await wait(80);
         assert(document.querySelector('#qaddons-enhancer [data-slot="all"] strong').textContent === 'Zbroja testowa', 'Przeciągnięcie ustawia cel Ulepszarki');
+        assert(document.querySelector('#qaddons-enhancer [data-slot="all"] .qe-item-preview>.item')?.style.backgroundImage.includes('test-item.png'), 'Slot Ulepszarki pokazuje grafikę przedmiotu z ekwipunku');
         assert(!document.querySelector('#qaddons-enhancer .qe-slots').dataset.dragging, 'Stan przeciągania jest sprzątany');
         document.querySelector('#qaddons-enhancer [data-close]').click(); draggedItem.remove();
         Engine.items.testMyItems = previousEnhancerItems; window._g = previousGameCommand;
@@ -357,7 +365,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: ten addons, compact party, reminder, loot chances, enhancer drag-drop, native relogging, quick seller, relogger, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: eleven addons, night mode, enhancer item preview, compact party, reminder, loot chances, native relogging, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {

@@ -31,6 +31,13 @@ import { catchingChance, chanceLevel, eligibleMembers, isLegendary, requiredProf
 import { fightMembers } from '../src/addons/loot-chances/runtime.js';
 import { calendarReminder, expiredItems, freePromotions, resultSignature } from '../src/addons/reminder/data.js';
 import { compactPartyCss } from '../src/addons/compact-party/style.js';
+import { nightModeCss } from '../src/addons/night-mode/style.js';
+
+const nightCss = nightModeCss({ strength: 120, color: 'javascript:bad', vignette: false });
+assert.match(nightCss, /background:#07101c!important/);
+assert.match(nightCss, /opacity:0\.85!important/);
+assert.match(nightModeCss({ strength: 35, color: '#102030', vignette: true }), /radial-gradient\(circle at center,transparent 30%,#000 125%\),#102030/);
+console.log('OK: Tryb nocny ogranicza moc i kolor oraz przyciemnia wyłącznie warstwę mapy');
 
 const compactCss = compactPartyCss({ hideAvatars: true, showHpPoints: false, rowHeight: 2, fontSize: 99 });
 assert.match(compactCss, /height:16px!important/);

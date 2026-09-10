@@ -12,6 +12,27 @@ function elementItemId(element) {
     const value = node?.dataset?.id || node?.dataset?.itemId || String(node?.className || '').match(/(?:^|\s)item-id-(\d+)/)?.[1];
     return Number(value) || null;
 }
+function itemPreview(item) {
+    const id = Number(item?.id);
+    const source = [...document.querySelectorAll(`.item-id-${id}`)]
+        .find(node => !node.closest('#qaddons-enhancer'));
+    let image = source?.cloneNode(true);
+    if (!image) {
+        image = document.createElement('div');
+        image.className = `item item-id-${id}`;
+        const icon = String(item?.icon || item?.img || item?.image || '');
+        if (/^[a-z0-9_./-]+\.(?:gif|png|webp)(?:\?.*)?$/i.test(icon)) {
+            image.style.backgroundImage = `url("${icon.startsWith('/') ? icon : `/obrazki/itemy/${icon}`}")`;
+        }
+    }
+    image.removeAttribute('id');
+    image.removeAttribute('draggable');
+    image.querySelectorAll?.('[id]').forEach(node => node.removeAttribute('id'));
+    image.classList.add('qe-item-image');
+    const wrapper = document.createElement('span');
+    wrapper.className = 'qe-item-preview'; wrapper.setAttribute('aria-hidden', 'true'); wrapper.append(image);
+    return wrapper;
+}
 function heroId(page) { return String(page.Engine?.hero?.d?.id || '0'); }
 function settingsWithDefaults(settings) {
     settings.rarity = { ...DEFAULTS.rarity, ...settings.rarity };
@@ -72,6 +93,11 @@ export function startEnhancer(ctx) {
             button.dataset.filled = String(Boolean(item));
             button.innerHTML = `<small>${SLOT_LABELS[slot]}</small><strong></strong><small>${item ? 'Przeciągnij inny · PPM: usuń' : 'Przeciągnij przedmiot tutaj'}</small>`;
             button.querySelector('strong').textContent = item ? itemName(item) : 'PUSTY SLOT';
+            if (item) {
+                button.dataset.itemId = String(item.id);
+                button.title = itemName(item);
+                button.prepend(itemPreview(item));
+            }
             return button;
         }));
         windowElement.querySelector('[data-mode]').value = settings.mode;
