@@ -81,6 +81,7 @@ export function startLootChances(ctx) {
         const root = findLootRoot();
         if (!root) return;
         const participants = currentMembers(candidates);
+        if (ctx.settings.hideSolo && participants.length <= 1) return;
         const entries = Object.entries(packet.item || packet.items || {}).map(([key, item]) => ({ key, item }));
         entries.forEach((entry, index) => {
             if (!isLegendary(entry.item)) return;

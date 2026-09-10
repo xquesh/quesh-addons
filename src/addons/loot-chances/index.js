@@ -14,6 +14,7 @@ export function createLootChances() {
             section.innerHTML = `<h2>Kto złapie?</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
                 <p>W oknie łupu pokazuje szansę Twojej postaci na legendę. Obliczenie uwzględnia członków tej samej drużyny i profesje wymagane przez przedmiot. Najedź na procent, aby zobaczyć listę losujących.</p>
                 <div class="ln-grid">
+                    <label class="ln-switch"><input type="checkbox" data-setting="hideSolo">Ukrywaj podczas walki solo</label>
                     <label class="ln-field">Pozycja<select data-setting="position"><option value="top-right">Prawy górny róg</option><option value="top-left">Lewy górny róg</option><option value="bottom-right">Prawy dolny róg</option><option value="bottom-left">Lewy dolny róg</option></select></label>
                     <label class="ln-field">Czcionka<select data-setting="fontFamily">${['Arial', 'Verdana', 'Tahoma', 'Georgia', 'monospace'].map(value => `<option>${value}</option>`).join('')}</select></label>
                     <label class="ln-field">Rozmiar (8–20 px)<input type="number" min="8" max="20" step="1" data-setting="fontSize"></label>

@@ -196,6 +196,10 @@
         Engine.communication.parseJSON({ loot: { init: 1 }, item: { 502: { id: 502, stat: 'rarity=legendary' } } });
         await wait(180);
         assert(document.querySelector('.qaddons-loot-chance')?.textContent === '100%', 'Kto złapie? pokazuje wynik także w walce solo');
+        manager.changeSettings('loot-chances', { hideSolo: true }); await wait(30);
+        assert(!document.querySelector('.qaddons-loot-chance'), 'Opcja ukrywa szansę podczas walki solo');
+        manager.changeSettings('loot-chances', { hideSolo: false }); await wait(30);
+        assert(document.querySelector('.qaddons-loot-chance')?.textContent === '100%', 'Wyłączenie opcji przywraca szansę solo');
         Engine.communication.parseJSON({ loot: { init: 0 } });
         __MARGONEM_TOOLKIT__.open();
         [...document.querySelectorAll('.mtk-addon')].find(node => node.textContent.includes('Kto złapie?')).querySelector('button').click();

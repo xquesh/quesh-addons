@@ -1,4 +1,5 @@
 export const DEFAULTS = {
+    hideSolo: false,
     position: 'top-right',
     fontSize: 12,
     fontFamily: 'Arial',
