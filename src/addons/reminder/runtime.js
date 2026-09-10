@@ -55,18 +55,23 @@ export function startReminder(ctx) {
         if (!current.calendar) return false;
         const dayNo = current.calendar.dayNo;
         const response = await ctx.game.request(`rewards_calendar&action=open&day_no=${dayNo}`,
-            packet => Boolean(packet?.rewards_calendar) || Object.hasOwn(packet || {}, 'e'), { strip: ['rewards_calendar'] });
+            packet => Boolean(packet?.rewards_calendar) || Object.hasOwn(packet || {}, 'e'), { strip: ['rewards_calendar'], signal: ctx.scheduler.signal });
+        if (!ctx.enabled) return false;
         const success = response?.e === 'ok';
-        if (success) removeType('calendar');
-        return success;
+        if (!success) throw new Error('Nie udało się odebrać nagrody z kalendarza.');
+        removeType('calendar');
+        return true;
     }
 
     async function claimPromotions() {
         const items = [...current.promotions];
         for (const item of items) {
-            await ctx.game.request(`promotions&a=use&id=${encodeURIComponent(item.id)}`,
-                packet => Object.hasOwn(packet || {}, 'e'), { strip: ['promotions'] });
+            if (!ctx.enabled) return false;
+            const response = await ctx.game.request(`promotions&a=use&id=${encodeURIComponent(item.id)}`,
+                packet => Object.hasOwn(packet || {}, 'e'), { strip: ['promotions'], signal: ctx.scheduler.signal });
+            if (response?.e !== 'ok') throw new Error('Nie udało się odebrać darmowej oferty.');
         }
+        if (!ctx.enabled) return false;
         removeType('promotions');
         return true;
     }
@@ -92,8 +97,10 @@ export function startReminder(ctx) {
             if (name === 'calendar') await claimCalendar();
             if (name === 'promotions') await claimPromotions();
         } catch (error) {
-            element.disabled = false;
-            element.textContent = 'Nie udało się — spróbuj ponownie';
+            if (ctx.enabled) {
+                element.disabled = false;
+                element.textContent = 'Nie udało się — spróbuj ponownie';
+            }
         }
     }
 
@@ -117,13 +124,18 @@ export function startReminder(ctx) {
         checking = true;
         ctx.events.emit('reminderStatus', { state: 'checking', text: 'Sprawdzanie…' });
         const next = { calendar: null, promotions: [], expired: [] };
+        let unavailable = 0;
         try {
             if (ctx.settings.calendarEnabled && calendarAvailable()) {
-                const response = await safely(() => ctx.game.request('rewards_calendar&action=show', packet => Boolean(packet?.rewards_calendar), { strip: ['rewards_calendar'] }));
+                const response = await safely(() => ctx.game.request('rewards_calendar&action=show', packet => Boolean(packet?.rewards_calendar), { strip: ['rewards_calendar'], signal: ctx.scheduler.signal }));
+                if (!ctx.enabled) return;
+                if (!response) unavailable++;
                 next.calendar = calendarReminder(response?.rewards_calendar);
             }
             if (ctx.settings.promotionsEnabled) {
-                const response = await safely(() => ctx.game.request('promotions&a=show', packet => Boolean(packet?.promotions), { strip: ['promotions'] }));
+                const response = await safely(() => ctx.game.request('promotions&a=show', packet => Boolean(packet?.promotions), { strip: ['promotions'], signal: ctx.scheduler.signal }));
+                if (!ctx.enabled) return;
+                if (!response) unavailable++;
                 next.promotions = freePromotions(response?.promotions);
             }
             if (ctx.settings.expiredEnabled) next.expired = expiredItems(page);
@@ -132,7 +144,10 @@ export function startReminder(ctx) {
             if (current.promotions.length && ctx.settings.promotionsAutoClaim) await safely(claimPromotions);
             render(force);
             const count = Number(Boolean(current.calendar)) + current.promotions.length + current.expired.length;
-            ctx.events.emit('reminderStatus', { state: 'ready', text: count ? `Znaleziono: ${count}` : 'Brak oczekujących rzeczy.' });
+            const text = unavailable
+                ? count ? `Znaleziono: ${count}. Część danych jest niedostępna.` : 'Nie udało się sprawdzić danych gry.'
+                : count ? `Znaleziono: ${count}` : 'Brak oczekujących rzeczy.';
+            ctx.events.emit('reminderStatus', { state: unavailable ? 'error' : 'ready', text });
         } finally { checking = false; }
     }
 

@@ -28,6 +28,7 @@ export function createGame(page, events, scheduler, host = window) {
             if (!match) continue;
             pending.delete(request);
             scheduler.clearTimeout(request.timeout);
+            request.releaseAbort();
             request.resolve(match);
             if (request.strip.length) parsed = stripPacket(parsed, request.strip);
         }
@@ -90,6 +91,7 @@ export function createGame(page, events, scheduler, host = window) {
         scheduler.clearTimeout(retry);
         for (const request of pending) {
             scheduler.clearTimeout(request.timeout);
+            request.releaseAbort();
             request.reject(new Error('Komunikacja gry została zatrzymana.'));
         }
         pending.clear();
@@ -101,9 +103,22 @@ export function createGame(page, events, scheduler, host = window) {
     function request(command, match, options = {}) {
         return new Promise((resolve, reject) => {
             if (stopped || typeof page._g !== 'function') return reject(new Error('Gra nie jest jeszcze gotowa.'));
-            const entry = { match, resolve, reject, strip: Array.isArray(options.strip) ? options.strip : [] };
+            const signal = options.signal;
+            if (signal?.aborted) return reject(new DOMException('Żądanie anulowane.', 'AbortError'));
+            const entry = { match, resolve, reject, strip: Array.isArray(options.strip) ? options.strip : [], releaseAbort: () => {} };
+            const abort = () => {
+                if (!pending.delete(entry)) return;
+                scheduler.clearTimeout(entry.timeout);
+                entry.releaseAbort();
+                reject(new DOMException('Żądanie anulowane.', 'AbortError'));
+            };
+            if (signal) {
+                signal.addEventListener('abort', abort, { once: true });
+                entry.releaseAbort = () => signal.removeEventListener('abort', abort);
+            }
             entry.timeout = scheduler.timeout(() => {
                 pending.delete(entry);
+                entry.releaseAbort();
                 reject(new Error('Serwer gry nie odpowiedział na czas.'));
             }, options.timeout || 6000);
             pending.add(entry);
@@ -111,6 +126,7 @@ export function createGame(page, events, scheduler, host = window) {
             catch (error) {
                 pending.delete(entry);
                 scheduler.clearTimeout(entry.timeout);
+                entry.releaseAbort();
                 reject(error);
             }
         });

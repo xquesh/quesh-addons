@@ -15,6 +15,7 @@ export function startQuickSeller(ctx) {
     document.body.append(button);
     let running = false;
     let timer = 0;
+    let heldHotkey = '';
 
     function available() {
         const shop = page.Engine?.shop;
@@ -44,6 +45,7 @@ export function startQuickSeller(ctx) {
     }
     function stop() {
         running = false;
+        heldHotkey = '';
         ctx.scheduler.clearTimeout(timer);
         timer = 0; refresh();
     }
@@ -52,9 +54,9 @@ export function startQuickSeller(ctx) {
     ctx.scheduler.listen(button, 'pointercancel', stop);
     ctx.scheduler.listen(document, 'keydown', event => {
         if (event.repeat || event.defaultPrevented || editable(event.target) || event.code !== ctx.settings.hotkey) return;
-        event.preventDefault(); start();
+        event.preventDefault(); heldHotkey = event.code; start();
     }, { capture: true });
-    ctx.scheduler.listen(document, 'keyup', event => { if (event.code === ctx.settings.hotkey) stop(); }, { capture: true });
+    ctx.scheduler.listen(document, 'keyup', event => { if (event.code === heldHotkey) stop(); }, { capture: true });
     ctx.scheduler.listen(page, 'blur', stop);
     ctx.events.on('quickSellerChanged', refresh);
     ctx.scheduler.cleanup(() => { stop(); button.remove(); });

@@ -66,6 +66,7 @@ export function startEnhancer(ctx) {
     function target(slot) { const id = Number(targetMap()[slot]); return allItems(page).find(item => Number(item.id) === id) || null; }
     function modeSlots() { return settings.mode === 'regular' ? ['all'] : settings.mode === 'type' ? ['armor','jewelry','weapon'] : ['all','armor','jewelry','weapon']; }
     function message(text, error = false) {
+        if (!ctx.enabled || ctx.scheduler.disposed) return;
         status.textContent = text;
         status.style.color = error ? '#ff7979' : '#bbb';
         if (settings.messages && page.message) page.message(text, error);
@@ -109,7 +110,23 @@ export function startEnhancer(ctx) {
         renderSlots(); scan();
     }
     async function gameRequest(command, match, strip = []) {
-        return ctx.game.request(command, match, { strip, timeout: 7000 });
+        return ctx.game.request(command, match, { strip, timeout: 7000, signal: ctx.scheduler.signal });
+    }
+    function pause(milliseconds) {
+        return new Promise((resolve, reject) => {
+            let settled = false;
+            const release = ctx.scheduler.cleanup(() => {
+                if (settled) return;
+                settled = true;
+                reject(new DOMException('Ulepszarka została wyłączona.', 'AbortError'));
+            });
+            ctx.scheduler.timeout(() => {
+                if (settled) return;
+                settled = true;
+                release();
+                resolve();
+            }, milliseconds);
+        });
     }
     async function openItem(id) {
         let packet = await gameRequest(`enhancement&action=open&item=${id}`, data => Number(data?.enhancement?.itemId) === Number(id) || data?.t === 'stop', ['enhancement','artisanship']);
@@ -143,7 +160,7 @@ export function startEnhancer(ctx) {
             if (enhancement?.completed === 1 || (up && Number(up.upgradeLevel) >= 4 && Number(up.current) >= Number(up.max))) throw new Error('Ten przedmiot jest już maksymalnie ulepszony.');
             targetMap()[slot] = Number(item.id); ctx.storage.save(); renderProgress(up); refresh();
             message(`Wybrano: ${itemName(item)}.`);
-        } catch (error) { refresh(); message(error.message || 'Nie można ulepszyć tego przedmiotu.', true); }
+        } catch (error) { if (ctx.enabled) { refresh(); message(error.message || 'Nie można ulepszyć tego przedmiotu.', true); } }
     }
     async function usageReached() {
         await updateUsage(); return usage && Number(usage.count) >= Number(usage.limit);
@@ -178,12 +195,12 @@ export function startEnhancer(ctx) {
                     const batch = candidates.splice(0, 25);
                     const result = await enhanceTarget(slot, batch); usedAnything = true;
                     if (result.done || usage && Number(usage.count) >= Number(usage.limit)) break;
-                    await new Promise(resolve => ctx.scheduler.timeout(resolve, 150));
+                    await pause(150);
                 }
             }
             scan(); message(usedAnything ? 'Ulepszanie zakończone.' : 'Brak przedmiotów spełniających filtry.');
-        } catch (error) { message(error.message || 'Ulepszanie nie powiodło się.', true); }
-        finally { busy = false; delete windowElement.dataset.busy; }
+        } catch (error) { if (ctx.enabled) message(error.message || 'Ulepszanie nie powiodło się.', true); }
+        finally { busy = false; if (!ctx.scheduler.disposed) delete windowElement.dataset.busy; }
     }
     ctx.scheduler.listen(toggle, 'click', () => { windowElement.hidden = !windowElement.hidden; if (!windowElement.hidden) { refresh(); updateUsage(); } });
     ctx.scheduler.listen(windowElement.querySelector('[data-close]'), 'click', () => { windowElement.hidden = true; });

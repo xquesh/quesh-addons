@@ -122,6 +122,26 @@
         await waitForUpdate('current');
         assert(document.querySelectorAll('.mtk-addon').length === 11, 'Manager jedenastu addonów');
         assert(document.querySelector('#qaddons-quick-seller')?.textContent === 'SPR', 'Przycisk Sprzedawczyka');
+        let sellCycles = 0;
+        Engine.shop = { greatMerchant() {}, basket: { finalize() { sellCycles++; } } };
+        manager.changeSettings('quick-seller', { hotkey: 'F8', interval: 100 });
+        document.dispatchEvent(new KeyboardEvent('keydown', { code: 'F8', bubbles: true }));
+        assert(sellCycles === 1, 'Sprzedawczyk uruchamia serię po wciśnięciu skrótu');
+        manager.changeSettings('quick-seller', { hotkey: 'F9' });
+        document.dispatchEvent(new KeyboardEvent('keyup', { code: 'F8', bubbles: true }));
+        await wait(140);
+        assert(sellCycles === 1, 'Sprzedawczyk zatrzymuje stary skrót po zmianie ustawienia podczas przytrzymania');
+        delete Engine.shop;
+        for (const addon of manager.list()) {
+            const initiallyEnabled = addon.enabled;
+            manager.setEnabled(addon.id, false);
+            assert(!manager.list().find(entry => entry.id === addon.id).enabled, `Wyłączenie dodatku ${addon.id}`);
+            manager.setEnabled(addon.id, true);
+            assert(manager.list().find(entry => entry.id === addon.id).enabled, `Ponowne włączenie dodatku ${addon.id}`);
+            if (!initiallyEnabled) manager.setEnabled(addon.id, false);
+        }
+        const styleKeys = [...document.querySelectorAll('[data-mtk-style]')].map(node => node.dataset.mtkStyle);
+        assert(new Set(styleKeys).size === styleKeys.length, 'Brak zduplikowanych arkuszy stylów po restarcie wszystkich dodatków');
         assert(document.querySelector('#qaddons-enhancer-toggle')?.textContent === 'UL', 'Przycisk Ulepszarki');
         manager.setEnabled('night-mode', true); await wait(20);
         const nightOverlay = document.querySelector('.qaddons-night-mode');
@@ -215,10 +235,19 @@
         assert(document.querySelector('.qaddons-loot-test .qaddons-loot-chance')?.textContent === '50%', 'Test Kto złapie? otwiera przykładową legendę');
         document.querySelector('.qaddons-loot-test-close').click();
         __MARGONEM_TOOLKIT__.open();
+        const reminderCommand = window._g;
+        window._g = command => {
+            if (command === 'promotions&a=show') setTimeout(() => Engine.communication.parseJSON({ promotions: { active: [{ id: 42, price: 0, is_used: false }] } }), 0);
+            if (command === 'promotions&a=use&id=42') setTimeout(() => Engine.communication.parseJSON({ e: 'error' }), 0);
+        };
         document.querySelector('#qaddons-reminder-button').click();
         await wait(80);
         assert(document.querySelector('#qaddons-reminder:not([hidden])'), 'Przypominajka pokazuje wygasły przedmiot');
         assert(!document.querySelector('#qaddons-reminder .qrp-row b'), 'Nazwa przedmiotu nie jest interpretowana jako HTML');
+        const failedPromotion = document.querySelector('#qaddons-reminder [data-action="promotions"]');
+        failedPromotion.click(); await wait(30);
+        assert(failedPromotion.isConnected && !failedPromotion.disabled && failedPromotion.textContent.includes('Nie udało'), 'Błąd odbioru nie ukrywa darmowej oferty i pozwala ponowić próbę');
+        window._g = reminderCommand;
         const destroyExpired = document.querySelector('#qaddons-reminder [data-action="expired"]');
         destroyExpired.click();
         assert(destroyExpired.dataset.confirmed === 'true' && !destroyExpired.disabled, 'Usuwanie wymaga drugiego kliknięcia');
