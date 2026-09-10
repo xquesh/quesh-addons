@@ -15,6 +15,7 @@ import { createRelogger } from './addons/relogger/index.js';
 import { createQuickSeller } from './addons/quick-seller/index.js';
 import { createEnhancer } from './addons/enhancer/index.js';
 import { createLootChances } from './addons/loot-chances/index.js';
+import { createReminder } from './addons/reminder/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -60,6 +61,7 @@ function start() {
         manager.register(createQuickSeller());
         manager.register(createEnhancer());
         manager.register(createLootChances());
+        manager.register(createReminder());
         panel.connect(manager);
         manager.start();
         game.start();

@@ -29,6 +29,17 @@ import './check-updates.mjs';
 import { normalize as normalizeTypography, typographyCss } from '../src/addons/notification-position/typography.js';
 import { catchingChance, chanceLevel, eligibleMembers, isLegendary, requiredProfessions } from '../src/addons/loot-chances/data.js';
 import { fightMembers } from '../src/addons/loot-chances/runtime.js';
+import { calendarReminder, expiredItems, freePromotions, resultSignature } from '../src/addons/reminder/data.js';
+
+const calendar = { start_ts: Date.parse('2026-09-08T10:00:00Z') / 1000, days: [{ isOpened: true }, { isOpened: false }, { isOpened: false }] };
+assert.deepEqual(calendarReminder(calendar, new Date('2026-09-09T12:00:00Z')), { dayNo: 2 });
+assert.equal(calendarReminder(calendar, new Date('2026-09-08T12:00:00Z')), null);
+assert.equal(calendarReminder({ start_ts: 0, days: [] }), null);
+assert.deepEqual(freePromotions({ active: [{ id: 1, price: 0, is_used: false }, { id: 2, price: 1 }, { id: 3, price: 0, is_used: true }] }).map(item => item.id), [1]);
+assert.deepEqual(expiredItems({ Engine: { items: { testMyItems: () => ({ a: { id: 7, checkExpires: () => true }, b: { id: 8, checkExpires: () => false } }) } } }).map(item => item.id), [7]);
+assert.deepEqual(expiredItems({ Engine: { items: { testMyItems: () => { throw new Error('not ready'); } } } }), []);
+assert.equal(resultSignature({ calendar: { dayNo: 2 }, promotions: [{ id: 4 }, { id: 3 }], expired: [{ id: 8 }] }), '2|3,4|8');
+console.log('OK: Przypominajka wykrywa dzień kalendarza, darmowe oferty i wygasłe przedmioty');
 
 const chanceParty = [
     { id: '1', name: 'Quesh', prof: 'w', isHero: true },
