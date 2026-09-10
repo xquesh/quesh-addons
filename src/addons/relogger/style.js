@@ -17,7 +17,7 @@ export const barStyle = `
 #qaddons-relogger .qr-cards{display:flex;gap:2px;max-width:358px;overflow-x:auto;scrollbar-width:none;}
 #qaddons-relogger .qr-cards::-webkit-scrollbar{display:none;}
 #qaddons-relogger .qr-card{flex:0 0 38px;width:38px;height:var(--qr-height,52px);position:relative;overflow:hidden;border:1px solid #343a3e;border-bottom:2px solid #454545;}
-#qaddons-relogger .qr-portrait{position:absolute;left:2px;top:max(1px,calc((var(--qr-height,52px) - 36px)/2));width:32px;height:min(24px,calc(var(--qr-height,52px) - 15px));overflow:hidden;background-position:center top;background-repeat:no-repeat;text-align:center;line-height:24px;font-size:23px;color:#aaa;}
+#qaddons-relogger .qr-portrait{position:absolute;left:2px;top:max(1px,calc((var(--qr-height,52px) - 36px)/2));width:32px;height:min(24px,calc(var(--qr-height,52px) - 15px));overflow:hidden;background-position:0 0;background-repeat:no-repeat;text-align:center;line-height:24px;font-size:23px;color:#aaa;}
 #qaddons-relogger .qr-nick{display:none;}
 #qaddons-relogger .qr-level{display:block;position:absolute;left:0;right:0;bottom:1px;height:12px;color:#ddd;background:#000b;text-align:center;font:bold 9px/12px Arial,sans-serif;text-shadow:0 1px 2px #000;}
 #qaddons-relogger .qr-card[data-state="window"]{border-bottom-color:#deb358;box-shadow:inset 0 -8px 10px -8px #deb358;}

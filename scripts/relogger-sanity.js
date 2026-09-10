@@ -37,6 +37,7 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         assert(bar().querySelector('.qr-cards').scrollWidth <= 358, 'Dziewięć szerszych portretów mieści się bez przewijania');
         assert(bar().querySelector('[data-hero="1"] .qr-level').textContent === '80w', 'Poziom i skrót profesji pod postacią');
         assert(bar().querySelector('.qr-portrait').getBoundingClientRect().height <= 24, 'Widoczna tylko górna połowa postaci');
+        assert(getComputedStyle(bar().querySelector('.qr-portrait')).backgroundPosition === '0px 0px', 'Pierwsza klatka arkusza postaci bez przesunięcia');
         anchor.style.height = '75px'; window.dispatchEvent(new Event('resize'));
         assert(bar().getBoundingClientRect().height === 60, 'Maksymalna wysokość paska to 60 px');
         anchor.style.height = '48px'; window.dispatchEvent(new Event('resize'));
