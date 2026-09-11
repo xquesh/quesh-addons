@@ -386,6 +386,8 @@
         assert(document.querySelector('#qaddons-enhancer [data-slot="all"] .qe-item-preview>.item')?.style.backgroundImage.includes('test-item.png'), 'Slot Ulepszarki pokazuje grafikę przedmiotu z ekwipunku');
         assert(document.querySelector('#qaddons-enhancer [data-slot="all"] canvas').getContext('2d').getImageData(0, 0, 1, 1).data[0] === 255, 'Slot kopiuje narysowaną grafikę canvas przedmiotu');
         assert(!document.querySelector('#qaddons-enhancer [data-slot="all"] strong, #qaddons-enhancer [data-slot="all"] small'), 'Kompaktowy slot zawiera wyłącznie przedmiot');
+        const enhancerRect = document.querySelector('#qaddons-enhancer').getBoundingClientRect();
+        assert(enhancerRect.width <= 222 && enhancerRect.height <= 155, `Kompaktowe okno Ulepszarki: ${enhancerRect.width} × ${enhancerRect.height}`);
         assert(!document.querySelector('#qaddons-enhancer .qe-slots').dataset.dragging, 'Stan przeciągania jest sprzątany');
         manager.setEnabled('enhancer', false); manager.setEnabled('enhancer', true); await wait(30);
         assert(!document.querySelector('#qaddons-enhancer').hidden, 'Ulepszarka pozostaje otwarta po ponownym uruchomieniu dodatku');
