@@ -120,7 +120,18 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 11, 'Manager jedenastu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 12, 'Manager dwunastu addonów');
+        const chatFixture = document.createElement('div');
+        chatFixture.className = 'new-chat-window';
+        chatFixture.innerHTML = '<div class="chat-message-wrapper"><div class="scroll-pane" style="height:24px;overflow-y:auto"><div style="height:240px">Wiadomości</div></div></div>';
+        document.body.append(chatFixture);
+        const chatPane = chatFixture.querySelector('.scroll-pane');
+        await wait(300);
+        assert(chatPane.scrollTop === chatPane.scrollHeight - chatPane.clientHeight, 'Czat jest przewijany do najnowszej wiadomości');
+        chatPane.scrollTop = 0;
+        await wait(300);
+        assert(chatPane.scrollTop === chatPane.scrollHeight - chatPane.clientHeight, 'Ciągłe pilnowanie naprawia zatrzymany czat');
+        chatFixture.remove();
         assert(document.querySelector('#qaddons-quick-seller')?.textContent === 'SPR', 'Przycisk Sprzedawczyka');
         let sellCycles = 0;
         Engine.shop = { greatMerchant() {}, basket: { finalize() { sellCycles++; } } };
@@ -394,7 +405,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: eleven addons, night mode, enhancer item preview, compact party, reminder, loot chances, native relogging, quick seller, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: twelve addons, forced chat bottom, safe native relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {

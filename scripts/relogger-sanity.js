@@ -82,13 +82,13 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         Engine.serverStorage = { get: () => undefined };
         manager.changeSettings('relogger', { selectedWorld: 'fobos' });
         assert(bar().querySelectorAll('.qr-card').length === 9, 'Brak timerów nie blokuje postaci');
-        Engine.changePlayer = { id: null, changePlayerRequest(id) { this.id = id; setTimeout(() => { Engine.hero = { d: { id } }; this.id = null; }, 10); } };
+        Engine.changePlayer = { id: null, changePlayer(id) { this.id = id; setTimeout(() => { Engine.hero = { d: { id } }; this.id = null; }, 10); }, changePlayerRequest() { throw new Error('Pominięto natywną ścieżkę changePlayer'); } };
         bar().querySelector('[data-hero="2"]').click();
         const disabledDuringRelog = [...bar().querySelectorAll('.qr-card')].map(button => button.disabled);
         assert(disabledDuringRelog.every(Boolean), `Kafelki są blokowane tylko podczas zmiany postaci: ${disabledDuringRelog.join(',')} / ${bar().querySelector('.qr-status').textContent}`);
         await wait(1050);
         assert([...bar().querySelectorAll('.qr-card')].every(button => !button.disabled) && bar().querySelector('[data-hero="2"]')?.getAttribute('aria-current') === 'true', 'Kafelki odblokowują się po zmianie postaci');
-        Engine.changePlayer = { id: null, changePlayerRequest() { this.id = 5; setTimeout(() => { this.id = null; }, 10); } };
+        Engine.changePlayer = { id: null, changePlayer() { this.id = 5; setTimeout(() => { this.id = null; }, 10); }, changePlayerRequest() { throw new Error('Pominięto natywną ścieżkę changePlayer'); } };
         bar().querySelector('[data-hero="5"]').click();
         assert([...bar().querySelectorAll('.qr-card')].every(button => button.disabled), 'Kafelki są zablokowane, gdy okno zmiany postaci jest otwarte');
         await wait(1050);

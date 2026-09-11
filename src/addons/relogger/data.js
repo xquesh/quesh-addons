@@ -51,6 +51,11 @@ export function relogTarget(hero, page) {
 }
 export function changeCharacter(hero, page, navigate = url => page.location.replace(url)) {
     const target = relogTarget(hero, page);
+    if (typeof page.Engine?.changePlayer?.changePlayer === 'function') {
+        page.Engine.changePlayer.changePlayer(Number(target.id));
+        return 'native';
+    }
+    if (page.Engine?.logOff) throw new Error('Trwa już wylogowywanie. Anuluj je przed zmianą postaci.');
     if (typeof page.Engine?.changePlayer?.changePlayerRequest === 'function') {
         page.Engine.changePlayer.changePlayerRequest(Number(target.id));
         return 'native';
