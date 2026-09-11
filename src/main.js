@@ -55,6 +55,10 @@ page.__MARGONEM_TOOLKIT__ = toolkit;
 
 function start() {
     if (destroyed) return;
+    if (page.Engine?.allInit !== true) {
+        scheduler.timeout(start, 100);
+        return;
+    }
     try {
         const settings = createSettings(window.localStorage, importLegacy);
         panel = createPanel(settings, styles, createScheduler(), events);

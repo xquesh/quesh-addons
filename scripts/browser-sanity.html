@@ -46,6 +46,7 @@
     window.addEventListener('unhandledrejection', event => fixtureErrors.push(String(event.reason)));
     localStorage.removeItem('margonem_toolkit_settings');
     window.Engine = {
+        allInit: false,
         ev: 1000,
         items: {
             items: { bag: { id: 777, name: 'Torba podróżna', stat: 'rarity=normal' } },
@@ -87,6 +88,10 @@
     async function run() {
         const assert = (condition, message) => { if (!condition) throw new Error(message); };
         const wait = delay => new Promise(resolve => setTimeout(resolve, delay));
+        const runtimeDeadline = Date.now() + 3000;
+        while (!window.__MARGONEM_TOOLKIT__ && Date.now() < runtimeDeadline) await wait(20);
+        assert(window.__MARGONEM_TOOLKIT__ && !window.__MARGONEM_TOOLKIT__.addons, 'QADDONS czeka na pełne Engine.allInit');
+        Engine.allInit = true;
         const startupDeadline = Date.now() + 5000;
         while (!window.__MARGONEM_TOOLKIT__?.addons && Date.now() < startupDeadline) await wait(20);
         assert(window.__MARGONEM_TOOLKIT__?.addons, 'Loader uruchomił runtime w kontekście strony');
