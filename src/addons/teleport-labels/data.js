@@ -5,6 +5,8 @@ export const DEFAULTS = Object.freeze({
     color: '#ffffff',
     bold: true,
     shadow: 'outline',
+    shadowColor: '#000000',
+    shadowStrength: 3,
     position: 'bottom'
 });
 
@@ -75,6 +77,45 @@ function initials(value) {
     return sanitizeLabel(words.length > 1 ? words.map(word => [...word][0]).join('') : words[0] || 'TP');
 }
 
+function plainText(value) {
+    return String(value || '')
+        .replace(/<\s*(?:br|\/div|\/p)\s*\/?>/gi, '\n')
+        .replace(/<[^>]*>/g, ' ')
+        .replaceAll('&nbsp;', ' ').replaceAll('&oacute;', 'ó').replaceAll('&Oacute;', 'Ó')
+        .replaceAll('&amp;', '&').replaceAll('&lt;', '<').replaceAll('&gt;', '>')
+        .replace(/[ \t]+/g, ' ');
+}
+
+function destinationLabel(value) {
+    const words = String(value || '').trim().replace(/[.,:;!?]+$/, '').match(/\p{L}+/gu) || [];
+    if (!words.length) return '';
+    if (words.length === 1) return sanitizeLabel([...words[0]].slice(0, 3).join(''));
+    return sanitizeLabel(words.map(word => [...word][0]).join(''));
+}
+
+export function destinationFromItem(item) {
+    let tip = '';
+    try {
+        const data = item?.getTipData?.();
+        tip = Array.isArray(data) ? data[0] : data;
+    } catch {}
+    const sources = [item?.name, item?.description, item?.desc, item?.tip, item?.tooltip, tip];
+    const patterns = [
+        /teleportuje(?:\s+(?:postać|gracza|cię))?\s+na\s+mapę\s*:?\s*([^\n\r<(]+)/iu,
+        /teleportuje(?:\s+(?:postać|gracza|cię))?\s+do(?:\s+mapy)?\s*:?\s*([^\n\r<(]+)/iu,
+        /teleportując\p{L}*\s+(?:do|na)\s+([^\n\r<(]+)/iu,
+        /teleportacji\s+(?:do|na)\s+([^\n\r<(]+)/iu
+    ];
+    for (const source of sources) {
+        const text = plainText(source);
+        for (const pattern of patterns) {
+            const match = text.match(pattern);
+            if (match?.[1]) return match[1].trim();
+        }
+    }
+    return '';
+}
+
 export function labelForItem(item, customLabels = {}) {
     const target = teleportTarget(item);
     if (!target) return '';
@@ -82,7 +123,7 @@ export function labelForItem(item, customLabels = {}) {
     const custom = sanitizeLabel(customLabels?.[customKey]);
     if (custom) return custom;
     if (target.type === 'summon') return sanitizeLabel(SUMMON_LABELS[target.key] || initials(target.key));
-    return sanitizeLabel(MAP_LABELS[target.key] || 'TP');
+    return sanitizeLabel(MAP_LABELS[target.key] || destinationLabel(destinationFromItem(item)) || 'TP');
 }
 
 export function parseCustomLabels(value) {

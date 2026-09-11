@@ -18,7 +18,9 @@ export function createTeleportLabels() {
                     <label class="ln-field">Pozycja<select data-setting="position"><option value="bottom">Na dole</option><option value="top">Na górze</option></select></label>
                     <label class="ln-field">Rozmiar (7–14 px)<input type="number" min="7" max="14" data-setting="fontSize"></label>
                     <label class="ln-field">Kolor<input type="color" data-setting="color"></label>
-                    <label class="ln-field">Cień<select data-setting="shadow"><option value="outline">Czarny obrys</option><option value="soft">Miękki cień</option><option value="none">Brak</option></select></label>
+                    <label class="ln-field">Cień / poświata<select data-setting="shadow"><option value="outline">Obrys</option><option value="soft">Miękki cień</option><option value="glow">Poświata</option><option value="none">Brak</option></select></label>
+                    <label class="ln-field">Kolor cienia / poświaty<input type="color" data-setting="shadowColor"></label>
+                    <label class="ln-field">Siła (0–12)<input type="number" min="0" max="12" data-setting="shadowStrength"></label>
                 </div><h2>Własne podpisy</h2><p>Każdy wpis umieść w nowej linii: <strong>ID_MAPY=PODPIS</strong>. Dla przywołania użyj <strong>name:Nazwa herosa=PODPIS</strong>. Maksymalnie 8 znaków.</p>
                 <div class="ln-grid"><label class="ln-field ln-full">Lista własnych podpisów<textarea data-custom rows="8" spellcheck="false" placeholder="1224=KEND\nname:Domina Ecclesiae=DOMI"></textarea></label>
                     <button class="ln-btn" type="button" data-save>Zapisz własne podpisy</button><button class="ln-btn" type="button" data-clear>Wyczyść własne podpisy</button>

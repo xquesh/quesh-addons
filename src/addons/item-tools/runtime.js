@@ -118,10 +118,10 @@ export function startItemTools(ctx) {
                 const textStyle = bonusStyle(settings);
                 canvas.font = bonusFont(textStyle);
                 canvas.fillStyle = textStyle.color; canvas.textAlign = 'right'; canvas.textBaseline = 'bottom';
-                canvas.shadowColor = '#000'; canvas.shadowBlur = textStyle.shadow === 'soft' ? 3 : 0;
+                canvas.shadowColor = textStyle.shadowColor; canvas.shadowBlur = ['soft', 'glow'].includes(textStyle.shadow) ? textStyle.shadowStrength : 0;
                 canvas.shadowOffsetX = 0; canvas.shadowOffsetY = textStyle.shadow === 'soft' ? 1 : 0;
                 if (textStyle.shadow === 'outline') {
-                    canvas.strokeStyle = '#000'; canvas.lineWidth = 2; canvas.lineJoin = 'round';
+                    canvas.strokeStyle = textStyle.shadowColor; canvas.lineWidth = 2; canvas.lineJoin = 'round';
                     canvas.strokeText(bonus.short, x - 2, y);
                 }
                 canvas.fillText(bonus.short, x - 2, y);

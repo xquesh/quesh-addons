@@ -143,10 +143,10 @@
         assert(document.querySelectorAll('.mtk-addon').length === 18, 'Manager osiemnastu addonów');
         const teleportIcon = document.createElement('div');
         teleportIcon.className = 'item item-id-2001'; document.body.append(teleportIcon);
-        Engine.communication.parseJSON({ item: { 2001: { id: 2001, name: 'Kamień teleportujący', stat: 'teleport=1224,10,20' } } });
+        Engine.communication.parseJSON({ item: { 2001: { id: 2001, name: 'Kamień teleportujący do Ithan', stat: 'teleport=99999,10,20' } } });
         await wait(40);
-        assert(teleportIcon.querySelector('.qaddons-teleport-label')?.textContent === 'KEND', 'Podpisownik oznacza znany teleport');
-        manager.changeSettings('teleport-labels', { customLabels: { 1224: 'BAZA' } }); await wait(40);
+        assert(teleportIcon.querySelector('.qaddons-teleport-label')?.textContent === 'ITH', 'Podpisownik wyciąga cel nieznanego teleportu z nazwy');
+        manager.changeSettings('teleport-labels', { customLabels: { 99999: 'BAZA' } }); await wait(40);
         assert(teleportIcon.querySelector('.qaddons-teleport-label')?.textContent === 'BAZA', 'Podpisownik odświeża własny podpis');
         teleportIcon.remove();
         const shortcutBar = document.querySelector('#qaddons-shortcut-bar');

@@ -84,6 +84,17 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         context.strokeText = function(...args) { outlined = this.lineWidth === 2 && this.strokeStyle === '#000000'; return strokeText.apply(this, args); };
         drawable.draw(context); context.strokeText = strokeText;
         assert(outlined, 'Obrys bonusu na mapie');
+        const shadowColorInput = settings.querySelector('[data-setting="bonusShadowColor"]');
+        const shadowStrengthInput = settings.querySelector('[data-setting="bonusShadowStrength"]');
+        shadowColorInput.value = '#ffffff'; shadowColorInput.dispatchEvent(new Event('input', { bubbles: true }));
+        shadowStrengthInput.value = '5'; shadowStrengthInput.dispatchEvent(new Event('input', { bubbles: true }));
+        shadowInput.value = 'glow'; shadowInput.dispatchEvent(new Event('change', { bubbles: true }));
+        await wait(150);
+        assert(getComputedStyle(badge()).textShadow.includes('rgb(255, 255, 255)'), 'Biała poświata bonusu w CSS');
+        let glowing = false;
+        context.fillText = function(...args) { glowing = this.shadowColor === '#ffffff' && this.shadowBlur === 5; return fillText.apply(this, args); };
+        drawable.draw(context); context.fillText = fillText;
+        assert(glowing, 'Wybrany kolor i siła poświaty bonusu na mapie');
         shadowInput.value = 'none'; shadowInput.dispatchEvent(new Event('change', { bubbles: true }));
         await wait(150);
         assert(getComputedStyle(badge()).textShadow === 'none', 'Można wyłączyć cień');

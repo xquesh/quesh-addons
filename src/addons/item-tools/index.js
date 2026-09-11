@@ -38,7 +38,9 @@ function renderSettings(ctx) {
                 <label class="ln-field">Czcionka<select data-setting="bonusFont">${Object.keys(BONUS_FONTS).map(font => `<option>${font}</option>`).join('')}</select></label>
                 <label class="ln-field">Rozmiar (7–18 px)<input type="number" min="7" max="18" step="1" data-setting="bonusSize"></label>
                 <label class="ln-field">Kolor tekstu<input type="color" data-setting="bonusColor"></label>
-                <label class="ln-field">Cień tekstu<select data-setting="bonusShadow"><option value="none">Brak</option><option value="soft">Miękki czarny cień</option><option value="outline">Czarny obrys liter</option></select></label>
+                <label class="ln-field">Cień / poświata<select data-setting="bonusShadow"><option value="none">Brak</option><option value="soft">Miękki cień</option><option value="outline">Obrys liter</option><option value="glow">Poświata</option></select></label>
+                <label class="ln-field">Kolor cienia / poświaty<input type="color" data-setting="bonusShadowColor"></label>
+                <label class="ln-field">Siła (0–12)<input type="number" min="0" max="12" step="1" data-setting="bonusShadowStrength"></label>
                 <div><label class="ln-switch"><input type="checkbox" data-setting="bonusBold">Pogrubienie</label><label class="ln-switch"><input type="checkbox" data-setting="bonusItalic">Kursywa</label></div>
                 <button class="ln-btn" type="button" data-reset-bonus>Przywróć wygląd tekstu</button>
             </div>

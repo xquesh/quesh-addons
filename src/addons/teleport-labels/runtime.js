@@ -29,12 +29,12 @@ export function startTeleportLabels(ctx) {
     let frame = 0;
     ctx.styles.set('runtime', teleportLabelsCss(ctx.settings));
 
-    function remember(items) {
+    function remember(items, replace = false) {
         for (const [fallback, item] of Object.entries(items || {})) {
             const id = itemId(item, fallback);
             if (!id) continue;
             if (item?.del) cache.delete(id);
-            else cache.set(id, { ...(cache.get(id) || {}), ...item, id: Number(id) });
+            else cache.set(id, replace ? item : { ...(cache.get(id) || {}), ...item, id: Number(id) });
         }
     }
 
@@ -50,7 +50,7 @@ export function startTeleportLabels(ctx) {
 
     function sync() {
         frame = 0;
-        remember(Object.fromEntries(engineItems(page).map((item, index) => [itemId(item, index), item])));
+        remember(Object.fromEntries(engineItems(page).map((item, index) => [itemId(item, index), item])), true);
         const active = new Set();
         if (ctx.settings.labels !== false) for (const [id, item] of cache) {
             const label = labelForItem(item, ctx.settings.customLabels);

@@ -2,12 +2,14 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { abbreviation, legendaryBonus, BONUSES, imageUrl, defaults } from '../src/addons/item-tools/data.js';
 import { createTooltipTools } from '../src/addons/item-tools/tooltip.js';
-import { bonusStyle } from '../src/addons/item-tools/bonus-style.js';
+import { bonusShadow, bonusStyle } from '../src/addons/item-tools/bonus-style.js';
 assert.equal(bonusStyle({}).size, 9);
 assert.equal(bonusStyle({ bonusSize: 99 }).size, 18);
 assert.equal(bonusStyle({ bonusSize: -4 }).size, 7);
 assert.equal(bonusStyle({ bonusColor: 'red;display:none', bonusFont: '__proto__' }).color, '#ffffff');
 assert.equal(bonusStyle({ bonusFont: '__proto__' }).family, 'Arial, sans-serif');
+assert.equal(bonusStyle({ bonusShadowColor: 'red;bad' }).shadowColor, '#000000');
+assert.match(bonusShadow(bonusStyle({ bonusShadow: 'glow', bonusShadowColor: '#ffffff', bonusShadowStrength: 5 })), /0 0 10px #ffffff/);
 for (const [name, result] of [['Krytyczna osłona', 'KO'], [' Cios  bardzo krytyczny ', 'CBK'], ['Oślepienie', 'OŚ'], ['Klątwa', 'KL'], ['Ochrona żywiołów', 'OŻ']]) assert.equal(abbreviation(name), result);
 for (const [code, name] of Object.entries(BONUSES)) {
     assert.deepEqual(legendaryBonus({ stat: `rarity=legendary;legbon=${code}` }), { name, short: abbreviation(name) });
