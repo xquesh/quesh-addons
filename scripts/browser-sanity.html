@@ -140,7 +140,7 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 18, 'Manager osiemnastu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 21, 'Manager dwudziestu jeden addonów');
         const teleportIcon = document.createElement('div');
         teleportIcon.className = 'item item-id-2001'; document.body.append(teleportIcon);
         Engine.communication.parseJSON({ item: { 2001: { id: 2001, name: 'Kamień teleportujący do Ithan', stat: 'teleport=99999,10,20' } } });
@@ -151,7 +151,7 @@
         teleportIcon.remove();
         const shortcutBar = document.querySelector('#qaddons-shortcut-bar');
         assert(shortcutBar && document.querySelector('#qaddons-pocket-berserk')?.parentElement === shortcutBar, 'Przyciski dodatków trafiają na wspólną belkę');
-        assert(shortcutBar.querySelectorAll('[data-qsb-hidden="false"]').length === 5, 'Belka domyślnie pokazuje pięć skrótów akcji');
+        assert(shortcutBar.querySelectorAll('[data-qsb-hidden="false"]').length === 6, 'Belka domyślnie pokazuje sześć skrótów akcji');
         const nightShortcut = shortcutBar.querySelector('[data-qsb-addon="night-mode"]');
         nightShortcut.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 2 }));
         assert(document.querySelector('#mtk-content h2')?.textContent === 'Tryb nocny', 'PPM otwiera konfigurację konkretnego dodatku');
@@ -173,6 +173,26 @@
         assert(shortcutBar.offsetLeft === lockedLeft, 'Blokada uniemożliwia przesunięcie belki');
         manager.changeSettings('shortcut-bar', { showHandle: false }); await wait(30);
         assert(getComputedStyle(grip).display === 'none', 'Ustawienie ukrywa uchwyt przenoszenia belki');
+        const garbagePanel = document.querySelector('#qaddons-garbage-truck');
+        document.querySelector('#qaddons-garbage-truck-button').click(); await wait(20);
+        assert(garbagePanel && !garbagePanel.hidden && garbagePanel.textContent.includes('<b>Stary przedmiot</b>'), 'Śmieciara pokazuje wygasły przedmiot jako bezpieczny tekst');
+        garbagePanel.querySelector('[data-cancel]').click();
+        assert(garbagePanel.hidden, 'Śmieciara nie niszczy przedmiotu bez potwierdzenia');
+        Engine.hero = { d: { id: 7, lvl: 190, prof: 'w', x: 10, y: 10 } };
+        Engine.communication.parseJSON({ skill_data: { 11: { name: 'Atak', pos: 1, maxLvl: 5 } }, skill_list: { 11: { lvl: 2 } }, skill_set: 1, battleskills: { list: [3, 4], cur: 2, rpt: 1 } });
+        document.querySelector('#qaddons-skill-set-button').click();
+        document.querySelector('#qaddons-skill-set [data-export]').click(); await wait(20);
+        const exportedSkills = JSON.parse(document.querySelector('#qaddons-skill-set [data-text]').value);
+        assert(exportedSkills.prof === 'w' && exportedSkills.skills[0]['11'] === 2 && exportedSkills.mastery.skills.length === 2, 'Zapisz zestaw UM eksportuje umiejętności i mistrzostwo');
+        Engine.communication.parseJSON({ builds: { action: 'INIT', currentId: 1, list: [{ id: 1, name: 'EXP', skillsLearnt: 20, skillsTotal: 30 }, { id: 2, name: 'PvP', skillsLearnt: 30, skillsTotal: 30 }], listToBuy: [] } });
+        await wait(20);
+        assert(document.querySelectorAll('#qaddons-build-switcher [data-build]').length === 2, 'Zmieniacz zestawów wyświetla zestawy gry');
+        const buildCommands = []; const commandBeforeBuilds = window._g;
+        window._g = command => { buildCommands.push(command); if (command.includes('updateCurrent&id=2')) setTimeout(() => Engine.communication.parseJSON({ builds: { action: 'UPDATE_CURRENT_ID', currentId: 2 } }), 0); };
+        document.querySelector('#qaddons-build-switcher [data-build="2"]').click(); await wait(30);
+        assert(buildCommands.some(command => command.includes('builds&action=updateCurrent&id=2')), 'Zmieniacz wysyła natywne polecenie zmiany zestawu');
+        assert(document.querySelector('#qaddons-build-switcher [data-build="2"]').dataset.selected === 'true', 'Zmieniacz potwierdza aktywny zestaw z odpowiedzi gry');
+        window._g = commandBeforeBuilds;
         const quickGroupCommands = [];
         const commandBeforeQuickGroup = window._g;
         window._g = command => quickGroupCommands.push(command);
@@ -594,7 +614,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: eighteen addons, teleport labels, quick group, shortcut bar, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: twenty-one addons, garbage truck, saved skill sets, build switcher, teleport labels, quick group, shortcut bar, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {

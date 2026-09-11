@@ -25,6 +25,9 @@ import { createPocketBerserk } from './addons/pocket-berserk/index.js';
 import { createShortcutBar } from './addons/shortcut-bar/index.js';
 import { createQuickGroup } from './addons/quick-group/index.js';
 import { createTeleportLabels } from './addons/teleport-labels/index.js';
+import { createGarbageTruck } from './addons/garbage-truck/index.js';
+import { createSkillSet } from './addons/skill-set/index.js';
+import { createBuildSwitcher } from './addons/build-switcher/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -84,6 +87,9 @@ function start() {
         manager.register(createPocketBerserk());
         manager.register(createQuickGroup());
         manager.register(createTeleportLabels());
+        manager.register(createGarbageTruck());
+        manager.register(createSkillSet());
+        manager.register(createBuildSwitcher());
         manager.register(createShortcutBar());
         panel.connect(manager);
         manager.start();

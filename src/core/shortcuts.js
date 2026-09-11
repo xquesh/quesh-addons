@@ -15,7 +15,10 @@ export const SHORTCUTS = Object.freeze([
     { id: 'clan-online', label: 'KL', buttonId: 'qaddons-clan-online-button', defaultVisible: true },
     { id: 'pocket-berserk', label: 'BR', buttonId: 'qaddons-pocket-berserk', defaultVisible: true },
     { id: 'quick-group', label: 'SG', buttonId: 'qaddons-quick-group', defaultVisible: true },
-    { id: 'teleport-labels', label: 'POD' }
+    { id: 'teleport-labels', label: 'POD' },
+    { id: 'garbage-truck', label: 'ŚM', buttonId: 'qaddons-garbage-truck-button' },
+    { id: 'skill-set', label: 'UM', buttonId: 'qaddons-skill-set-button' },
+    { id: 'build-switcher', label: 'ZES', buttonId: 'qaddons-build-switcher-button', defaultVisible: true }
 ]);
 
 const BY_ID = new Map(SHORTCUTS.map(shortcut => [shortcut.id, shortcut]));

@@ -6,6 +6,7 @@ import './check-clan-online.mjs';
 import './check-pocket-berserk.mjs';
 import './check-quick-group.mjs';
 import './check-teleport-labels.mjs';
+import './check-new-addons.mjs';
 import { selectedChannels, buttonLabel } from '../src/addons/detector-global/channels.js';
 assert.deepEqual(selectedChannels({}), ['LOCAL']);
 assert.deepEqual(selectedChannels({ channels: [] }), []);

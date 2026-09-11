@@ -1,0 +1,11 @@
+export const BUILD_SWITCHER_CSS = `
+#qaddons-build-switcher-button{position:fixed;left:8px;bottom:68px;z-index:31000;width:32px;height:26px;border:1px solid #666;border-radius:0;background:#050505;color:#ddd;font:700 9px Arial;cursor:pointer}
+#qaddons-build-switcher-button:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px #fff8}
+#qaddons-build-switcher{position:fixed;left:calc(50% - 150px);top:120px;z-index:32020;width:300px;border:1px solid #777;background:#000;color:#ddd;box-shadow:0 5px 20px #000;font:11px Arial}
+#qaddons-build-switcher[hidden]{display:none}#qaddons-build-switcher header{display:flex;align-items:center;justify-content:space-between;height:27px;padding:0 7px;border-bottom:1px solid #555;font-weight:700}
+#qaddons-build-switcher header span:last-child{display:flex;align-items:center;gap:4px}#qaddons-build-switcher header button{border:0;background:none;color:#ddd;font-size:15px;cursor:pointer}#qaddons-build-switcher [data-buy]{font-size:18px}.qbs-grid{display:grid;grid-template-columns:repeat(var(--qbs-columns),minmax(0,1fr));gap:4px;padding:7px}
+.qbs-build{height:27px;min-width:0;border:1px solid #555;border-radius:0;background:#0b0b0b;color:#ddd;font:700 10px Arial;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.qbs-build:hover{border-color:#fff;box-shadow:0 0 6px #fff6}.qbs-build[data-selected="true"]{border-color:#fff;background:#202020;color:#fff}.qbs-build[data-hidden="true"]{opacity:.32}
+.qbs-menu{display:flex;gap:4px;padding:0 7px 7px}.qbs-menu[hidden]{display:none}.qbs-menu button{flex:1;height:24px;border:1px solid #555;border-radius:0;background:#090909;color:#ddd;font:700 9px Arial;cursor:pointer}.qbs-menu button:hover{border-color:#fff}.qbs-status{min-height:13px;padding:0 7px 7px;color:#999}
+.qbs-purchase{display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;margin:0 7px 7px;padding:5px;border:1px solid #444}.qbs-purchase[hidden]{display:none}.qbs-purchase button{height:23px;border:1px solid #666;border-radius:0;background:#0b0b0b;color:#eee;font:700 9px Arial;cursor:pointer}
+.qbs-preview{display:flex;flex-wrap:wrap;gap:3px;min-height:34px;padding:5px;border:1px solid #333;background:#080808}.qbs-preview .item{position:relative!important;left:auto!important;top:auto!important}
+`;

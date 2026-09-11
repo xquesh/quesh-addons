@@ -323,7 +323,7 @@
     let layoutFrame = 0;
     let latestSettings = null;
     const pending = /* @__PURE__ */ new Set();
-    function packets(packet) {
+    function packets2(packet) {
       return Array.isArray(packet) ? packet.flat(Infinity) : [packet];
     }
     function settleRequests(packet) {
@@ -336,7 +336,7 @@
         return clone;
       };
       for (const request2 of [...pending]) {
-        const match = packets(packet).find((data) => {
+        const match = packets2(packet).find((data) => {
           try {
             return request2.match(data);
           } catch {
@@ -354,7 +354,7 @@
     }
     function publish(packet) {
       events2.emit("gamePacket", packet);
-      for (const data of packets(packet)) {
+      for (const data of packets2(packet)) {
         if (data?.settings) latestSettings = data;
         if (!data?.loot) continue;
         if (data.loot.init !== void 0) {
@@ -479,7 +479,10 @@
     { id: "clan-online", label: "KL", buttonId: "qaddons-clan-online-button", defaultVisible: true },
     { id: "pocket-berserk", label: "BR", buttonId: "qaddons-pocket-berserk", defaultVisible: true },
     { id: "quick-group", label: "SG", buttonId: "qaddons-quick-group", defaultVisible: true },
-    { id: "teleport-labels", label: "POD" }
+    { id: "teleport-labels", label: "POD" },
+    { id: "garbage-truck", label: "ŚM", buttonId: "qaddons-garbage-truck-button" },
+    { id: "skill-set", label: "UM", buttonId: "qaddons-skill-set-button" },
+    { id: "build-switcher", label: "ZES", buttonId: "qaddons-build-switcher-button", defaultVisible: true }
   ]);
   var BY_ID = new Map(SHORTCUTS.map((shortcut) => [shortcut.id, shortcut]));
   function shortcutFor(id) {
@@ -829,7 +832,7 @@
   var quesh_default = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAABVCAYAAAAfWymyAAAujUlEQVR4nL28+ZNk2XUe9t3trbnX2t3V0zM9GxoYYSNGELSQDIkhKcI/GSRMKRwO2QphADpk2n+KTYoOS2DI1k+STYIUQ6EIi+EIiZYpUIIwwAyA2Xt6qe5aMiv3t97t+If3Mrt6egaYgWDfiOrqqszKzPe9c8/yne9chp/D+o1XXoFSEowxcMYB9ugxIoCIQCD2EX9OAGPU/rB9EgMYGIEBjDEwMBARvPfQWuN/+Uf/6Ofx0T90yf/PXvnR2lwnXfo/+8DDrH38o55P+P9xfdTd+1jrN175OqRSkEKAsUcvRc0/DCA451HXNbPOhUSkiIgTEfNEm0ul7T8AOGdgnDMGZhljtRDcBEEApVRragSizffGcn77d/7n/5TLeGL9TKB885VXoKSEkOKD22XzudtvBGMMsixPqrq+qrXe854i7730zsMTeQa2vUwwQHDBhBSQUmZSyjMl5cMkTUwUhow/2mXbN9kA5JzHb//O7/wsl/PE+sTb55uvvIIwDMEYwFpAnPPMOYfWCjgBjIgYqPnOuegDeLEoyy8bbXcJEOSgPBwxai+MA4wx4lwwxpnp9/vvBUHwHSnlnAhlXWsGkG/RIAY4MAbOGKQQ4Jz/XAD5mUCRSjWOr/liRAStDS/KIrXWdbz3MREx770nAFJKLjjfNcZ+cb3OflnX5pALHnImU++9JG8Z55xxKUBEnoCCiJbdbneXCzkBYxdVVdV1rck5yzlnjDHmGGNrwdhSBYFNkwRKKfz3v/nfwf8cLOYTbZ9vfuMbCIIAQojN3zLnPNV1HZVl9YzW+lat9Q3GWEhEjDHGlVKBVGrEGftznPPPe+8TxpggIlYUBfI8h1IKaZoijmMopUhK6YjouKrr73jv7xitS20Mc9YSYwDnbKmkep1z/kMpxTyJkyb6cQ4GwDn3nwTMJ7YUzjkYY3CuCY1EFAHoSilvrrPsr4/H488JIXpCyj7nPOScqyAI5OHBQbi/vy+UUgQAxhg/m83AGEMcxxiNRhiNRkiShHU6HXk+Hj99+/btvbOzMwuC8+SttXZN3tVRGJ7u7e35IAgfAGSMtZV1zgZKQSq5uWk/8/rYlvLNb34TcRyDtSHUGEN5UXRBdMQ4f9Y5/5erqvqlPM9f6na7cZIkQkoJzjmCIMDu7oh2d3cBgIwxrCxLzGYzzGYzhGGIXq+HXq+HTqeDTqeDxWKB09NTzOdLxjmHEAJFUbj1el0ZrR90e71/K6X410T0Hnl/6pw7iePIxXHcgNJGpv/pt3/7E4PysS1lA4jzDt558t5LJVXfWvvZPCt+hQv+0nA4/Mz169c7Ozs7tLe35+M4RhtOISVnUkrUdc1XqxVJKUFEW8sLguCx9xuNRhgOhxBCeSklgiDAdDrlJycnydnZ2ZUsyz6/Wq2HURT+mRTy/yGiC2tdqbWBlB5SyJ/Z+f5UUH7jm98E0GSV5Am61qyq60QpNRRCPOMN/cJiMf/z/cHghX6/H12/fo2uXbuGo6MjFoYhnHNwzqGua9R1jaqqyDkHYwyICEKI7ePWWhARnHPY3d3F/v4+dnZ2WBRFSJIEZ2dn6HQSBIHsvfPOe7fG4/PRaLTDOp107D1d1LVeWmsXUkqTpo2f+cbXv45/+K1v/XxB2SwGBg+CdS402tzwzr8Exr4QhuHLL7z44vM7OzvR4eGhPzjYYzs7O0iSBOfn5+ydd97BvXv3tkBorVEUBcqyhNYaxhh47wFgu9WUUrhx4wZeeOEFcM7R6XQAAEopHB4egjFGRVGl0+n0qnduXRTlXwMwUFL+yHn2mvd+Gsdxc4FKfSJAPhYom4wVbSpORIF17npe5H95vc5e/tSnXrj13HM3493dXb+3t8eGwyGSJEEcx5hMJv7P/uzP2He+8x201w3vfZuJNlZB1NQ0ALZZMeccy+USURSh1+sRACalRBiGODw8RKfTwcXFBfX73WgymT69XK0ixtiV4XDolJS3HcOM2hf9WZzuTwdFNoUeWJNCMjAOILbW7Vlrn4vjuL+zs0NSSvbgwQPcvn0bQRAgCAJ644032P3797FcLsH5pajAGECu2ZLUALX5aoAijMdjvPvuu7DWsk6ng263izAMoZSCcw6z2QxJklC3q/tFUaCu65K87xNIbAsHagD+H37zN/E//tZv/fxAYWh8iXWWOe8EkVftB5dCiDSKIhoMBhiPx/jBD36A27dvQwgBziVWqxUuLmaIogSqAQqcc3gG8LZ6BgBr7XYrUQvOcrnGW2+9g4cPT6GU2v4t50AQBOj3++j3+zDG0XqVp1rrwNN2cWOsa3IaASEEfvPv/3381j/4Bz8fUAA09UuehUS0450fOeeuCyGuSykjoqa+mUwmeOutt+jVV19lANjGMsIwbLZBv49utwsIjrYkAOccigtYa7eO2BoDay3KssTZ2Rnu3r0LzjmICIwxeG+Rpilu3bqFTqcDIQSpQMhAqR1r7YBzdgAiWxT5siiwiuMYSZKAMYav/72/t72mb/3u735yUL7xyjcglQSB4LxDVVUDY8xLWusvcS7+ehCoL2gN3LlzD8vlGpPJBPP5kkVRAiklCdm8tPceXAhcu3YNt27dAhFhuVyiqir0ej0M+t02GXTQWiPPcxRFgdPTUxwfH2M8HrcWwtutJUBEmEwmAAAhBPPeI06ioTH1X9K6DoJAfdc5+xoYe1dKqTeAftz1oaC88sorTWbIxfbCrLVhlmUvTafTr6Zp+vk0TTnnnO7cuYPvf//723AaxzHCMEQQhjDGoCgKCCFw/fp1vPzyy7DW4uTkBKvVCteuXcPRtSsIggAbi1ssFlgsFnjzzTdRFAUWiwU2ydsmXHvvMZlMcHFxgX6/j93dXep0Oqqu65en09n1NE3iXrd7JpW8vfFTeJyz+eSgAHhECTSVLrzzwhjT1Vpf01rzqqq8UoqtswxFWW5zjiAIMByNsLe3B6UUvDOI4xjXj64iChUQKuzv7aDXTTEY9CClRBRFiKIIQgjEcYw4jnG5LtrwJnmeY7lcIsuy7Z03xiHLChhjqKqqoCyLPSnFjo6imDHGPfnNJX1souqjfUrznozQOC7nnXfOMSFEUpbl1gK4UOh2u7DWwhgDzjlGoxFeeOEFDIdDJHG4vdCyLKGUQr/fx2g0grUW6/UaALbAdLtdcM6htQYA7O7uoixL1HWN09NTOOdQliWCIEAYhiBiyLIMi4VmnPONJTFrLYQQ8J5aS/n45N2HgiJlk/C0AYITEWszU8Y5F+22YACws7eL0c4A3ntUVYUoCHF07Qqef+4mrly5guFwiCiKMJ1OcXFxASEE+v0+kiTBarXCcrmEtRbeezDGEEURlFLgnCOOY+zu7iLLMqzXawghUNc1nHPbbbrOCkwmEyryNYuiCExw5ryDdRbCiSbMtzSWCgL4NsP+WKD8N3/37z4yEtYmJZ7g4AgAE0KwDZnBGINSisIwZIeHh3jmmWc2kQBpnODGjRt46qmnMBqN0O12IYRAlmVbZ9kALzEcDjEYDGCtRVVVqKoK3W4XvV7vsedu8pvNaxZFAeccrLV4eHIGIo9zqyGlhAeBcc44F5BCsiZiERxce20c3/rdf/jJLQUAyBOMNdwaK4h8HARBGMdJWlWV4JwjDEOkaYqrh1fwqRdexOHhIfr9/mOVbpIkSJIERIQNTbBZQgj0ej2kaYrZbIYHDx4gyzLEcYw0TVt2j23/xjmH4XCITqcDpRSWyyWWy2VjLasFm8+mmzqKxWEUp0mSBkGQMsZcVVU1AygIwo+V4T4BCtv4EU+oyopXVXlNCHHkvX8xTZNbQaDkYDAgIQTrdrt45plncPXqVezv72/L/01uYq3FbDbDer3Gw4cPcXp6Cmstjo+P0e128eKLL+LFF1/c+pOWn4HWesuzANhmuRuKIYqixxxylmWQUsJaS845FYbhU4yxL0opc+/9/TzP3yfv816fgwuOv/N3/uvHrvmf/JP/7SeDQg3f3IQ/7wKt9VPOuV8pivJL+/t7Xzw4OOBKKR/HMet2u7h+/Tr29va2d30DSFv74Pj4GMfHxzg7O8Pp6SmWyyXW6zWiKAJjDDdu3EAQBOh2u9sEbfP4I2fa/F4IgTRNEQRBk/9wjqOjIwDAaHeHiqJguqr5arU6mkwmv1jX9QEI/ycRjT353HsPENqI5mHth/uWD90+ja8meO+Z1qa/Xq9emk6nL+/sjHZ2dnZoZ2eHdTod9Hq9LWPW6XS2F8E5h7UW8/kc77//Pt566y3MZjNMp1NMJhOcn59vc5fPfOYzGA6HUEqh1+ttc5V+v7+1BmMM6rqGEGILFtDUNc45cM7R7fdYlmXI1xnduXOnk+f5rdls1r1+dP1dIcSfUlsLEQhCcAbwltP5mKCAGm9NnuC95wCklLLDmg3+2MtsqtfNF+cc0+kU0+kUb7/9Nl5//XW8++6720x1vc5RVRqcc7z++o8AALdu3cLzzz+Pg4MDnJ+fYzweQ2uNOI4RRRGKosByuXzM31hrtz6HiMAI2DRAGGNcStkVQqREHp4YY4xx5x0ZYwgEAmNgnEFwjq+/8gq+danjuAXlf/3H/3j7y2/+xn+7pfOcs9QS8y1etP3OGHsMlDiOYa3FdDrFW2+9hR/+8Id4/fXXcfv27fa1HLxvnCZjrAXsbfzyL/8y9vb2cPPmzcfykb29PfT7fVRVhfl8vn3vKIpQ1/UjQJ5M4YlzLjjnsXWWkbUKRL0lg0fTgDCC8yoIQ3Q6XagPcC4fvn1ax+a8g3OOiIhh099sgUiSBN1uF2maIooicM5hjMF6vcbJyQneeust3L17F/P5fJuINXeWIGVDE9Z1iapqUvksy1CWJZbLJc7PzxEEAaqq2uY/G2daFAWqqgJjDEmSbIkrZzysdshZvgXJWpuslotPe/K/4q1frFfCeaKSc/5QCPFeknZyFQSQ6nEYPnr74JEtfvBhKSW63S6GwyG63S6SJIH3Hhsy+vj4GO+88w5OTk5Q1zWiKHrMuh4Dvq1lyrLEfD7fbr1ut/tYNCqKApxzLBYLJEmCIAjQ6XS2r8cIqKoCfMnR3kQYU8e6zr/ivXveGpMDzHIhTjudzh9Lqc6FlLl37olk96Md7aPM+Ak/sslR+v3+do+XZbkFZVPyr1arbT30wbXZTu0dxWq1eswRDwaDLWWZZRkuLi62yV2n09m0Qxp+xntYbTCfzyGEYACIwZOzWlbF+kZZZE9pXVNRwgahOHn66affFUKoTSb9xE3/cEPZ9DLBGCCab49Wm9FuU3LG2HbrzOdzZFkGY8w2Mjz+4o1leAfY9jl5tsLkfIw0TnDyoMlnBoPB1mru3buHN954A4PBAGEYotvtIooiDAaDLehhpCAVb++pB+ARBQJHB0d80OvSZDLBe3fvU1ZozhkYeQff8jr0AVP5aJ8CtJoS1shDLi0hBJRS2xqFMba9o4vZEmVeQWsLaz2EaGoaUJsTeAc4B1gCcxZea5TrFabnZwg4w8mD+zh9eIyd4Qjz6Qyziynu3bmLH//wRzg8PMRoNMLBwQGG/QG8deCCN8xcGEPI4LHtGYUKN68f0KdvPY/b79/HarVieX5G5J111hDjEpvc5eOB8kgqsQ19mzK/6ePILSDAo+1grW22hSeQs3CGgSuJw4M9HO7tQXDAmBqmtiiKCmWZ4+r+HkbdGEkg0Y0jdNMEkmPrdMuyhBBiy6lcNvvLZPfGeoMggOICnDwE9wg4IeBEgoNzziTIE7Wfl2jLt/x0ULbOlj0CZePckiSBbJm1y/lBawogchDkG0sgDxEr3Dy6gi9/6QtIwwBVkaMoqpZQWmE4HOL6lX0k3S4u9keYXrmCKAqwWi9weq7gyGN3/wCD0Q7CMAQAOPJbbRRjbNseidOmk8A5BzkPXWqslxmqouZOGyMY90EQMC4UY0Juw/onshT26E2pbTkgTdMtKBsCiIgAT5CcIwkU+mkESQaMMez0Ujz31FV86XOfRjeOUeUZiqJq6ITJFGESY39nBzwMcf1gD+v1Gl4GKMsck3HjgzYdw00k21jnNvq0tMPm8zWlALDKSownc8wXq5JBLjtpZxyFYUVMkGcCTZviE4BCrcKKMY5NAbi/v4/RaIQoihoK0VlQXcHUGuQcQiXx9NFVxO4LcLaC5AL9QQfPP3WEjpJQzIOHEgIhOBsgiRWkUuimPZCUuHn9EEkSYbLMMV3nmM+nIBIYDofo9XrbumdDdkspG4cuBTq9Lg7h8XA4RBjGqCxwcr5gF/PcOmfv9YaDN4d74Q+EUj+qjMsZBJ7M0X8aKK3qjHPGhBDodruNkxsOn+BMtdbw3iJSAZ4+uo7ruwNEXCAMFbppjOGgi0hJKMEA0bQ70jSGGw7ABAeHABMcnTjC4bWrePfuQ8zfeBur+QLd4S6Gwz56vf42vG84mMt1ULfbRSdpFAxBlMBYjwfLFYrVwh0cHk52d0Z/wqX6Y8blWEmx9kyAMf7Jog+IttsHDdG0JZnzPIdzDqEKEEXRNvk6OzuDJAfpDHgUIJICzDuQsTBVDSeaNN9ZgvFuS2GGUjVch+AIVQhOHqYssVqtwOWjIlDrCsaYLQVKRE1rxLvGp4TBNio6YqiMxbyw1Cn1OqnN/RDiYZJG6ygMCEyA8+bm/uqvfQ3f/v3fa0D56q997TFA/uD3f++SzBOb/crYpcxWa43ZbIaqqjAaNBVuURQ4Oxvj/Xt3IbyFcgb9JMHOoIudQR/kLCRnAGus6nJPeVM2RFEEqULIyKLMclRFgSLPAb6AI4/VagUpmybbzs7Otnk/m81Q1hWGwyEC2X+sUHSeWWr4baMtHFfwQoXU7Q8gpNoS4z/VUjbKw0ubrUlyW6e6qVrX6zWUUuj2e6h0jel8jgcnD8G9A7cG/TRBVvWhdQUBQhxG4GhAqasK6zxHXhZNQWYJZAmBImhLqIsSZV6gygtYMGhrtmlAXdfIsgybpv1isWg+i5Dodbqw1je0pOA+CIJZEse5UHLhiLQxznliEFIhCAJGADn3eFYr8SFp/Aa4DYPQrq1zc84hyzLK85xtij2gUed5BpS1Rp2vUdQVqrpAXZTNB+52kYQNJZikKcIkwZCaCCLpkezU1hqmtiDbWILNC9SVQRhHWzZusza+Jc9zKsuSVVUF5xzz3iOKorzb7bymd3dfJ+9+JKQ8IcBsbrf3RMZaWGufAOVDaBZ6zEY2yGxAsdYiz3OW5/m2aNss54G8KrFaZVgzYLkUyLMSvU4XB3uHUEGAUDWONowjhKFq9SkGdVk1GhajW/AJ3lpU2kDbHKlJn+BY25YHa6tsVlUV1XVN3hkKA7kc7ey+Wpblt/OsOGGCLxljblN6bG70B9dHFoQtUdWaiQcRsbqusVqtUNc1ZrMZsizDwcEB6rputkRdoyxL5EWFVVaAkUMkBbzxuH92jjhOMF12kURNQdnpJuh2O+12yLFer1EWNfJa497DU1zMZyiKEqVzqI0DMSCIQlRVtX3PoiiwWq1oNpuh0+lQt9tFUTTNMcaYDoJgba07V4E5CaOIGGNQQdB2LD68FyQ/it3eiKGJiLz3tGlCLRYLFEWB6XSKLMuwWq3aCrlGUVQoigp5niMrcsATailhjUf48By1tuh1U3SSGP1uB4NBD8NBryGRFivMV2vkWYF1UWJ8scDp5ALLVQZNBG0twAWCsAG9LGtUVdN7ns/nmEwmSNMUaZpivV5D15aImOecQ0rpwzCkTUiXsgnF3tM24jwGymXyVkqJv/Vf/lfYcPoMjBOItXUN5XmO6XSKPM9xcXGxuUtbqrEsy7Z/o1FVTd5iRABnLNh4gnWeo9dJ0ekk6HY6GPUbUIqqxHy5xnzRvFZWVlitM2R5iayuYZyD9QShmt7QhqYoyxLr9RqLxQLT6RRpmiJJEiyXS9R13fR7rGPkPQcYlFIsiqKt7P2yP/zg9tk6WtEKdLYCmtZoNsXefD7H/fv3t/Sgc44tl2uaz5dYZxm0MSDwS0bJQQxN9PAE7TwK4wBt4PISy6LE8fgCzjfRQjuHwjkUxkF7gkFDAhDjANzWdzWkVJPtbiJPtspxMW6UCNPpBEVVwnmHJtx4AgM8EVnnwBgH5wz8I3bJY46WMQZnLcqqZOS9stYmRFCeSFhr2Ww2IynlljvhnNNyudz2dh4h/4hDaS7Ew3oH7Sy40aCao3YeLfsOGSgk3U7LvRrURsN6aqvYR8HxckW+2cobUJqetKeiapxuURTMOce1NhyAIkJSlWWttXabNsxHuY6toxWyeYIxBsvFMvXePe29f9ro+hestQdCSVEbTdPplG140yAIUBQZ1uslqrKEaz35pkfTiHYUkijGsNtBr9+Bcw5VbbBYZY16qRUqI69AlhCHAfq9Doq8wipUEFmBSteo67YwZQzkPeq6bsDIM+RlgaLK4ciyStfQ2sJ5cE8sXK1Xz3LGv8ylvGOdO/HeP+j3+75RRgn86td+Hc5Z/PM/+PaToDDGt3fBaN2v6+rlbL3+m57883ESPx1FkTDG0LLWW+5k43zzPEdVVU3bgQDBm1okVBJpt4NeN8XV/T0c7u1juVzi7vF9ZFkGFUZIOinI+W1BuTcY4PpT11DkFc4mY4DPwLMM3jpI/ujObiJPq3dDVTXpf1nWQFPVsyAIRqvl8ovamCtpmv5pHCf/hkBjZ231QfHhY5byh99uvO/Xfv1vb8ydWefCPCuevXf/+MuBUvtXrl4Nk7hDpa5h6rJpUVDzgnleYrFYYbXMUFcGniwCqdBPEwSBRBiH6MQRBt0edoYjeGsRCAlvLUQExGHTLtVFDu85wkhhOBwiDAusyzWSPACjGIIRpAwgGGB1vRX0rBZLKvOC1XXdUJ/MQCmFMAyJKxlnefHs+Pz06pUrVzXn/DUuBPee2KZT8xO3Dy7ReN475pxrx29EyBgD8YZ54xTD2BqmbuqX+XyO4+Nj5FmJ6cUYdVlh0OtgdO0Kal1isV5hMZ8jFBKsLd7iMMT+7g4ceeiqBpjHcNBDICTgPcZnZ1jnOeYXU1Rljn6vhxvXrqKsDZbrFRaLBVTYFIjr9Zrleb7V0EnVFIRMCsA5BEGQgglOgHTOySYR9WhT0p/sU9ACR0Rw1sE6Q4Dnm64g55IpxcgLAVSA1U0WejGdtmZbYjGbg5HB6OgALz53E7PZDEWWYTqdQXiCMwZR6+QOwxDT1RKzeaOX7Xe66CQJrNMYT86wWK6xWCxhrcHT147wwvPP46LNjRaLRROttIXWFdbrNZwHQqG2PSjOOSPrqK30mbPeGWOdEATn/AdrwJ8ACj3GpEkAG6UiC9cZORAYIzhtYKyFbX1Kk/4blFUJQbZpWOUFAs5wbX8Ho26C/nCA4XC4DflZUaEoCsAaBDxGtxPjYG8HSjROOs9LzGdLVHWBQTeGrUqUbSOsqiqIPADRDESNgNA5QjsIQW0aT1sZKhHz3lHTmdxayscDhbDtADIpJQNjMFq7sigEWirhsVlBIpTGIq81rHXQ2iCAx2K+wvHxMQ52Brh5dITdUR/D4RDD3SGKosBkOsPp2QSzCwnvNAQnDJIIR/sj7O2OsLszhC41ZtMFLuYLTGdzjMdjnI8n2/bJRrjD2KbBxlGVJVVluf18mygJeNc21kkISbx12ERNtP2jP/z2ZRgugXLJGwvBIaXMwzAc15XmdV33rbUxY41/EkJABCGYUvAiACIBr01bYBmsyhJnFxfY6fdw5WAfn37hWYyGfQxGg6bDFwUg5zGdTHCWRBh1EhzsDnH9cA9H167iqWtXYWqL2XSJk7NzfL98E++8fw/zxRLaOjDBt10DzkFKKSaEgm0qXua9p5a/JW3MUgi1CJSaSyGNEAKMb7rA9AQgACD/81/9WmslTUHNOCMp5TqK4u/t7u6tV6v1S3VV/cWqKl4UQjAmOBwUmBUI4hR7z76Aa08/0zS0ju8hPx+Dw6MmQu18M/XnCVYb6KKCZMDBcICQSygGDDopBsMenn7qOo6uXkE3SRrqoNTwzoBRUwlr40BCIuqkEFG83UbkPGu6hNi0WMg5R95bDmAdKPXdbif9D3EcvyaVvC+lcoKLnzjodMlSmi/OOKRSK6Xsq3GcvOWcHzvnnl6vl8+rMBCSguaJgiCDkB3cfI6+8Fd+CdPpBCxK8dAxmLKAqyqsSaBiHBYCWjcq6iCU2Nvdxc7OHrqdFFcPDpGmMfZ2dzAc9LbKa103foLQXHBtmoKwE6fwnAGzOcqyhPdu27jf9IM2fLEQQidJ8sMojv9QSnkmhSyCQFkpBcAe8UZPgNKYUivpwraFKD35obX2mtb6RWv1iAjgTEKEEUb7hxgdXcf+M8/Ts5/7Io6eex7RaBcrTUDQgV6uoRdzuDTG2cogunuMXqjQSRSGgy76/T5CFSDLMsynMzjbQSeOEaoAs8Uc8/kCWV4iLw2WqxyV8egNR3BFgdpY1EW51acQOJwjcO4hhICUvHW+Dt57pbW5IqV+UQjBCf4cwHprBB8VktuOKLFmtrrlNX1Ha/2F1Xr1N7Js/Zmy0kcQSiCMEHT6uPrsp/C5r/xF9vwXvkjd/UN09/chkw4sCfQGe5hP5sjGE9B6juP5GNPzE4xiiU6icHVvD1evHaITJ7h77wHeee997I5GAHHU1uPByRkenp5gvsxQVDXKysIJgd0rV+BnUzx8eIrFYnGZHKImuvhWJ6O2elqtdaJ1/bJzdsQY/iSKwn/jnJt43zjejwpA8nIzCQzME6E2NloXxXMnp2dfgTNXwVXCghhBZ4RgdAU7N2/h5he+TJ/98susriuqjIYiQjdNUR1cA+IBov4+Fvfew3R5jpOzMUYBRycUKGsLwzg6SYr3HpzizffvYX9dQCY95A44Ph3j7oNzLFcZ8rKCI4/+zi76vT6kDJq8ZLWAEE3rlgnBrLVw3lMiJQujhAgcdV1TXdeyLMunAexyLvIwil5jjAlrbbN3GPBrX/svUGuNf/FH//yJ7QOAwRMALrmIIiGjJGRRlJAWMeIYQTpC7+gZDK4/j+DgBjKR4N54Tmd33sHx3fcxn04xXWVYk8Lu1Ru4cuUI/OgaonKC0pcQuoD2NS6yEvrBGTjnuH96gfNViVKswO+fYJw3zF6mPXiYohN3QAzIqwqT929jOp03iZt1kDJodLPew3kP0Q5KtR1EcjZtZqatUXVZxULwAIDc7gbnwDgHZ2zbin3C0WpjmHZOeKGSoNPrR5Z2eDxOHdccaZfkziHiq89i58XPQx4+g6VIcfdihTd+8Dp++O/+BNOHD7BcZ0Cniy//tb+Bz7zwDEiNkOcHyFyGejFBuXSYrHOcL9eotMF0tsBZViNBgSXOMVhWUAxQgiGNY3S6jf5k+v57uHPnTjv90eREATyk5LCOAQ31yLiSm7kghnbqjBUZ6rLivBmNl2AsstbaPC+0lILiOIGUj1MIklo5W1mWMtPmmkw6z3oZ/Pl0/8pnX+j0U804RNxF1N/D6PqzGDz1LPhgBytNyFcrrOYrFIsF6vkEbrUCdInYldjtRch8iUm2xsOzU5j1AnWeQdcWxns4MIjhLq4cPQseRIhECEeEKlvAZCvEWYZemYJzYDZfIsuKFpDGl0gpG+Wk9VstPvOPOpabPnMcx2CMMSnVvjXms1bKrCqrh8aYu0KIQkoJKR/vEGyZN+e80rV5Orfr/2yl3ZevfOozz770Fz6tWNojpwLIKEXYGSDojuAMR5nlcNMpTGWQBAFsGKJiDswbDALJDrop6dkYk7OHeO/td+B1CWs0PAGOScjeAM889Tyuf/aLgEhQLQtUFxPkt3+MyfQ+YEpE3EMIxtarFW3Egxv/J1WIKE4h20EJTxbeGei63E6aAUAYJdQfjGRd19fKsvwVY80R5/xfKSXHUqqikXSwJ0DZuHBhjNmbXExfPBlPb45ufX5w/dbn0Ns7gOcCQjJwJsG4wmK2xsVFjvl0DFEXLJGCtBRQbY9VCkZh1LQuLmZz3D85hQobja0MQpAKEfV3MbpxE09/5kvQlmH24BSTvIQlYLFaQ69nkF5vPN0jJUTTsKTNrHLb4WORVpQkCTqdDowxkDKAMQZhFCFNUzabzfZOT08jo6uRlPLNJEkVY4/0/x+MPs07NSJ/DuIMXqiqcPLibEGMxUiTEJ0I1EtiliaKzdaaQlFBUAZjckKZwdQVrCPy5JHVBtNVjnlZs8ITIUmx/+zzeOa5ZzEYjBCnfUTpAEF/F6uVxsXFFBe338HszttYT0/AXA3R1jTUbAnaTJKQ80SMwTqNWpfo94Zsd3eXBv1GEbG/v9+wh8slFosFxhcTjMdjMraWUvGOdyIAgTfzhXwTdT98+7D2dhBg4Ywtlmu3OjuXXcHRGXbQERHb4xK7iaAkIjhRI6cCE5PDlTm8rkHeM08MWWVwsSxxkWtaOQ4kPVx74Ra+/Eu/iKeOrqPfHyIQEd4/Psft4wkm9+7g9PYbuLj9JpBfgHkDydkjmRkRs1azVs9LHIJZbaC1ZlEU0Y0bN/Dszadx8+ZNPPPMM9BaYzwe08nJCfuPr34PZ2dnrCgKW5ZlDoL2RJo+qulzeft4Tw6MTUejnTdk2ku7wr00efdHe32b4Ub8LK4GKTq2glpdwE9PqBjfZ8uze1hNz7BazqjIczhjAUcsLwzOZxksT9nezRcJUYwg7eL8bAKqaww6XUgW4uT4FJOTMfLjezDT+2DFFNAlRKtScq3/IHIgYrSR8jrnqK5rtlos/aq7RNYSTRsFQztmwxhjePPNN1EVJUkuJvu7++9xzt4Kw+A+QPbSKN2Hg8I501KIe0Hc+ddJPxgzuOj87dd3h6hY+twhrvQS6CJDcbHE9OSYnd17Hw/vvo+LsxO2WkxZWRQAccAx5OuCpuM5E90ePXfrJTz91HVcPLyH7/+H70B5g24QIBABqqxEUWjk2QJuOYHydeMwQXAb4SD8xufhkkqTte1a1o7FkJSNPmU0GtFwOGSbkzaUUlSWpUuS5F4URf/KWPvvORf3heDF5tikDxaHW58ihLBK8PuMYeq8nbuivjW++/YvXO2pUOiXfSdUfLrUtJzNMTk7x8nxfZyfPGT5al1zYnWglOU85EEnjaU14eT4vt+5fp3t7Q+guhHGb/8Qd157FXa9QCI5IhlCNAqpZprdaHCyjTDPW5DzYAR474mas1gYEVWMsYwxVnkics6rsizT6XSaCMHY7u4uOzg4YGEYbqfoGWO8rmszGAzGcRy/vs6y70sp10EQWKWCDz0kQm7oxiSOSEilDYGWy/XM1vVMOe2oypAvZpiNT2k+m9FquWSLRhnNVqt1labp96Mkea2qzdyrEEFv5yiE/6un7/zo2vH77/huL2SSDM5vvwm7nEO5GiFXCCHBmYOkZrTNOANvDJw1DVvmmo6BcYa1jtYHQXRfKfXdMIzeDQLpoygKGWM3jDF/YTKZPDedTmm5XG6V2HXdENyNq4ThnFsGVsZxrHu93nYI/MO2DwFAGAQIArC8qLwtc2vqypK3TusKq8UCk8kEy+WSLRYLzOdTXEzOabWaZ4N+93UB9s8YF2MZpQJK3NDLi/7Z8fHhYrniEACYA9c1SJcIQgUZSkgGcA6w1jKc1bBGbyfZNzRAKw1lAFwURWdJHP1bFYR/GobBOoqijrX2F8qyOlou589Np9OtTH1DIbTNdu+c89Y6772HlBKdtHOp0f4BULx3rU/h4JwTvCVTF06XpfHeuOV8gXfffQceHnmeU1VV7P79+1gsFqRrbYy1MyHEXcGZlcxfL7Llfl3XsV+OCcsVwBwAggcDZwBxgqmb6XYyzUjKZlJ1w6Zd1shu5KBEjAFIARwJIY6CIHhPSnniPd0AoLMsc+PxmN++fZvNZjNK0xRaazx8+BBaa6rrmoSQZK31IIC3h1tdlsM/AqX9BW+bYSAPNOpD5xyZi4spfvzjH7OTs3MYa5ltlENsuVxb78kSkZVSegD7uir/6nwy+Yqz7nnunQglh/EO3jsIiOa4Eeu22hNgI57x7Yejx6LBptPYKJgkc84daGP+pgzMs1ykfxQEwf/lyVvAk9banJ+fR845anS+AZxzOD09bVqxdU1SSmoAf/Qev/d//O9Pbp+tSPhRDkMAwVrrrbWVrkq6c0/j4ekZnPegJozVxpp5FEZjEC0AOKP1cHpx8efOTx5+KQzDnTCMESjWjsE24/ibC910DFg7rr+xBs45POfg/NGZKgBahXfAiyLbmc3WnaLIR0qqHyqlAhC0lHIShuEkz/P9oiiCxvIlIyKqyhLOGVfXtVMq2PY2NiztV7/6q9v3+YO2dfoYm78xVyElF4Ir7y2Y4O3RH7KRQejSh2H4Xr/f/26adn4spfqPnHHjvZfOWgYgaAeQsJlKBTysbTjUKIoa1XbaRXBJyVSWNbSu4PSjbWRsDXKeeW+JiBAEQWSMISLPrbXcaA0h5INOp/sv9/f379R1/Yta67/knJNSShJCQusmLd34KClF0wLZTjA9uTYk0+ZhakUunHPOvPeGiAopZayUYq2CiMIwvC+E/GPG8B0hxFRIsRHlueYu8XZ2OUAYqnbIupkDTNMUo50dDHZG6LcnZTQKqQxZlsHW1VbH1nC1JW1US61IUzZDkcZrYxAL8SCMonkcx68ZY0Lv/cvee9kqxHme5zWA2lqrARjR+pLmiM4PkxY/spTLcgwSnNdxHL9/cHj4f+u6usUYnquqatSGSiLnS5C/IKJxEAZFEASJJxIEJgAoAGyjfrJWgIhtHahr1dIb59o0qxiEYFBKQGugqCvotmFubeNrWraehBDKe8+c98waS4hZFYWhzqWU3tNFURQLznlijOFEtGaMvZ+mnbfTtPNdKeWUc+7Zo6MdaSMZvax9e7xD2NwJ4kJkQRi8OhqNxmVZ/JVsvVKz2SxxzikAdVuh8igKXZqmLbPHGGNMAVAbj75huLaDSm1JXxQFhGxmhKqqAucS1M4BFUWB2WwG26obNtMWjTNukrlW1MvQiMERRbFP4pjWgeLee6211nVdG6XUrNfrfa/f7/+LMAzfkVJNhOBuYykftR73KdiOiKzJ+7ellGecsVDX+hnvfZ83BYVTSi2FFJpz4a21iTF631h9wDkbMC6FJ0aMCP5SeN04uK2mvmi0cHVRNsPaaQecSzhtUKwzmO3c4SP1UgOI2IC/672/orWpqqrKAOaVUlkQBCfttichxDSK4tfiOHlVKXkupTScCy+l2GilP1x1cNnLEzXmNBwOqK61rqpyCeBer9//4+ucv80AOO+1kuqOUupYcJ6URfGZLMu+kuf5l4zR16SUvBXsEGPtoUt4dEDVZkQmUGo7ODUcDtEbjhDHMRbTi8ciUjMqQ5t0nDHGmHMuMsZ8ibHSCCG+lxf5d8nTeZIkPz44OPg9a2zKOCMAWRiGr0kpl2EY1Z1OiiAIkaQJcc7bgyEI1tlt5Hly+4CabK/TZWGoCYCpquodKcRpmqYBY4zIe+c9FWEYVULw3SzPXj45efjV9Xp9XQjRUyrkSjVtho31XdaqSSmbEKsUsjzHYrFo5OftsOZmtnkDCmtP4dkA2oqLOqvV6kUAVzzRIIrCU6WC4zAMv0eEd601jHNO3nvPGMuF4Fmg1HZWSbSF4KWzVR63lMsOZhNGORfURI6QwjDMAVZIqcA437TVKIpjVteVNNoMiqI4cM7thGEYtxayeWPmN1lau5Rqzlvpdrso28NoNiP6m0GD1iQavYnkW58EAM4RMcakMehba4U1dldrHQspWRR11koFa61rcMaZa+eppZQIo2Z2WkrVTOeTB/kPp1TkH3z797c//Prf+ttNysuas6qTR+cK0IYKBECMMWatxXh8TtZa4723nHMGwEshWEMGS/jmatnlNDoIAgwGA/SGA8xXy8dOvriczbapAaR8dPRQQ0Z7WGtJbPs9TltrHXlPcRyj2+1syaj2/jW5FxftQXiEf/ZP/+mHgrFZ/y9sJqLHFI4hXAAAAABJRU5ErkJggg==";
 
   // src/version.js
-  var VERSION = "1.17.3";
+  var VERSION = "1.18.0";
 
   // src/core/updates.js
   var MANIFEST_URL = "https://xquesh.github.io/quesh-addons/dist/version.json";
@@ -4705,8 +4708,8 @@
     const read = (style, key) => [style.getPropertyValue(key), style.getPropertyPriority(key)];
     const equal = (a, b) => a[0] === b[0] && a[1] === b[1];
     const write = (style, key, value2) => value2[0] ? style.setProperty(key, ...value2) : style.removeProperty(key);
-    function restore(element, values3) {
-      for (const [key, value2] of values3) if (equal(read(element.style, key), value2.applied)) write(element.style, key, value2.previous);
+    function restore(element, values4) {
+      for (const [key, value2] of values4) if (equal(read(element.style, key), value2.applied)) write(element.style, key, value2.previous);
     }
     function sync() {
       queued = 0;
@@ -4715,21 +4718,21 @@
         targets.add(root);
         root.querySelectorAll(":scope *").forEach((element) => targets.add(element));
       }
-      for (const [element, values3] of owned) if (!targets.has(element)) {
-        restore(element, values3);
+      for (const [element, values4] of owned) if (!targets.has(element)) {
+        restore(element, values4);
         owned.delete(element);
       }
       for (const element of targets) {
         if (!element.style) continue;
-        let values3 = owned.get(element);
-        if (!values3) {
-          values3 = /* @__PURE__ */ new Map();
-          owned.set(element, values3);
+        let values4 = owned.get(element);
+        if (!values4) {
+          values4 = /* @__PURE__ */ new Map();
+          owned.set(element, values4);
         }
         for (const [key, applied] of properties) {
           const current = read(element.style, key);
-          const value2 = values3.get(key);
-          if (!value2 || !equal(current, value2.applied)) values3.set(key, { previous: current, applied });
+          const value2 = values4.get(key);
+          if (!value2 || !equal(current, value2.applied)) values4.set(key, { previous: current, applied });
           if (!equal(current, applied)) write(element.style, key, applied);
         }
       }
@@ -4738,7 +4741,7 @@
       if (!queued) queued = ctx.scheduler.frame(sync);
     }
     function update() {
-      owned.forEach((values3, element) => restore(element, values3));
+      owned.forEach((values4, element) => restore(element, values4));
       owned.clear();
       if (!typographyCss(ctx.settings)) {
         properties = [];
@@ -4754,7 +4757,7 @@
     }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
     ctx.events.on("notificationTextChanged", update);
     ctx.scheduler.cleanup(() => {
-      owned.forEach((values3, element) => restore(element, values3));
+      owned.forEach((values4, element) => restore(element, values4));
       owned.clear();
     });
     update();
@@ -4807,9 +4810,9 @@
   };
   var defaults2 = { channels: ["LOCAL"] };
   function selectedChannels(settings) {
-    const values3 = settings.channels === void 0 ? defaults2.channels : settings.channels;
-    if (!Array.isArray(values3)) return [];
-    return [...new Set(values3.filter((value2) => typeof value2 === "string" && Object.hasOwn(CHANNELS, value2)))];
+    const values4 = settings.channels === void 0 ? defaults2.channels : settings.channels;
+    if (!Array.isArray(values4)) return [];
+    return [...new Set(values4.filter((value2) => typeof value2 === "string" && Object.hasOwn(CHANNELS, value2)))];
   }
   function channelLabel(channels) {
     return channels.map((channel) => CHANNELS[channel].label).join(", ");
@@ -5259,8 +5262,8 @@
     const type = item?.getItemType?.() || item?.itemType;
     const legendary = type ? type === "t-leg" : Object.hasOwn(stats, "legendary") || stats.rarity === "legendary" || legendaryDom;
     if (!legendary) return null;
-    const values3 = [item?.getLegbonStat?.(), stats.legbon, stats.socket_injection_legbon, stats.socket_fleeting_legbon];
-    const codes = [...new Set(values3.filter((value2) => typeof value2 === "string").map((value2) => value2.split(",")[0].trim()).filter((code) => Object.hasOwn(BONUSES, code)))];
+    const values4 = [item?.getLegbonStat?.(), stats.legbon, stats.socket_injection_legbon, stats.socket_fleeting_legbon];
+    const codes = [...new Set(values4.filter((value2) => typeof value2 === "string").map((value2) => value2.split(",")[0].trim()).filter((code) => Object.hasOwn(BONUSES, code)))];
     if (!codes.length) return null;
     return { name: codes.map((code) => BONUSES[code]).join(" / "), short: codes.map((code) => abbreviation(BONUSES[code])).join("/") };
   }
@@ -5665,11 +5668,11 @@
           const result = original.call(this, canvas, ...args);
           if (!active || scheduler2.disposed || !settings.bonusLabels || !this.frames || !this.sprite) return result;
           const bonus = legendaryBonus(this.i);
-          const engine2 = page2.Engine;
-          if (!bonus || !engine2?.map?.offset || !engine2.mapShift?.getShift) return result;
-          const shift = engine2.mapShift.getShift();
-          const x = Math.round(this.i.x * 32 - engine2.map.offset[0] - shift[0]) + 31;
-          const y = Math.round(this.i.y * 32 - engine2.map.offset[1] - shift[1]) + 31;
+          const engine3 = page2.Engine;
+          if (!bonus || !engine3?.map?.offset || !engine3.mapShift?.getShift) return result;
+          const shift = engine3.mapShift.getShift();
+          const x = Math.round(this.i.x * 32 - engine3.map.offset[0] - shift[0]) + 31;
+          const y = Math.round(this.i.y * 32 - engine3.map.offset[1] - shift[1]) + 31;
           canvas.save();
           canvas.globalAlpha = 1;
           const textStyle = bonusStyle(settings);
@@ -6513,7 +6516,7 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
     if (stats.binds != null || stats.soulbound != null || stats.permbound != null || "artisan_worthless" in stats) return false;
     const allowedRarity = settings.rarity?.enabled === false ? ["common"] : ["common", "unique", "heroic"].filter((key) => settings.rarity?.[key]);
     if (!allowedRarity.includes(stats.rarity || "common")) return false;
-    const allowedTypes = Object.entries(ITEM_TYPES).flatMap(([key, values3]) => settings.types?.[key] === false ? [] : values3);
+    const allowedTypes = Object.entries(ITEM_TYPES).flatMap(([key, values4]) => settings.types?.[key] === false ? [] : values4);
     return allowedTypes.includes(Number(item.cl));
   }
 
@@ -9972,6 +9975,822 @@ name:Domina Ecclesiae=DOMI"></textarea></label>
     };
   }
 
+  // src/addons/garbage-truck/data.js
+  var DEFAULTS14 = Object.freeze({
+    disableOnGuest: false,
+    autoCheck: true,
+    additionalGarbage: []
+  });
+  var PROTECTED_SLOTS = /* @__PURE__ */ new Set([10, 20, 21, 22, 26]);
+  function values3(source) {
+    if (source instanceof Map) return [...source.values()];
+    if (Array.isArray(source)) return source;
+    return source && typeof source === "object" ? Object.values(source) : [];
+  }
+  function inventoryItems(page2) {
+    try {
+      return values3(page2.Engine?.items?.testMyItems?.());
+    } catch {
+      return [];
+    }
+  }
+  function isExpired(item) {
+    try {
+      return Boolean(item?.checkExpires?.());
+    } catch {
+      return false;
+    }
+  }
+  function garbageCandidates(items, templates = []) {
+    const marked = new Set((templates || []).map((entry) => Number(entry?.tpl ?? entry)).filter(Number.isFinite));
+    return values3(items).filter((item) => item?.id != null && String(item.loc || "g") === "g" && !PROTECTED_SLOTS.has(Number(item.st)) && (isExpired(item) || marked.has(Number(item.tpl))));
+  }
+  function itemIdentity(item) {
+    return {
+      tpl: Number(item?.tpl ?? item?.id),
+      name: String(item?.name || item?._cachedStats?.name || `Przedmiot #${item?.tpl ?? item?.id ?? "?"}`)
+    };
+  }
+
+  // src/addons/garbage-truck/style.js
+  var GARBAGE_TRUCK_CSS = `
+#qaddons-garbage-truck-button{position:fixed;left:8px;bottom:68px;z-index:31000;width:32px;height:26px;border:1px solid #666;border-radius:0;background:#050505;color:#ddd;font:700 9px Arial;cursor:pointer}
+#qaddons-garbage-truck-button:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px #fff8}
+#qaddons-garbage-truck{position:fixed;z-index:33020;width:286px;border:1px solid #777;background:#000;color:#ddd;box-shadow:0 5px 22px #000;font:11px Arial}
+#qaddons-garbage-truck[hidden]{display:none}
+#qaddons-garbage-truck .qgt-head{display:flex;align-items:center;justify-content:space-between;height:27px;padding:0 7px;border-bottom:1px solid #555;font-weight:700}
+#qaddons-garbage-truck .qgt-head button{border:0;background:none;color:#ddd;font-size:15px;cursor:pointer}
+#qaddons-garbage-truck .qgt-body{padding:7px}.qgt-list{display:grid;gap:3px;max-height:190px;overflow:auto;margin:6px 0}
+#qaddons-garbage-truck .qgt-row{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;min-height:34px;border:1px solid #333;background:#0b0b0b;padding:2px}
+#qaddons-garbage-truck .qgt-icon{width:30px;height:30px;display:grid;place-items:center;border:1px solid #444;background:#111;color:#999;font-size:9px}
+#qaddons-garbage-truck .qgt-actions{display:flex;gap:5px}.qgt-actions button{flex:1;height:25px;border:1px solid #666;border-radius:0;background:#0b0b0b;color:#eee;font:700 10px Arial;cursor:pointer}
+#qaddons-garbage-truck .qgt-actions button:hover{border-color:#fff}.qgt-actions button:disabled{opacity:.45;cursor:default}
+.qgt-drop{min-height:45px;border:1px dashed #666;padding:6px;text-align:center;color:#aaa}.qgt-drop[data-dragging="true"]{border-color:#fff;box-shadow:inset 0 0 8px #fff4}
+.qgt-marked{display:grid;gap:3px;margin-top:5px}.qgt-marked-row{display:flex;justify-content:space-between;align-items:center;border:1px solid #333;padding:4px 6px}.qgt-marked-row button{border:0;background:none;color:#ddd;cursor:pointer}
+`;
+
+  // src/addons/garbage-truck/runtime.js
+  function escapeText(value2) {
+    return String(value2 ?? "");
+  }
+  function guestAccount(page2) {
+    const hero = page2.Engine?.hero?.d || page2.Engine?.hero || page2.g?.hero || {};
+    return Boolean(hero.guest ?? hero.isGuest ?? hero.is_guest);
+  }
+  function startGarbageTruck(ctx) {
+    const page2 = ctx.game.page;
+    let candidates = [];
+    let busy = false;
+    let lastPrompt = "";
+    let scanTimer = 0;
+    ctx.styles.set("runtime", GARBAGE_TRUCK_CSS);
+    const button = document.createElement("button");
+    button.id = "qaddons-garbage-truck-button";
+    button.type = "button";
+    button.textContent = "ŚM";
+    button.title = "Śmieciara — sprawdź przedmioty";
+    const panel2 = document.createElement("section");
+    panel2.id = "qaddons-garbage-truck";
+    panel2.hidden = true;
+    panel2.innerHTML = '<header class="qgt-head"><span>ŚMIECIARA</span><button type="button" data-close aria-label="Zamknij">×</button></header><div class="qgt-body"><div data-info></div><div class="qgt-list" data-list></div><div class="qgt-actions"><button type="button" data-destroy>WYWIEŹ</button><button type="button" data-cancel>ANULUJ</button></div></div>';
+    document.body.append(button, panel2);
+    function place() {
+      panel2.style.left = `${Math.max(4, Math.round((innerWidth - panel2.offsetWidth) / 2))}px`;
+      panel2.style.top = `${Math.max(4, Math.round((innerHeight - panel2.offsetHeight) / 2))}px`;
+    }
+    function itemNode(item) {
+      const row = document.createElement("div");
+      row.className = "qgt-row";
+      const icon = document.createElement("span");
+      icon.className = "qgt-icon";
+      icon.textContent = "ITEM";
+      const source = [...document.querySelectorAll(`.item-id-${CSS.escape(String(item.id))}`)].find((node) => !node.closest("#qaddons-garbage-truck"));
+      if (source) {
+        const clone = source.cloneNode(true);
+        clone.removeAttribute("id");
+        icon.replaceChildren(clone);
+      }
+      const name = document.createElement("span");
+      name.textContent = escapeText(item.name || item._cachedStats?.name || `Przedmiot #${item.id}`);
+      row.append(icon, name);
+      return row;
+    }
+    function render(message = "") {
+      const list = panel2.querySelector("[data-list]");
+      list.replaceChildren(...candidates.map(itemNode));
+      panel2.querySelector("[data-info]").textContent = message || `Znaleziono ${candidates.length} przedm. do bezpowrotnego zniszczenia.`;
+      panel2.querySelector("[data-destroy]").disabled = busy || !candidates.length;
+      panel2.querySelector("[data-cancel]").disabled = busy;
+      panel2.querySelector("[data-close]").disabled = busy;
+      if (!panel2.hidden) place();
+    }
+    function signature(items) {
+      return items.map((item) => String(item.id)).sort().join(",");
+    }
+    function scan(force = false) {
+      if (guestAccount(page2) && ctx.settings.disableOnGuest) return;
+      candidates = garbageCandidates(inventoryItems(page2), ctx.settings.additionalGarbage);
+      const next = signature(candidates);
+      if (candidates.length && (force || next !== lastPrompt)) {
+        lastPrompt = next;
+        panel2.hidden = false;
+        render();
+        place();
+      } else if (force) {
+        panel2.hidden = false;
+        render("Nie znaleziono śmieciowych przedmiotów.");
+        place();
+      }
+    }
+    function scheduleScan() {
+      ctx.scheduler.clearTimeout(scanTimer);
+      scanTimer = ctx.scheduler.timeout(() => scan(false), 350);
+    }
+    async function destroyAll() {
+      if (busy || !candidates.length) return;
+      busy = true;
+      render("Trwa niszczenie…");
+      let removed = 0;
+      try {
+        for (const item of [...candidates]) {
+          if (!ctx.enabled) return;
+          const response = await ctx.game.request(`moveitem&st=-2&id=${encodeURIComponent(item.id)}`, (packet) => {
+            const messages2 = Array.isArray(packet?.msg) ? packet.msg : packet?.msg ? [packet.msg] : [];
+            return packet?.e !== void 0 || packet?.item?.[item.id]?.del || messages2.length > 0;
+          }, { timeout: 6500, signal: ctx.scheduler.signal });
+          const messages = Array.isArray(response?.msg) ? response.msg : response?.msg ? [response.msg] : [];
+          if (messages.some((message) => String(message).includes("Właściciel konta zablokował tę funkcjonalność dla zastępcy"))) {
+            ctx.changeSettings({ disableOnGuest: true });
+            throw new Error("Niszczenie jest zablokowane dla zastępcy. Śmieciara została wyłączona na tym koncie.");
+          }
+          removed++;
+          await new Promise((resolve) => ctx.scheduler.timeout(resolve, 1500));
+        }
+        candidates = [];
+        render(`Zniszczono ${removed} przedm.`);
+        ctx.scheduler.timeout(() => {
+          panel2.hidden = true;
+        }, 1e3);
+      } catch (error) {
+        if (error?.name !== "AbortError") render(error?.message || "Nie udało się zniszczyć przedmiotów.");
+      } finally {
+        busy = false;
+        render(panel2.querySelector("[data-info]").textContent);
+      }
+    }
+    ctx.scheduler.listen(button, "click", () => scan(true));
+    ctx.scheduler.listen(panel2.querySelector("[data-close]"), "click", () => {
+      if (!busy) panel2.hidden = true;
+    });
+    ctx.scheduler.listen(panel2.querySelector("[data-cancel]"), "click", () => {
+      if (!busy) panel2.hidden = true;
+    });
+    ctx.scheduler.listen(panel2.querySelector("[data-destroy]"), "click", destroyAll);
+    ctx.scheduler.listen(window, "resize", place, { passive: true });
+    ctx.events.on("gamePacket", (packet) => {
+      const list = Array.isArray(packet) ? packet.flat(Infinity) : [packet];
+      if (ctx.settings.autoCheck !== false && list.some((entry) => entry?.item)) scheduleScan();
+    });
+    ctx.events.on("garbageTruckChanged", () => {
+      button.hidden = ctx.settings.showOnBar === false;
+      if (ctx.settings.autoCheck !== false) scheduleScan();
+    });
+    ctx.scheduler.cleanup(() => {
+      button.remove();
+      panel2.remove();
+    });
+    button.hidden = ctx.settings.showOnBar === false;
+    if (ctx.settings.autoCheck !== false) scheduleScan();
+  }
+
+  // src/addons/garbage-truck/index.js
+  function draggedItem(page2, target) {
+    const node = target?.closest?.('[data-id],[data-item-id],[class*="item-id-"]');
+    const id = Number(node?.dataset?.id || node?.dataset?.itemId || String(node?.className || "").match(/(?:^|\s)item-id-(\d+)/)?.[1]);
+    return inventoryItems(page2).find((item) => Number(item.id) === id) || null;
+  }
+  function createGarbageTruck() {
+    return {
+      id: "garbage-truck",
+      name: "Śmieciara",
+      description: "Wykrywa przeterminowane i wskazane przedmioty, pokazuje je do kontroli i niszczy dopiero po potwierdzeniu.",
+      defaultEnabled: true,
+      defaults: DEFAULTS14,
+      enable: startGarbageTruck,
+      onSettingsChange: (ctx) => ctx.events.emit("garbageTruckChanged"),
+      renderSettings(ctx) {
+        const section = document.createElement("section");
+        section.className = "mtk-addon-settings";
+        section.innerHTML = `<h2>Śmieciara</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
+                <p>Śmieciara rozpoznaje przeterminowane przedmioty oraz wskazane przez Ciebie typy. Zawsze pokazuje listę przed zniszczeniem.</p>
+                <div class="ln-grid"><label class="ln-switch"><input type="checkbox" data-setting="autoCheck">Sprawdzaj automatycznie po zmianie ekwipunku</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="disableOnGuest">Wyłącz na koncie zastępowanym</label></div>
+                <h2>Dodatkowe śmieci</h2><div class="qgt-drop" data-drop>Przeciągnij tutaj przedmiot z ekwipunku</div><div class="qgt-marked" data-marked></div>`;
+        const enabled = section.querySelector("[data-enabled]");
+        let sourceItem = null;
+        function sync() {
+          enabled.checked = ctx.enabled;
+          section.querySelectorAll("[data-setting]").forEach((input) => {
+            input.checked = Boolean(ctx.settings[input.dataset.setting]);
+            input.disabled = !ctx.enabled;
+          });
+          const root = section.querySelector("[data-marked]");
+          root.replaceChildren();
+          for (const entry of ctx.settings.additionalGarbage || []) {
+            const row = document.createElement("div");
+            row.className = "qgt-marked-row";
+            const name = document.createElement("span");
+            name.textContent = `${entry.name} (#${entry.tpl})`;
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.textContent = "×";
+            remove.dataset.removeTpl = String(entry.tpl);
+            row.append(name, remove);
+            root.append(row);
+          }
+        }
+        ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        section.querySelectorAll("[data-setting]").forEach((input) => ctx.scheduler.listen(input, "change", () => ctx.changeSettings({ [input.dataset.setting]: input.checked })));
+        ctx.scheduler.listen(document, "pointerdown", (event) => {
+          sourceItem = draggedItem(ctx.game.page, event.target);
+        }, { capture: true });
+        ctx.scheduler.listen(section.querySelector("[data-drop]"), "pointerup", () => {
+          if (!sourceItem) return;
+          const entry = itemIdentity(sourceItem);
+          const list = [...ctx.settings.additionalGarbage || []];
+          if (!list.some((item) => Number(item.tpl) === entry.tpl)) list.push(entry);
+          ctx.changeSettings({ additionalGarbage: list });
+          sourceItem = null;
+          sync();
+        });
+        ctx.scheduler.listen(section.querySelector("[data-marked]"), "click", (event) => {
+          const tpl = Number(event.target.closest("[data-remove-tpl]")?.dataset.removeTpl);
+          if (!tpl) return;
+          ctx.changeSettings({ additionalGarbage: (ctx.settings.additionalGarbage || []).filter((entry) => Number(entry.tpl) !== tpl) });
+          sync();
+        });
+        ctx.events.on("addonChanged", (event) => {
+          if (event.id === ctx.id) sync();
+        });
+        sync();
+        ctx.container.append(section);
+      }
+    };
+  }
+
+  // src/addons/skill-set/data.js
+  var DEFAULTS15 = Object.freeze({ windowOpen: false });
+  function heroData2(page2) {
+    const hero = page2.Engine?.hero?.d || page2.Engine?.hero || page2.g?.hero || {};
+    return { level: Number(hero.lvl ?? hero.level) || 0, profession: String(hero.prof ?? hero.profession ?? "") };
+  }
+  function parseSkillList(skillList, skillData = {}) {
+    if (Array.isArray(skillList)) {
+      const result2 = [];
+      for (let index = 0; index + 9 < skillList.length; index += 10) {
+        const level = String(skillList[index + 7] || "0/0").split("/");
+        result2.push({
+          id: Number(skillList[index]),
+          name: String(skillList[index + 1] || `UM ${skillList[index]}`),
+          group: Number(skillList[index + 3]) % 8 - 1,
+          level: Number(level[0]) || 0,
+          maxLevel: Number(level[1]) || 0
+        });
+      }
+      return { legacy: true, skills: result2 };
+    }
+    const result = [];
+    for (const [key, value2] of Object.entries(skillList || {})) {
+      const template = skillData?.[key] || {};
+      result.push({
+        id: Number(key),
+        name: String(template.name || `UM ${key}`),
+        group: Number(template.pos) % 8 - 1,
+        level: Number(value2?.lvl ?? value2?.level ?? value2) || 0,
+        maxLevel: Number(template.maxLvl ?? template.max_level) || 0
+      });
+    }
+    return { legacy: false, skills: result };
+  }
+  function exportSkillSet({ skills, mastery, hero }) {
+    const groups = [];
+    for (const skill of skills || []) if (skill.level > 0) {
+      const group = Number.isFinite(skill.group) && skill.group >= 0 ? skill.group : 0;
+      if (!groups[group]) groups[group] = {};
+      groups[group][skill.id] = skill.level;
+    }
+    return {
+      level: Math.min(Number(hero?.level) || 0, 300),
+      prof: String(hero?.profession || ""),
+      skills: groups,
+      mastery: mastery ? { skills: Array.from(mastery.list || mastery.skills || [], Number), repeat: Number(mastery.rpt ?? mastery.repeat) === 1 || mastery.repeat === true } : null
+    };
+  }
+  function validateSkillSet(value2) {
+    if (!value2 || typeof value2 !== "object" || !Array.isArray(value2.skills)) return false;
+    if (!Number.isFinite(Number(value2.level)) || typeof value2.prof !== "string") return false;
+    return value2.skills.every((group) => group == null || typeof group === "object" && Object.entries(group).every(([id, level]) => Number(id) > 0 && Number(level) >= 0));
+  }
+  function learningQueue(saved, currentSkills) {
+    const current = new Map((currentSkills || []).map((skill) => [Number(skill.id), Number(skill.level) || 0]));
+    const queue = [];
+    for (const group of saved?.skills || []) for (const [id, target] of Object.entries(group || {})) {
+      if ((current.get(Number(id)) || 0) < Number(target)) queue.push({ id: Number(id), target: Number(target) });
+    }
+    return queue;
+  }
+
+  // src/addons/skill-set/style.js
+  var SKILL_SET_CSS = `
+#qaddons-skill-set-button{position:fixed;left:8px;bottom:68px;z-index:31000;width:32px;height:26px;border:1px solid #666;border-radius:0;background:#050505;color:#ddd;font:700 9px Arial;cursor:pointer}
+#qaddons-skill-set-button:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px #fff8}
+#qaddons-skill-set{position:fixed;left:calc(50% - 175px);top:110px;z-index:32020;width:350px;border:1px solid #777;background:#000;color:#ddd;box-shadow:0 5px 20px #000;font:11px Arial}
+#qaddons-skill-set[hidden]{display:none}#qaddons-skill-set header{display:flex;align-items:center;justify-content:space-between;height:27px;padding:0 7px;border-bottom:1px solid #555;font-weight:700}
+#qaddons-skill-set header button{border:0;background:none;color:#ddd;font-size:15px;cursor:pointer}.qss-body{display:grid;gap:6px;padding:7px}.qss-body textarea{box-sizing:border-box;width:100%;height:115px;resize:vertical;border:1px solid #555;border-radius:0;background:#080808;color:#eee;padding:5px;font:10px Consolas,monospace}
+.qss-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px}.qss-actions button{height:26px;border:1px solid #666;border-radius:0;background:#0b0b0b;color:#eee;font:700 9px Arial;cursor:pointer}.qss-actions button:hover{border-color:#fff}.qss-actions button:disabled{opacity:.4;cursor:default}.qss-status{min-height:14px;color:#aaa}
+`;
+
+  // src/addons/skill-set/runtime.js
+  function packets(packet) {
+    return Array.isArray(packet) ? packet.flat(Infinity).filter(Boolean) : [packet].filter(Boolean);
+  }
+  async function copyText(value2) {
+    try {
+      await navigator.clipboard.writeText(value2);
+      return true;
+    } catch {
+      const area = document.createElement("textarea");
+      area.value = value2;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.append(area);
+      area.select();
+      const copied = document.execCommand?.("copy") === true;
+      area.remove();
+      return copied;
+    }
+  }
+  function startSkillSet(ctx) {
+    const page2 = ctx.game.page;
+    const state = { skillData: null, skills: null, mastery: null, selected: 0, legacy: false };
+    let running = false;
+    ctx.styles.set("runtime", SKILL_SET_CSS);
+    const button = document.createElement("button");
+    button.id = "qaddons-skill-set-button";
+    button.type = "button";
+    button.textContent = "UM";
+    button.title = "Zapisz zestaw UM";
+    const panel2 = document.createElement("section");
+    panel2.id = "qaddons-skill-set";
+    panel2.hidden = ctx.settings.windowOpen !== true;
+    panel2.innerHTML = '<header><span>ZAPISZ ZESTAW UM</span><button type="button" data-close aria-label="Zamknij">×</button></header><div class="qss-body"><div class="qss-actions"><button type="button" data-export>KOPIUJ AKTUALNY</button><button type="button" data-import>IMPORTUJ ZESTAW</button></div><textarea data-text spellcheck="false" placeholder="Wklej tutaj zestaw do importowania…"></textarea><div class="qss-actions"><button type="button" data-world>OTWÓRZ NA MARGOWORLD</button><button type="button" data-cancel disabled>ANULUJ IMPORT</button></div><div class="qss-status" data-status>Otwórz w grze umiejętności i mistrzostwo walk, aby pobrać aktualne dane.</div></div>';
+    document.body.append(button, panel2);
+    const text = panel2.querySelector("[data-text]");
+    const cancel = panel2.querySelector("[data-cancel]");
+    function report(message) {
+      panel2.querySelector("[data-status]").textContent = message;
+    }
+    function setOpen(open) {
+      panel2.hidden = !open;
+      if (ctx.settings.windowOpen !== open) ctx.changeSettings({ windowOpen: open });
+    }
+    function update(packet) {
+      for (const data of packets(packet)) {
+        if (data.skill_data) state.skillData = data.skill_data;
+        if (data.skill_list && data.skill_set !== void 0) {
+          const parsed = parseSkillList(data.skill_list, state.skillData || {});
+          state.skills = parsed.skills;
+          state.legacy = parsed.legacy;
+          state.selected = Number(data.skill_set);
+        }
+        if (data.battleskills) state.mastery = data.battleskills;
+        if (data.skills_learnt !== void 0) state.skillsLearnt = Number(data.skills_learnt);
+      }
+    }
+    async function save() {
+      if (!state.skills) return report("Najpierw otwórz okno umiejętności w grze.");
+      if (!state.mastery) return report("Otwórz także mistrzostwo walk, aby zapisać pełny zestaw.");
+      const value2 = JSON.stringify(exportSkillSet({ skills: state.skills, mastery: state.mastery, hero: heroData2(page2) }));
+      text.value = value2;
+      report(await copyText(value2) ? "Skopiowano aktualny zestaw do schowka." : "Zestaw przygotowany w polu tekstowym.");
+    }
+    function parsedInput() {
+      try {
+        const value2 = JSON.parse(text.value);
+        return validateSkillSet(value2) ? value2 : null;
+      } catch {
+        return null;
+      }
+    }
+    async function importSet() {
+      if (running) return;
+      if (!state.skills) return report("Najpierw otwórz okno umiejętności w grze.");
+      const saved = parsedInput();
+      if (!saved) return report("Zapisany zestaw jest uszkodzony lub ma zły format.");
+      const hero = heroData2(page2);
+      if (hero.level < Math.min(Number(saved.level), 300)) return report("Poziom postaci jest niższy niż poziom zapisanego zestawu.");
+      if (hero.profession !== saved.prof) return report("Zestaw zapisano dla innej profesji.");
+      running = true;
+      cancel.disabled = false;
+      panel2.querySelector("[data-import]").disabled = true;
+      try {
+        let queue = learningQueue(saved, state.skills);
+        while (queue.length && ctx.enabled && running) {
+          const next = queue[0];
+          const current = state.skills.find((skill) => skill.id === next.id);
+          if (!current) throw new Error(`Brak umiejętności #${next.id} na aktualnej postaci.`);
+          const level = state.legacy ? current.level + 1 : next.target;
+          report(`${current.name}: ${level}/${current.maxLevel || next.target}`);
+          const response = await ctx.game.request(`skills&learn=${next.id}&lvl=${level}`, (packet) => Boolean(packet?.skill_list) || packet?.e !== void 0 && packet.e !== "ok", { timeout: 3500, signal: ctx.scheduler.signal });
+          update(response);
+          if (response?.e && response.e !== "ok") throw new Error("Gra odrzuciła rozdanie punktu umiejętności.");
+          queue = learningQueue(saved, state.skills);
+        }
+        if (!running) return report("Import anulowany.");
+        const mastery = saved.mastery;
+        if (mastery?.skills?.length) {
+          report("Ustawianie mistrzostwa walk…");
+          if (!state.mastery) {
+            const response = await ctx.game.request("skills&battleaction=show", (packet) => Boolean(packet?.battleskills), { timeout: 3500, signal: ctx.scheduler.signal });
+            update(response);
+          }
+          const limit = Number(state.mastery?.cur) || mastery.skills.length;
+          const selected = mastery.skills.slice(0, limit);
+          await ctx.game.request(`skills&battleaction=set&battleskills=${selected.join(",")}&rpt=${mastery.repeat ? 1 : -1}`, (packet) => Boolean(packet?.battleskills) || packet?.e !== void 0 && packet.e !== "ok", { timeout: 3500, signal: ctx.scheduler.signal });
+        }
+        report("Zakończono rozdawanie umiejętności.");
+      } catch (error) {
+        if (error?.name !== "AbortError") report(error?.message || "Nie udało się zaimportować zestawu.");
+      } finally {
+        running = false;
+        cancel.disabled = true;
+        panel2.querySelector("[data-import]").disabled = false;
+      }
+    }
+    ctx.scheduler.listen(button, "click", () => setOpen(panel2.hidden));
+    ctx.scheduler.listen(panel2.querySelector("[data-close]"), "click", () => setOpen(false));
+    ctx.scheduler.listen(panel2.querySelector("[data-export]"), "click", save);
+    ctx.scheduler.listen(panel2.querySelector("[data-import]"), "click", importSet);
+    ctx.scheduler.listen(cancel, "click", () => {
+      running = false;
+    });
+    ctx.scheduler.listen(panel2.querySelector("[data-world]"), "click", () => {
+      const value2 = parsedInput();
+      if (value2) window.open(`https://margoworld.pl/tools/skills#import:${encodeURIComponent(text.value)}`, "_blank", "noopener");
+      else report("Najpierw wklej poprawny zestaw.");
+    });
+    ctx.events.on("gamePacket", update);
+    ctx.events.on("skillSetChanged", () => {
+      button.hidden = ctx.settings.showOnBar === false;
+      panel2.hidden = ctx.settings.windowOpen !== true;
+    });
+    ctx.scheduler.cleanup(() => {
+      running = false;
+      button.remove();
+      panel2.remove();
+    });
+    button.hidden = ctx.settings.showOnBar === false;
+  }
+
+  // src/addons/skill-set/index.js
+  function createSkillSet() {
+    return {
+      id: "skill-set",
+      name: "Zapisz zestaw UM",
+      description: "Eksportuje aktualne umiejętności i mistrzostwo, a potem bezpiecznie odtwarza zapisany zestaw na zgodnej postaci.",
+      defaultEnabled: true,
+      defaults: DEFAULTS15,
+      enable: startSkillSet,
+      onSettingsChange: (ctx) => ctx.events.emit("skillSetChanged"),
+      renderSettings(ctx) {
+        const section = document.createElement("section");
+        section.className = "mtk-addon-settings";
+        section.innerHTML = `<h2>Zapisz zestaw UM</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
+                <p>Przed eksportem otwórz w grze okno umiejętności oraz mistrzostwo walk. Import sprawdza poziom i profesję, a następnie rozdaje punkty po kolei, czekając na odpowiedź gry.</p>
+                <label class="ln-switch"><input type="checkbox" data-setting="windowOpen">Okno widoczne po uruchomieniu</label>`;
+        const enabled = section.querySelector("[data-enabled]");
+        const open = section.querySelector('[data-setting="windowOpen"]');
+        function sync() {
+          enabled.checked = ctx.enabled;
+          open.checked = ctx.settings.windowOpen === true;
+          open.disabled = !ctx.enabled;
+        }
+        ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        ctx.scheduler.listen(open, "change", () => ctx.changeSettings({ windowOpen: open.checked }));
+        ctx.events.on("addonChanged", (event) => {
+          if (event.id === ctx.id) sync();
+        });
+        sync();
+        ctx.container.append(section);
+      }
+    };
+  }
+
+  // src/addons/build-switcher/data.js
+  var DEFAULTS16 = Object.freeze({
+    windowOpen: true,
+    minimalist: false,
+    disableTips: false,
+    grayHidden: true,
+    columns: 3,
+    hiddenBuilds: {}
+  });
+  function normalizeBuilds2(source) {
+    if (!source || typeof source !== "object") return [];
+    const entries = source instanceof Map ? [...source.entries()] : Object.entries(source);
+    return entries.map(([key, value2]) => {
+      const build = value2 && typeof value2 === "object" ? value2 : {};
+      const id = Number(build.id ?? key);
+      if (!Number.isFinite(id) || id < 1) return null;
+      const rawName = String(build.name || `Zestaw ${id}`);
+      const name = /^\[SET\.\d+\]$/.test(rawName) ? `Zestaw ${id}` : rawName;
+      return { ...build, id, name };
+    }).filter(Boolean).sort((a, b) => a.id - b.id);
+  }
+  function engine2(page2) {
+    try {
+      return page2.getEngine?.() || page2.Engine;
+    } catch {
+      return page2.Engine;
+    }
+  }
+  function readBuildState(page2) {
+    try {
+      const manager2 = engine2(page2)?.buildsManager?.getBuildsCommons?.();
+      const detailed = manager2?.getCrazyDataToMatchmaking?.();
+      const names = manager2?.getBuildsName?.();
+      return {
+        builds: normalizeBuilds2(detailed && Object.keys(detailed).length ? detailed : names),
+        currentId: Number(manager2?.getCurrentId?.()) || 0,
+        offers: []
+      };
+    } catch {
+      return { builds: [], currentId: 0, offers: [] };
+    }
+  }
+  function mergeBuildPacket(state, packet) {
+    const data = packet?.builds;
+    if (!data || typeof data !== "object") return false;
+    const action = String(data.action || "").toUpperCase();
+    if (action === "INIT" || Array.isArray(data.list) && !state.builds.length) {
+      state.builds = normalizeBuilds2(data.list);
+      state.offers = Array.isArray(data.listToBuy) ? data.listToBuy.slice() : state.offers;
+    } else if (action === "UPDATE_DATA") {
+      const byId = new Map(state.builds.map((build) => [build.id, build]));
+      for (const patch of data.list || []) {
+        const id = Number(patch?.id);
+        if (id) byId.set(id, { ...byId.get(id) || {}, ...patch, id });
+      }
+      state.builds = normalizeBuilds2(Object.fromEntries(byId));
+    } else if (action === "BUY_BUILD") {
+      const byId = new Map(state.builds.map((build) => [build.id, build]));
+      for (const build of normalizeBuilds2(data.list)) byId.set(build.id, build);
+      state.builds = normalizeBuilds2(Object.fromEntries(byId));
+      state.offers = state.offers.slice(1);
+    }
+    if (data.currentId != null || data.current_id != null) state.currentId = Number(data.currentId ?? data.current_id) || 0;
+    return true;
+  }
+  function buildItemIds(build) {
+    if (Array.isArray(build?.items)) return build.items.map(Number).filter(Boolean);
+    if (build?.items && typeof build.items === "object") return Object.values(build.items).map((value2) => Number(value2?.id ?? value2)).filter(Boolean);
+    return [];
+  }
+
+  // src/addons/build-switcher/style.js
+  var BUILD_SWITCHER_CSS = `
+#qaddons-build-switcher-button{position:fixed;left:8px;bottom:68px;z-index:31000;width:32px;height:26px;border:1px solid #666;border-radius:0;background:#050505;color:#ddd;font:700 9px Arial;cursor:pointer}
+#qaddons-build-switcher-button:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px #fff8}
+#qaddons-build-switcher{position:fixed;left:calc(50% - 150px);top:120px;z-index:32020;width:300px;border:1px solid #777;background:#000;color:#ddd;box-shadow:0 5px 20px #000;font:11px Arial}
+#qaddons-build-switcher[hidden]{display:none}#qaddons-build-switcher header{display:flex;align-items:center;justify-content:space-between;height:27px;padding:0 7px;border-bottom:1px solid #555;font-weight:700}
+#qaddons-build-switcher header span:last-child{display:flex;align-items:center;gap:4px}#qaddons-build-switcher header button{border:0;background:none;color:#ddd;font-size:15px;cursor:pointer}#qaddons-build-switcher [data-buy]{font-size:18px}.qbs-grid{display:grid;grid-template-columns:repeat(var(--qbs-columns),minmax(0,1fr));gap:4px;padding:7px}
+.qbs-build{height:27px;min-width:0;border:1px solid #555;border-radius:0;background:#0b0b0b;color:#ddd;font:700 10px Arial;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.qbs-build:hover{border-color:#fff;box-shadow:0 0 6px #fff6}.qbs-build[data-selected="true"]{border-color:#fff;background:#202020;color:#fff}.qbs-build[data-hidden="true"]{opacity:.32}
+.qbs-menu{display:flex;gap:4px;padding:0 7px 7px}.qbs-menu[hidden]{display:none}.qbs-menu button{flex:1;height:24px;border:1px solid #555;border-radius:0;background:#090909;color:#ddd;font:700 9px Arial;cursor:pointer}.qbs-menu button:hover{border-color:#fff}.qbs-status{min-height:13px;padding:0 7px 7px;color:#999}
+.qbs-purchase{display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;margin:0 7px 7px;padding:5px;border:1px solid #444}.qbs-purchase[hidden]{display:none}.qbs-purchase button{height:23px;border:1px solid #666;border-radius:0;background:#0b0b0b;color:#eee;font:700 9px Arial;cursor:pointer}
+.qbs-preview{display:flex;flex-wrap:wrap;gap:3px;min-height:34px;padding:5px;border:1px solid #333;background:#080808}.qbs-preview .item{position:relative!important;left:auto!important;top:auto!important}
+`;
+
+  // src/addons/build-switcher/runtime.js
+  function packetList5(packet) {
+    return Array.isArray(packet) ? packet.flat(Infinity).filter(Boolean) : [packet].filter(Boolean);
+  }
+  function escapeSelector(value2) {
+    return globalThis.CSS?.escape ? CSS.escape(String(value2)) : String(value2).replace(/[^\w-]/g, "\\$&");
+  }
+  function startBuildSwitcher(ctx) {
+    const page2 = ctx.game.page;
+    const initial = readBuildState(page2);
+    const state = { builds: initial.builds, currentId: initial.currentId, offers: initial.offers };
+    let menuId = 0;
+    let busy = false;
+    ctx.styles.set("runtime", BUILD_SWITCHER_CSS);
+    const button = document.createElement("button");
+    button.id = "qaddons-build-switcher-button";
+    button.type = "button";
+    button.textContent = "ZES";
+    button.title = "Zmieniacz zestawów";
+    const panel2 = document.createElement("section");
+    panel2.id = "qaddons-build-switcher";
+    panel2.hidden = ctx.settings.windowOpen === false;
+    panel2.innerHTML = '<header><span data-title>ZMIENIACZ ZESTAWÓW</span><span><button type="button" data-buy title="Dokup zestaw">＋</button><button type="button" data-close aria-label="Zamknij">×</button></span></header><div class="qbs-grid" data-grid></div><div class="qbs-menu" data-menu hidden><button type="button" data-action="rename">NAZWA</button><button type="button" data-action="preview">PODGLĄD</button><button type="button" data-action="hide">UKRYJ</button></div><div class="qbs-purchase" data-purchase hidden><span data-purchase-label></span><button type="button" data-currency="gold"></button><button type="button" data-currency="credits"></button></div><div class="qbs-status" data-status></div>';
+    document.body.append(button, panel2);
+    function hidden(id) {
+      return ctx.settings.hiddenBuilds?.[id] === true;
+    }
+    function status(text) {
+      panel2.querySelector("[data-status]").textContent = text;
+    }
+    function setOpen(open) {
+      panel2.hidden = !open;
+      if (ctx.settings.windowOpen !== open) ctx.changeSettings({ windowOpen: open });
+    }
+    function refreshEngine() {
+      const next = readBuildState(page2);
+      if (next.builds.length) state.builds = next.builds;
+      if (next.currentId) state.currentId = next.currentId;
+    }
+    function render() {
+      refreshEngine();
+      const grid = panel2.querySelector("[data-grid]");
+      grid.replaceChildren();
+      const columns = Math.max(1, Math.min(5, Number(ctx.settings.columns) || 3));
+      grid.style.setProperty("--qbs-columns", columns);
+      panel2.querySelector("[data-title]").textContent = ctx.settings.minimalist ? "ZESTAWY" : "ZMIENIACZ ZESTAWÓW";
+      panel2.querySelector("[data-buy]").hidden = !state.offers.length;
+      for (const build of normalizeBuilds2(state.builds)) {
+        if (hidden(build.id) && !ctx.settings.grayHidden) continue;
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "qbs-build";
+        item.dataset.build = String(build.id);
+        item.dataset.selected = String(build.id === Number(state.currentId));
+        item.dataset.hidden = String(hidden(build.id));
+        item.textContent = ctx.settings.minimalist ? String(build.id) : build.name;
+        if (!ctx.settings.disableTips) item.title = `${build.name}
+Rozdane umiejętności: ${build.skillsLearnt ?? "?"} / ${build.skillsTotal ?? "?"}
+PPM — więcej opcji`;
+        grid.append(item);
+      }
+      button.hidden = ctx.settings.showOnBar === false;
+      if (!grid.children.length) status("Otwórz w grze okno zestawów, aby pobrać dane.");
+    }
+    async function select(id) {
+      if (busy || hidden(id) || id === Number(state.currentId)) return;
+      busy = true;
+      status(`Włączanie zestawu ${id}…`);
+      try {
+        const skillshop = page2.Engine?.skills ? "&skillshop=1" : "";
+        await ctx.game.request(`builds&action=updateCurrent&id=${id}${skillshop}`, (packet) => {
+          const value2 = packet?.builds?.currentId ?? packet?.builds?.current_id;
+          return Number(value2) === id;
+        }, { timeout: 5e3, signal: ctx.scheduler.signal });
+        state.currentId = id;
+        status(`Włączono zestaw ${id}.`);
+        render();
+      } catch (error) {
+        if (error?.name !== "AbortError") status(error?.message || "Zmiana zestawu nie powiodła się.");
+      } finally {
+        busy = false;
+      }
+    }
+    function selectedBuild() {
+      return state.builds.find((build) => Number(build.id) === menuId);
+    }
+    function rename() {
+      const build = selectedBuild();
+      if (!build) return;
+      const name = prompt("Podaj nową nazwę zestawu:", build.name);
+      if (!name?.trim()) return;
+      page2._g?.(`builds&action=update&id=${build.id}&name=${encodeURIComponent(name.trim())}`);
+      build.name = name.trim();
+      status("Nazwa zostanie zapisana przez grę.");
+      render();
+    }
+    function preview() {
+      const build = selectedBuild();
+      if (!build) return;
+      let preview2 = panel2.querySelector(".qbs-preview");
+      if (!preview2) {
+        preview2 = document.createElement("div");
+        preview2.className = "qbs-preview";
+        panel2.querySelector("[data-menu]").after(preview2);
+      }
+      preview2.replaceChildren();
+      for (const id of buildItemIds(build)) {
+        const source = [...document.querySelectorAll(`.item-id-${escapeSelector(id)}`)].find((node) => !node.closest("#qaddons-build-switcher"));
+        if (source) {
+          const clone = source.cloneNode(true);
+          clone.removeAttribute("id");
+          preview2.append(clone);
+        } else {
+          const slot = document.createElement("span");
+          slot.className = "item";
+          slot.title = `Przedmiot #${id}`;
+          preview2.append(slot);
+        }
+      }
+      if (!preview2.children.length) preview2.textContent = "Gra nie udostępniła listy przedmiotów tego zestawu.";
+    }
+    function toggleHidden() {
+      if (!menuId) return;
+      const next = { ...ctx.settings.hiddenBuilds || {}, [menuId]: !hidden(menuId) };
+      ctx.changeSettings({ hiddenBuilds: next });
+      render();
+    }
+    function showPurchase() {
+      const offer = state.offers[0];
+      if (!offer) return;
+      const root = panel2.querySelector("[data-purchase]");
+      root.hidden = !root.hidden;
+      root.querySelector("[data-purchase-label]").textContent = `Zestaw ${offer.id}`;
+      root.querySelector('[data-currency="gold"]').textContent = `${offer.cost?.gold ?? "?"} zł`;
+      root.querySelector('[data-currency="credits"]').textContent = `${offer.cost?.credits ?? "?"} SŁ`;
+    }
+    function purchase(currency) {
+      if (!state.offers.length || !["gold", "credits"].includes(currency)) return;
+      page2._g?.(`builds&action=buy&currency=${currency}`);
+      panel2.querySelector("[data-purchase]").hidden = true;
+      status("Wysłano prośbę zakupu zestawu.");
+    }
+    ctx.scheduler.listen(button, "click", () => setOpen(panel2.hidden));
+    ctx.scheduler.listen(panel2.querySelector("[data-close]"), "click", () => setOpen(false));
+    ctx.scheduler.listen(panel2.querySelector("[data-buy]"), "click", showPurchase);
+    ctx.scheduler.listen(panel2.querySelector("[data-purchase]"), "click", (event) => purchase(event.target.closest("[data-currency]")?.dataset.currency));
+    ctx.scheduler.listen(panel2.querySelector("[data-grid]"), "click", (event) => {
+      const id = Number(event.target.closest("[data-build]")?.dataset.build);
+      if (id) select(id);
+    });
+    ctx.scheduler.listen(panel2.querySelector("[data-grid]"), "contextmenu", (event) => {
+      const id = Number(event.target.closest("[data-build]")?.dataset.build);
+      if (!id) return;
+      event.preventDefault();
+      menuId = id;
+      panel2.querySelector("[data-menu]").hidden = false;
+      panel2.querySelector('[data-action="hide"]').textContent = hidden(id) ? "POKAŻ" : "UKRYJ";
+    });
+    ctx.scheduler.listen(panel2.querySelector("[data-menu]"), "click", (event) => {
+      const action = event.target.closest("[data-action]")?.dataset.action;
+      if (action === "rename") rename();
+      if (action === "preview") preview();
+      if (action === "hide") toggleHidden();
+    });
+    ctx.events.on("gamePacket", (packet) => {
+      let changed = false;
+      for (const data of packetList5(packet)) changed = mergeBuildPacket(state, data) || changed;
+      if (changed) render();
+    });
+    ctx.events.on("buildSwitcherChanged", () => {
+      panel2.hidden = ctx.settings.windowOpen === false;
+      render();
+    });
+    ctx.scheduler.cleanup(() => {
+      button.remove();
+      panel2.remove();
+    });
+    render();
+  }
+
+  // src/addons/build-switcher/index.js
+  function createBuildSwitcher() {
+    return {
+      id: "build-switcher",
+      name: "Zmieniacz zestawów",
+      description: "Kompaktowe okno do przełączania zestawów ekwipunku, ich podglądu, nazywania i ukrywania.",
+      defaultEnabled: true,
+      defaults: DEFAULTS16,
+      enable: startBuildSwitcher,
+      onSettingsChange: (ctx) => ctx.events.emit("buildSwitcherChanged"),
+      renderSettings(ctx) {
+        const section = document.createElement("section");
+        section.className = "mtk-addon-settings";
+        section.innerHTML = `<h2>Zmieniacz zestawów</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
+                <p>Kliknij zestaw, aby go włączyć. PPM otwiera zmianę nazwy, podgląd i ukrywanie zestawu.</p><div class="ln-grid">
+                <label class="ln-switch"><input type="checkbox" data-setting="windowOpen">Okno widoczne po uruchomieniu</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="minimalist">Tryb minimalistyczny</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="disableTips">Wyłącz podpowiedzi</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="grayHidden">Wyszarz zamiast ukrywać</label>
+                <label class="ln-field">Liczba kolumn<select data-setting="columns">${[1, 2, 3, 4, 5].map((value2) => `<option value="${value2}">${value2}</option>`).join("")}</select></label></div>`;
+        const enabled = section.querySelector("[data-enabled]");
+        function sync() {
+          enabled.checked = ctx.enabled;
+          section.querySelectorAll("[data-setting]").forEach((input) => {
+            const value2 = ctx.settings[input.dataset.setting];
+            if (input.type === "checkbox") input.checked = Boolean(value2);
+            else input.value = value2;
+            input.disabled = !ctx.enabled;
+          });
+        }
+        ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        section.querySelectorAll("[data-setting]").forEach((input) => ctx.scheduler.listen(input, "change", () => ctx.changeSettings({ [input.dataset.setting]: input.type === "checkbox" ? input.checked : Number(input.value) })));
+        ctx.events.on("addonChanged", (event) => {
+          if (event.id === ctx.id) sync();
+        });
+        sync();
+        ctx.container.append(section);
+      }
+    };
+  }
+
   // src/main.js
   var page = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -10030,6 +10849,9 @@ name:Domina Ecclesiae=DOMI"></textarea></label>
       manager.register(createPocketBerserk());
       manager.register(createQuickGroup());
       manager.register(createTeleportLabels());
+      manager.register(createGarbageTruck());
+      manager.register(createSkillSet());
+      manager.register(createBuildSwitcher());
       manager.register(createShortcutBar());
       panel.connect(manager);
       manager.start();
