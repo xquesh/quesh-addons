@@ -21,6 +21,7 @@ import { createNightMode } from './addons/night-mode/index.js';
 import { createChatAutoscroll } from './addons/chat-autoscroll/index.js';
 import { createAutoAbyss } from './addons/auto-abyss/index.js';
 import { createClanOnline } from './addons/clan-online/index.js';
+import { createPocketBerserk } from './addons/pocket-berserk/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -72,6 +73,7 @@ function start() {
         manager.register(createChatAutoscroll());
         manager.register(createAutoAbyss());
         manager.register(createClanOnline());
+        manager.register(createPocketBerserk());
         panel.connect(manager);
         manager.start();
         game.start();

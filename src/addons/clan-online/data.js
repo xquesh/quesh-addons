@@ -7,7 +7,9 @@ export const DEFAULTS = Object.freeze({
     refreshInterval: 10,
     sort: 'level-desc',
     windowX: null,
-    windowY: 70
+    windowY: 70,
+    windowWidth: 370,
+    windowHeight: 310
 });
 
 export const PROFESSION_NAMES = Object.freeze({

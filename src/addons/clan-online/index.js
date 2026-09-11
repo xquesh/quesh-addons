@@ -23,7 +23,7 @@ export function createClanOnline() {
                     <label class="ln-field">Rozmiar czcionki<input type="range" min="9" max="14" step="1" data-setting="fontSize"><output data-font-size></output></label>
                     <label class="ln-field">Odświeżanie<select data-setting="refreshInterval"><option value="7">Co 7 sekund</option><option value="10">Co 10 sekund</option><option value="15">Co 15 sekund</option><option value="30">Co 30 sekund</option><option value="60">Co minutę</option></select></label>
                     <label class="ln-field">Domyślne sortowanie<select data-setting="sort"><option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nick A–Z</option><option value="profession">Profesja</option><option value="location">Lokacja</option></select></label>
-                </div><div class="ln-grid"><button class="ln-btn" type="button" data-open>Otwórz listę</button><button class="ln-btn" type="button" data-refresh>Odśwież teraz</button><button class="ln-btn" type="button" data-reset>Przywróć pozycję okna</button></div>`;
+                </div><p>Rozmiar okna zmienisz swobodnie, przeciągając jego prawy dolny róg.</p><div class="ln-grid"><button class="ln-btn" type="button" data-open>Otwórz listę</button><button class="ln-btn" type="button" data-refresh>Odśwież teraz</button><button class="ln-btn" type="button" data-reset>Przywróć pozycję i rozmiar</button></div>`;
             const enabled = section.querySelector('[data-enabled]');
             function sync() {
                 enabled.checked = ctx.enabled;
@@ -43,7 +43,7 @@ export function createClanOnline() {
             });
             ctx.scheduler.listen(section.querySelector('[data-open]'), 'click', () => document.querySelector('#qaddons-clan-online-button')?.click());
             ctx.scheduler.listen(section.querySelector('[data-refresh]'), 'click', () => ctx.events.emit('clanOnlineRefresh'));
-            ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => ctx.changeSettings({ windowX: null, windowY: 70 }));
+            ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => ctx.changeSettings({ windowX: null, windowY: 70, windowWidth: 370, windowHeight: 310 }));
             ctx.events.on('addonChanged', event => { if (event.id === ctx.id) sync(); });
             ctx.container.append(section);
         }

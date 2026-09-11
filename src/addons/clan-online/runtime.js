@@ -20,6 +20,7 @@ export function startClanOnline(ctx) {
     let busy = false;
     let lastUpdate = 0;
     let drag = null;
+    let geometryTimer = 0;
 
     ctx.styles.set('runtime', CLAN_ONLINE_CSS);
     const button = document.createElement('button');
@@ -54,10 +55,29 @@ export function startClanOnline(ctx) {
     }
 
     function placePanel() {
-        const width = 370;
+        const width = Math.max(250, Math.min(window.innerWidth - 12, Number(ctx.settings.windowWidth) || 370));
+        const height = Math.max(145, Math.min(window.innerHeight - 12, Number(ctx.settings.windowHeight) || 310));
+        panel.style.width = `${width}px`;
+        panel.style.height = `${height}px`;
         const x = ctx.settings.windowX == null ? Math.max(6, window.innerWidth - width - 12) : Number(ctx.settings.windowX);
-        panel.style.left = `${Math.max(0, Math.min(window.innerWidth - Math.min(width, window.innerWidth - 12), x || 0))}px`;
-        panel.style.top = `${Math.max(0, Math.min(window.innerHeight - 80, Number(ctx.settings.windowY) || 70))}px`;
+        panel.style.left = `${Math.max(0, Math.min(window.innerWidth - width, x || 0))}px`;
+        panel.style.top = `${Math.max(0, Math.min(window.innerHeight - height, Number(ctx.settings.windowY) || 70))}px`;
+    }
+
+    function persistGeometry() {
+        if (panel.hidden || !panel.isConnected) return;
+        const next = {
+            windowX: Math.round(panel.offsetLeft),
+            windowY: Math.round(panel.offsetTop),
+            windowWidth: Math.round(panel.offsetWidth),
+            windowHeight: Math.round(panel.offsetHeight)
+        };
+        if (Object.entries(next).some(([key, value]) => Number(ctx.settings[key]) !== value)) ctx.changeSettings(next);
+    }
+
+    function scheduleGeometrySave() {
+        clearTimeout(geometryTimer);
+        geometryTimer = window.setTimeout(persistGeometry, 180);
     }
 
     function message(text) {
@@ -168,8 +188,9 @@ export function startClanOnline(ctx) {
     ctx.scheduler.listen(panel.querySelector('.qco-head'), 'pointerup', () => {
         if (!drag) return;
         drag = null;
-        ctx.changeSettings({ windowX: Math.round(parseFloat(panel.style.left)), windowY: Math.round(parseFloat(panel.style.top)) });
+        persistGeometry();
     });
+    if (typeof ResizeObserver === 'function') ctx.scheduler.observer(ResizeObserver, scheduleGeometrySave).observe(panel);
     ctx.scheduler.listen(window, 'resize', placePanel, { passive: true });
     ctx.events.on('gamePacket', packet => {
         for (const data of packetList(packet)) {
@@ -180,7 +201,7 @@ export function startClanOnline(ctx) {
     });
     ctx.events.on('clanOnlineChanged', () => { placePanel(); render(); });
     ctx.events.on('clanOnlineRefresh', () => refresh(true));
-    ctx.scheduler.cleanup(() => { button.remove(); panel.remove(); });
+    ctx.scheduler.cleanup(() => { clearTimeout(geometryTimer); button.remove(); panel.remove(); });
     ctx.scheduler.timeout(() => refresh(true), 900);
     tick();
 }

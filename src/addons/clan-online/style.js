@@ -3,7 +3,7 @@ export const CLAN_ONLINE_CSS = `
 #qaddons-clan-online-button:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px rgba(255,255,255,.72)}
 #qaddons-clan-online-button[hidden]{display:none!important}
 #qaddons-clan-online-button .qco-badge{position:absolute;right:2px;top:2px;min-width:12px;height:12px;padding:0 2px;box-sizing:border-box;background:#111;border:1px solid #777;color:#fff;font:700 8px/10px Arial}
-#qaddons-clan-online{position:fixed;z-index:32000;width:370px;max-width:calc(100vw - 12px);height:310px;display:flex;flex-direction:column;border:1px solid #777;background:#000;color:#ddd;box-shadow:0 5px 20px rgba(0,0,0,.9);font:11px/1.25 Arial}
+#qaddons-clan-online{position:fixed;z-index:32000;box-sizing:border-box;width:370px;max-width:calc(100vw - 12px);height:310px;max-height:calc(100vh - 12px);min-width:250px;min-height:145px;display:flex;flex-direction:column;overflow:hidden;resize:both;border:1px solid #777;background:#000;color:#ddd;box-shadow:0 5px 20px rgba(0,0,0,.9);font:11px/1.25 Arial}
 #qaddons-clan-online[hidden]{display:none}
 #qaddons-clan-online .qco-head{height:29px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 6px 0 9px;border-bottom:1px solid #333;background:#090909;color:#fff;font-weight:700;cursor:move;user-select:none}
 #qaddons-clan-online .qco-head button{width:23px;height:22px;padding:0;border:0;background:transparent;color:#bbb;font-size:17px;cursor:pointer}
