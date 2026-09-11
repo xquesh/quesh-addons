@@ -171,6 +171,8 @@
         grip.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: lockedLeft + 80, clientY: shortcutBar.offsetTop + 3 }));
         grip.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }));
         assert(shortcutBar.offsetLeft === lockedLeft, 'Blokada uniemożliwia przesunięcie belki');
+        manager.changeSettings('shortcut-bar', { showHandle: false }); await wait(30);
+        assert(getComputedStyle(grip).display === 'none', 'Ustawienie ukrywa uchwyt przenoszenia belki');
         const quickGroupCommands = [];
         const commandBeforeQuickGroup = window._g;
         window._g = command => quickGroupCommands.push(command);

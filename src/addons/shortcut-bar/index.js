@@ -1,7 +1,7 @@
 import { SHORTCUTS } from '../../core/shortcuts.js';
 import { SHORTCUT_BAR_CSS } from './style.js';
 
-const DEFAULTS = Object.freeze({ locked: false, x: null, y: null });
+const DEFAULTS = Object.freeze({ locked: false, showHandle: true, x: null, y: null });
 
 function startShortcutBar(ctx) {
     ctx.styles.set('runtime', SHORTCUT_BAR_CSS);
@@ -30,6 +30,7 @@ function startShortcutBar(ctx) {
 
     function place() {
         bar.dataset.locked = String(ctx.settings.locked === true);
+        bar.dataset.showHandle = String(ctx.settings.showHandle !== false);
         const saved = ctx.settings.x !== null && ctx.settings.y !== null && Number.isFinite(Number(ctx.settings.x)) && Number.isFinite(Number(ctx.settings.y));
         const position = saved ? clampPosition(ctx.settings.x, ctx.settings.y) : defaultPosition();
         bar.style.left = `${Math.round(position.x)}px`;
@@ -122,15 +123,19 @@ export function createShortcutBar() {
             section.innerHTML = `<h2>Belka skrótów</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
                 <p>Przeciągaj belkę za uchwyt z kropkami. PPM na skrócie otwiera ustawienia jego dodatku.</p>
                 <div class="ln-grid"><label class="ln-switch"><input type="checkbox" data-setting="locked">Zablokuj pozycję belki</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="showHandle">Pokazuj uchwyt przenoszenia</label>
                 <button class="ln-btn" type="button" data-reset>Ustaw ponownie obok slotu 8</button></div>`;
             const enabled = section.querySelector('[data-enabled]');
             const locked = section.querySelector('[data-setting="locked"]');
+            const showHandle = section.querySelector('[data-setting="showHandle"]');
             function sync() {
                 enabled.checked = ctx.enabled; locked.checked = ctx.settings.locked === true;
-                locked.disabled = !ctx.enabled; section.querySelector('[data-reset]').disabled = !ctx.enabled;
+                showHandle.checked = ctx.settings.showHandle !== false;
+                locked.disabled = !ctx.enabled; showHandle.disabled = !ctx.enabled; section.querySelector('[data-reset]').disabled = !ctx.enabled;
             }
             ctx.scheduler.listen(enabled, 'change', () => ctx.setEnabled(enabled.checked));
             ctx.scheduler.listen(locked, 'change', () => ctx.changeSettings({ locked: locked.checked }));
+            ctx.scheduler.listen(showHandle, 'change', () => ctx.changeSettings({ showHandle: showHandle.checked }));
             ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => ctx.changeSettings({ x: null, y: null }));
             ctx.events.on('addonChanged', event => { if (event.id === ctx.id) sync(); });
             sync(); ctx.container.append(section);
