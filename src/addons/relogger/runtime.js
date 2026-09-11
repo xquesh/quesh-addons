@@ -152,6 +152,7 @@ export function startRelogger(ctx) {
             changeCharacter(hero, page); relogging = true; error = '';
             reloggingObserved = page.Engine?.changePlayer?.id != null;
             relogStartedAt = Date.now();
+            relogDeadline = relogStartedAt + 7000;
             entries.forEach(button => { button.disabled = true; }); updateTimers();
             relogTimeout = scheduler.timeout(() => unlockRelog('Zmiana postaci nie zakończyła się. Możesz spróbować ponownie.'), 14000);
         }
@@ -225,7 +226,7 @@ export function startRelogger(ctx) {
             const seconds = Number(data.logoff_time_left);
             if (seconds > 0) {
                 reloggingObserved = true;
-                relogDeadline = Date.now() + seconds * 1000 + 1500;
+                relogDeadline = Math.max(relogDeadline, relogStartedAt + 7000, Date.now() + seconds * 1000 + 1500);
             } else if (seconds === 0) {
                 unlockRelog();
                 render();
@@ -241,7 +242,6 @@ export function startRelogger(ctx) {
         if (relogging && changePending) reloggingObserved = true;
         if (relogging && activeHero && activeHero !== reloggingFrom) { unlockRelog(); render(); }
         else if (relogging && relogDeadline && Date.now() >= relogDeadline) finishStalledRelog();
-        else if (relogging && !reloggingObserved && !changePending && Date.now() - relogStartedAt >= 2500) unlockRelog('Serwer nie rozpoczął zmiany postaci. Możesz spróbować ponownie.');
         if (account && user !== account) { unlockRelog(); heroes = []; loaded = false; account = ''; error = ''; attemptedAccount = ''; render(); }
         if (!loading && attemptedAccount !== user && page.Engine?.allInit === true && user && page.getCookie?.('hs3')) { attemptedAccount = user; load(); }
         updateTimers(); position(); scheduler.timeout(tick, 1000);

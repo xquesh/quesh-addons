@@ -115,7 +115,10 @@ export function startReminder(ctx) {
         }
         body.innerHTML = rows.join('');
         const signature = resultSignature(current);
-        panel.hidden = !rows.length || (!force && signature === dismissed);
+        const claimable = Boolean(current.calendar || current.promotions.length);
+        panel.dataset.claimable = String(claimable);
+        panel.querySelector('.qrp-close').hidden = claimable;
+        panel.hidden = !rows.length || (!claimable && !force && signature === dismissed);
         showButton();
     }
 
@@ -157,7 +160,10 @@ export function startReminder(ctx) {
         intervalTimer = ctx.scheduler.timeout(() => { check(); scheduleInterval(); }, seconds * 1000);
     }
 
-    ctx.scheduler.listen(panel.querySelector('.qrp-close'), 'click', () => { dismissed = resultSignature(current); panel.hidden = true; });
+    ctx.scheduler.listen(panel.querySelector('.qrp-close'), 'click', () => {
+        if (current.calendar || current.promotions.length) return;
+        dismissed = resultSignature(current); panel.hidden = true;
+    });
     ctx.scheduler.listen(button, 'click', () => check(true));
     ctx.scheduler.listen(panel, 'click', event => {
         const target = event.target.closest('[data-action]');

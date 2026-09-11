@@ -30,14 +30,19 @@ export function startPocketBerserk(ctx, tracker) {
     button.id = 'qaddons-pocket-berserk';
     button.type = 'button';
     button.textContent = 'BR';
-    document.body.append(button);
+    function mountButton() {
+        const host = document.querySelector('.bottom-panel-of-bottom-positioner') || document.querySelector('.positioner.bottom');
+        const target = host || document.body;
+        if (button.parentElement !== target) target.append(button);
+        button.dataset.fallback = String(!host);
+    }
 
     function currentId() { return tracker.inParty ? GROUP_BERSERK_ID : SOLO_BERSERK_ID; }
     function render() {
         const id = currentId();
         const mode = tracker.modes[id];
         button.hidden = ctx.settings.showButton === false;
-        button.style.setProperty('--qpb-y', `${Math.max(0, Math.min(window.innerHeight - 30, Number(ctx.settings.buttonY) || 96))}px`);
+        button.style.setProperty('--qpb-x', `${Math.max(0, Math.min(100, Number(ctx.settings.buttonHorizontal) || 82))}%`);
         button.dataset.ready = String(Boolean(mode));
         button.dataset.enabled = String(Boolean(mode?.v));
         const scope = tracker.inParty ? 'w grupie' : 'solo';
@@ -58,7 +63,8 @@ export function startPocketBerserk(ctx, tracker) {
     });
     ctx.events.on('pocketBerserkDataChanged', render);
     ctx.events.on('pocketBerserkChanged', render);
+    ctx.scheduler.observer(MutationObserver, mountButton).observe(document.body, { childList: true, subtree: true });
     ctx.scheduler.listen(window, 'resize', render, { passive: true });
     ctx.scheduler.cleanup(() => button.remove());
-    render();
+    mountButton(); render();
 }

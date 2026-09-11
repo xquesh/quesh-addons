@@ -2,8 +2,11 @@ export const REMINDER_CSS = `
 #qaddons-reminder-button{position:fixed;left:116px;bottom:68px;z-index:31000;width:32px;height:26px;border:1px solid #777;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer}
 #qaddons-reminder-button:hover,#qaddons-reminder-button[data-alert="true"]{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.75);color:#fff}
 #qaddons-reminder-button[data-alert="true"]::after{content:"";position:absolute;right:2px;top:2px;width:5px;height:5px;background:#fff;box-shadow:0 0 5px #fff}
-#qaddons-reminder{position:fixed;right:12px;bottom:92px;z-index:32000;width:300px;border:1px solid #777;background:#000;color:#ddd;font:12px/1.4 Arial;box-shadow:0 4px 18px rgba(0,0,0,.85)}
+#qaddons-reminder{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2147483000;width:340px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);overflow:auto;border:1px solid #aaa;background:#000;color:#ddd;font:12px/1.4 Arial;box-shadow:0 0 0 2px #000,0 0 22px rgba(255,255,255,.42),0 10px 35px #000}
 #qaddons-reminder[hidden]{display:none}
+#qaddons-reminder[data-claimable="true"]{border-color:#fff;animation:qaddons-reminder-attention 1.8s ease-in-out infinite}
+#qaddons-reminder[data-claimable="true"] .qrp-head{box-shadow:inset 4px 0 #fff}
+@keyframes qaddons-reminder-attention{0%,100%{box-shadow:0 0 0 2px #000,0 0 14px rgba(255,255,255,.3),0 10px 35px #000}50%{box-shadow:0 0 0 2px #000,0 0 28px rgba(255,255,255,.68),0 10px 35px #000}}
 #qaddons-reminder .qrp-head{display:flex;align-items:center;justify-content:space-between;height:29px;padding:0 8px;border-bottom:1px solid #333;background:#0b0b0b;color:#fff;font-weight:700}
 #qaddons-reminder .qrp-close{width:24px;height:22px;padding:0;border:0;background:transparent;color:#ddd;font-size:17px;cursor:pointer}
 #qaddons-reminder .qrp-close:hover{color:#fff;text-shadow:0 0 6px #fff}

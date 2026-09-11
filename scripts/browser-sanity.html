@@ -197,6 +197,7 @@
         await wait(20);
         const berserkButton = document.querySelector('#qaddons-pocket-berserk');
         assert(berserkButton?.dataset.ready === 'true' && berserkButton.dataset.enabled === 'false', 'Kieszonkowy berserk odczytuje ustawienia solo');
+        assert(berserkButton.parentElement.matches('.bottom-panel-of-bottom-positioner'), 'Przycisk BR jest osadzony na dolnej belce gry');
         berserkButton.click();
         assert(berserkCommands.includes('settings&action=update&id=34&v=1'), 'Przycisk BR przełącza berserk solo');
         Engine.communication.parseJSON({ party: { members: { 7: { id: 7 }, 9: { id: 9 } } } }); await wait(20);
@@ -329,6 +330,15 @@
         const failedPromotion = document.querySelector('#qaddons-reminder [data-action="promotions"]');
         failedPromotion.click(); await wait(30);
         assert(failedPromotion.isConnected && !failedPromotion.disabled && failedPromotion.textContent.includes('Nie udało'), 'Błąd odbioru nie ukrywa darmowej oferty i pozwala ponowić próbę');
+        const reminderPanel = document.querySelector('#qaddons-reminder');
+        const reminderRect = reminderPanel.getBoundingClientRect();
+        assert(Math.abs(reminderRect.left + reminderRect.width / 2 - innerWidth / 2) < 8 && Math.abs(reminderRect.top + reminderRect.height / 2 - innerHeight / 2) < 8, `Przypominajka jest wyśrodkowana: ${JSON.stringify({ left: reminderRect.left, top: reminderRect.top, width: reminderRect.width, height: reminderRect.height, innerWidth, innerHeight })}`);
+        assert(reminderPanel.dataset.claimable === 'true' && reminderPanel.querySelector('.qrp-close').hidden, 'Nagrody do odebrania nie można przypadkiem schować');
+        window._g = command => {
+            if (command === 'promotions&a=use&id=42') setTimeout(() => Engine.communication.parseJSON({ e: 'ok' }), 0);
+        };
+        failedPromotion.click(); await wait(30);
+        assert(document.querySelector('#qaddons-reminder').dataset.claimable === 'false', 'Po odebraniu znika trwałe wyróżnienie');
         window._g = reminderCommand;
         const destroyExpired = document.querySelector('#qaddons-reminder [data-action="expired"]');
         destroyExpired.click();

@@ -96,7 +96,9 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         let recoveredHero = null;
         Engine.changePlayer = { id: null, changePlayer(id) { this.id = id; setTimeout(() => Engine.communication.parseJSON({ logoff_time_left: 1 }), 0); }, reloadPlayer(id) { recoveredHero = id; this.id = null; Engine.hero = { d: { id } }; }, changePlayerRequest() { throw new Error('Pominięto natywną ścieżkę changePlayer'); } };
         bar().querySelector('[data-hero="5"]').click();
-        await wait(3800);
+        await wait(2800);
+        assert(recoveredHero === null && [...bar().querySelectorAll('.qr-card')].every(button => button.disabled), 'Przelogawka nie przerywa operacji po dwóch sekundach');
+        await wait(5700);
         assert(recoveredHero === 5 && Engine.hero.d.id === 5, 'Po zakończonym odliczaniu bez przełączenia dodatek kończy natywne przelogowanie');
         // Błąd pobrania nie usuwa poprawnie pobranej listy.
         window.fetch = async () => { throw new Error('fixture offline'); };

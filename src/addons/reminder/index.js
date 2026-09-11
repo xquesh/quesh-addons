@@ -11,7 +11,7 @@ export function createReminder() {
         renderSettings(ctx) {
             const section = document.createElement('section'); section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Przypominajka</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Dodatek sprawdza kalendarz eventowy, bezpłatne oferty w aktualnościach oraz przedmioty, które stały się bezpowrotnie nieaktywne.</p>
+                <p>Dodatek sprawdza kalendarz eventowy, bezpłatne oferty w aktualnościach oraz przedmioty, które stały się bezpowrotnie nieaktywne. Gdy jest nagroda do odebrania, wyróżnione okno pozostaje na środku ekranu aż do jej odebrania.</p>
                 <h2>Kalendarz eventowy</h2><div class="ln-grid">
                     <label class="ln-switch"><input type="checkbox" data-setting="calendarEnabled">Powiadamiaj o nieodebranym dniu</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="calendarAutoClaim">Odbieraj automatycznie</label>
