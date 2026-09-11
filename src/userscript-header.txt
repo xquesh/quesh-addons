@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QADDONS
 // @namespace    margonem-toolkit
-// @version      1.0.2
+// @version      1.0.3
 // @homepageURL  https://github.com/xquesh/quesh-addons
 // @updateURL    https://xquesh.github.io/quesh-addons/dist/installer.user.js
 // @downloadURL  https://xquesh.github.io/quesh-addons/dist/installer.user.js

@@ -2,6 +2,7 @@
     const script = document.createElement('script');
     script.src =
         'https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js';
+    script.src += `?v=${Date.now()}`;
     script.async = false;
 
     script.onerror = () => {

@@ -71,7 +71,7 @@ try {
         socket.send(JSON.stringify({ id, method, params }));
     });
     await command('Fetch.enable', { patterns: [{
-        urlPattern: 'https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js',
+        urlPattern: 'https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js*',
         requestStage: 'Request'
     }, {
         urlPattern: 'https://xquesh.github.io/quesh-addons/dist/version.json*',

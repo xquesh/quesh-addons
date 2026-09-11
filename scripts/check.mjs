@@ -186,7 +186,7 @@ for (const hasHead of [true, false]) {
         console: { error: message => errors.push(message) }
     });
     assert.equal(appended.length, 1);
-    assert.equal(appended[0].src, 'https://xquesh.github.io/quesh-addons/dist/margonem-toolkit.js');
+    assert.match(appended[0].src, /^https:\/\/xquesh\.github\.io\/quesh-addons\/dist\/margonem-toolkit\.js\?v=\d+$/);
     assert.equal(appended[0].async, false);
     assert.equal(errors.length, 0);
     appended[0].onerror();

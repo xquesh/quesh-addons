@@ -11,21 +11,26 @@ const timer = (presp, rest = {}) => ({ type: 2, heroData: { id: 1 }, name: 'E2',
 assert.deepEqual(heroTimers([timer(900), timer(1100, { minResp: 950 }), timer(1200), timer(100, {}), timer(1001, { heroData: { id: 2 } })], '1', 1000).map(value => value.state), ['due', 'window', 'waiting']);
 assert.equal(heroTimers(undefined, 1, 1000).length, 0);
 const calls = [];
-const page = { Engine: { allInit: true, hero: { d: { id: 1 } }, stop: () => calls.push('stop') }, location: { hostname: 'fobos.margonem.pl' }, setCookie: (...args) => calls.push(args) };
+const page = { Engine: { allInit: true, hero: { d: { id: 1 } } }, location: { hostname: 'fobos.margonem.pl' }, setCookie: (...args) => calls.push(args) };
 assert.throws(() => relogTarget(list[0], page), /już zalogowana/);
 assert.throws(() => relogTarget({ id: 2, world: 'evil.example' }, page), /Nieprawidłowy/);
 changeCharacter(list[1], page, url => calls.push(url));
 assert.equal(calls[0][0], 'mchar_id'); assert.equal(calls[0][1], '2'); assert.equal(calls[0][4], 'margonem.pl'); assert.equal(calls[0][5], true);
-assert.equal(calls[1], 'stop'); assert.equal(calls[2], 'https://fobos.margonem.pl/');
+assert.equal(calls[1], 'https://fobos.margonem.pl/');
 calls.length = 0;
 assert.equal(reloadCharacter(list[1], page, url => calls.push(url)), 'reload');
-assert.equal(calls[0][0], 'mchar_id'); assert.equal(calls[1], 'stop'); assert.equal(calls[2], 'https://fobos.margonem.pl/');
-const cleanupFailureCalls = [];
-const cleanupFailurePage = { Engine: { stop: () => { throw new Error('cleanup'); } }, location: { hostname: 'fobos.margonem.pl' }, setCookie: () => cleanupFailureCalls.push('cookie') };
-const previousWarn = console.warn; console.warn = () => {};
-try { assert.equal(reloadCharacter(list[1], cleanupFailurePage, url => cleanupFailureCalls.push(url)), 'reload'); }
-finally { console.warn = previousWarn; }
-assert.deepEqual(cleanupFailureCalls, ['cookie', 'https://fobos.margonem.pl/']);
+assert.equal(calls[0][0], 'mchar_id'); assert.equal(calls[1], 'https://fobos.margonem.pl/');
+const orderlyCalls = [];
+let delayedNavigation = null;
+const orderlyPage = {
+    Engine: { allInit: true, hero: { d: { id: 1 } } }, location: { hostname: 'fobos.margonem.pl' },
+    _g: command => orderlyCalls.push(['request', command]), setCookie: (...args) => orderlyCalls.push(['cookie', ...args]),
+    setTimeout: () => { throw new Error('Wstrzyknięty scheduler powinien obsłużyć opóźnienie.'); }
+};
+assert.equal(reloadCharacter(list[1], orderlyPage, url => orderlyCalls.push(['navigate', url]), (callback, delay) => { delayedNavigation = callback; orderlyCalls.push(['delay', delay]); }), 'reload');
+assert.deepEqual(orderlyCalls.map(call => call.slice(0, 2)), [['request', 'logoff&a=start'], ['cookie', 'mchar_id'], ['delay', 500]]);
+delayedNavigation();
+assert.deepEqual(orderlyCalls.at(-1), ['navigate', 'https://fobos.margonem.pl/']);
 const nativeCalls = [];
 const nativePage = { Engine: { allInit: true, hero: { d: { id: 1 } }, changePlayer: { id: null, changePlayer: id => nativeCalls.push(['changePlayer', id]), changePlayerRequest: id => nativeCalls.push(['request', id]) } }, location: { hostname: 'fobos.margonem.pl' } };
 assert.equal(changeCharacterNative(list[1], nativePage), 'native');

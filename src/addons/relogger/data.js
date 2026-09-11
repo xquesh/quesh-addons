@@ -52,16 +52,14 @@ export function relogTarget(hero, page) {
     if (String(engine.hero?.d?.id || page.getCookie?.('mchar_id')) === String(hero.id)) throw new Error('Ta postać jest już zalogowana.');
     return characterDestination(hero, page);
 }
-export function reloadCharacter(hero, page, navigate = url => page.location.replace(url)) {
+export function reloadCharacter(hero, page, navigate = url => page.location.replace(url), schedule = (callback, delay) => page.setTimeout(callback, delay)) {
     const target = characterDestination(hero, page);
     if (typeof page.setCookie !== 'function') throw new Error('Gra nie udostępnia zmiany postaci.');
+    const canCloseSession = typeof page._g === 'function' && typeof page.setTimeout === 'function';
+    if (canCloseSession) page._g('logoff&a=start');
     page.setCookie('mchar_id', target.id, new Date(Date.now() + 30 * 86400000), '/', target.cookieDomain, true);
-    // The client normally stops the active game instance immediately before
-    // its final reload. Do the same here so the previous connection cannot
-    // interfere with item packets received by the new character session.
-    try { page.Engine?.stop?.(); }
-    catch (cause) { console.warn('[QADDONS Przelogawka] Nie udało się zatrzymać poprzedniej sesji gry.', cause); }
-    navigate(target.url);
+    if (canCloseSession) schedule(() => navigate(target.url), 500);
+    else navigate(target.url);
     return 'reload';
 }
 export function changeCharacter(hero, page, navigate = url => page.location.replace(url)) {
