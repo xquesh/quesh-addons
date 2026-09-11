@@ -17,6 +17,16 @@ function itemPreview(item) {
     const source = [...document.querySelectorAll(`.item-id-${id}`)]
         .find(node => !node.closest('#qaddons-enhancer'));
     let image = source?.cloneNode(true);
+    if (source && image) {
+        const sourceCanvases = source.matches?.('canvas') ? [source, ...source.querySelectorAll('canvas')] : [...source.querySelectorAll('canvas')];
+        const clonedCanvases = image.matches?.('canvas') ? [image, ...image.querySelectorAll('canvas')] : [...image.querySelectorAll('canvas')];
+        sourceCanvases.forEach((canvas, index) => {
+            const clone = clonedCanvases[index];
+            if (!clone) return;
+            clone.width = canvas.width; clone.height = canvas.height;
+            try { clone.getContext('2d')?.drawImage(canvas, 0, 0); } catch {}
+        });
+    }
     if (!image) {
         image = document.createElement('div');
         image.className = `item item-id-${id}`;
@@ -47,7 +57,12 @@ export function startEnhancer(ctx) {
     const toggle = document.createElement('button');
     toggle.id = 'qaddons-enhancer-toggle'; toggle.type = 'button'; toggle.textContent = 'UL'; toggle.title = 'Ulepszarka';
     const windowElement = document.createElement('section');
-    windowElement.id = 'qaddons-enhancer'; windowElement.hidden = true;
+    windowElement.id = 'qaddons-enhancer'; windowElement.hidden = settings.windowOpen !== true;
+    if (Number.isFinite(Number(settings.windowX)) && Number.isFinite(Number(settings.windowY))) {
+        windowElement.style.left = `${Math.max(0, Number(settings.windowX))}px`;
+        windowElement.style.top = `${Math.max(0, Number(settings.windowY))}px`;
+        windowElement.style.bottom = 'auto';
+    }
     windowElement.innerHTML = `<header><span>ULEPSZARKA</span><button type="button" data-close aria-label="Zamknij">×</button></header><div class="qe-body"><div class="qe-toolbar"><button type="button" class="qe-state" data-active></button><select data-mode><option value="regular">Zwykły</option><option value="type">Po typie</option><option value="hybrid">Hybrydowy</option></select></div><div class="qe-slots"></div><div class="qe-progress"><span></span></div><div class="qe-meta"><span data-buffer>Bufor: 0</span><span data-limit>Limit: —</span></div><div class="qe-actions"><button type="button" data-enhance>ULEPSZ TERAZ</button><button type="button" data-rescan>ODŚWIEŻ BUFOR</button></div><p class="qe-status" role="status">Wybierz przedmiot do ulepszania.</p></div>`;
     ctx.styles.set('runtime', enhancerStyle);
     document.body.append(toggle, windowElement);
@@ -92,13 +107,12 @@ export function startEnhancer(ctx) {
             const item = target(slot);
             const button = document.createElement('button'); button.type = 'button'; button.className = 'qe-slot'; button.dataset.slot = slot;
             button.dataset.filled = String(Boolean(item));
-            button.innerHTML = `<small>${SLOT_LABELS[slot]}</small><strong></strong><small>${item ? 'Przeciągnij inny · PPM: usuń' : 'Przeciągnij przedmiot tutaj'}</small>`;
-            button.querySelector('strong').textContent = item ? itemName(item) : 'PUSTY SLOT';
+            button.title = item ? `${SLOT_LABELS[slot]}: ${itemName(item)} · PPM: usuń` : `${SLOT_LABELS[slot]} — przeciągnij przedmiot`;
+            button.setAttribute('aria-label', button.title);
             if (item) {
                 button.dataset.itemId = String(item.id);
-                button.title = itemName(item);
-                button.prepend(itemPreview(item));
-            }
+                button.append(itemPreview(item));
+            } else button.textContent = '+';
             return button;
         }));
         windowElement.querySelector('[data-mode]').value = settings.mode;
@@ -203,8 +217,13 @@ export function startEnhancer(ctx) {
         } catch (error) { if (ctx.enabled) message(error.message || 'Ulepszanie nie powiodło się.', true); }
         finally { busy = false; if (!ctx.scheduler.disposed) delete windowElement.dataset.busy; }
     }
-    ctx.scheduler.listen(toggle, 'click', () => { windowElement.hidden = !windowElement.hidden; if (!windowElement.hidden) { refresh(); updateUsage(); } });
-    ctx.scheduler.listen(windowElement.querySelector('[data-close]'), 'click', () => { windowElement.hidden = true; });
+    function setWindowOpen(open) {
+        windowElement.hidden = !open;
+        ctx.changeSettings({ windowOpen: open });
+        if (open) { refresh(); updateUsage(); }
+    }
+    ctx.scheduler.listen(toggle, 'click', () => setWindowOpen(windowElement.hidden));
+    ctx.scheduler.listen(windowElement.querySelector('[data-close]'), 'click', () => setWindowOpen(false));
     ctx.scheduler.listen(windowElement.querySelector('[data-active]'), 'click', () => { active = !active; persistActive(); refresh(); });
     ctx.scheduler.listen(windowElement.querySelector('[data-mode]'), 'change', event => { ctx.changeSettings({ mode: event.target.value }); refresh(); });
     ctx.scheduler.listen(windowElement.querySelector('[data-enhance]'), 'click', enhance);
@@ -263,7 +282,11 @@ export function startEnhancer(ctx) {
     let drag = null;
     ctx.scheduler.listen(windowElement.querySelector('header'), 'pointerdown', event => { if (event.target.closest('button')) return; const rect = windowElement.getBoundingClientRect(); drag = { x: event.clientX - rect.left, y: event.clientY - rect.top }; event.currentTarget.setPointerCapture?.(event.pointerId); });
     ctx.scheduler.listen(windowElement.querySelector('header'), 'pointermove', event => { if (!drag) return; windowElement.style.left = `${Math.max(0, event.clientX - drag.x)}px`; windowElement.style.top = `${Math.max(0, event.clientY - drag.y)}px`; windowElement.style.bottom = 'auto'; });
-    ctx.scheduler.listen(windowElement.querySelector('header'), 'pointerup', () => { drag = null; });
+    ctx.scheduler.listen(windowElement.querySelector('header'), 'pointerup', () => {
+        if (!drag) return;
+        drag = null;
+        ctx.changeSettings({ windowX: Math.round(windowElement.offsetLeft), windowY: Math.round(windowElement.offsetTop) });
+    });
     ctx.events.on('enhancerChanged', refresh);
     ctx.events.on('gamePacket', packet => { const data = Array.isArray(packet) ? packet.flat(Infinity) : [packet]; const update = data.find(entry => entry?.enhancement?.progressing || entry?.enhancement?.upgradable); if (update) renderProgress(update.enhancement.progressing || update.enhancement.upgradable); });
     ctx.scheduler.cleanup(() => { clearDrag(); document.querySelectorAll('.qaddons-enhancer-buffer').forEach(node => node.classList.remove('qaddons-enhancer-buffer')); toggle.remove(); windowElement.remove(); });

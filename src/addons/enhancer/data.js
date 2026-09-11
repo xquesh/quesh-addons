@@ -10,7 +10,8 @@ export const ITEM_TYPES = {
 };
 
 export const DEFAULTS = {
-    showWindowButton: true, rememberActive: false, active: false, mode: 'regular', bufferSize: 25,
+    showWindowButton: true, windowOpen: false, windowX: null, windowY: null,
+    rememberActive: false, active: false, mode: 'regular', bufferSize: 25,
     highlight: false, messages: true, hotkey: 'F9',
     rarity: { enabled: true, common: true, unique: false, heroic: false },
     types: Object.fromEntries(['oneHand','twoHand','oneHalf','distance','help','wand','orb','armor','helmet','boots','gloves','ring','necklace','shield','arrows'].map(key => [key, true])),

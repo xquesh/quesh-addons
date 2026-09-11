@@ -24,6 +24,7 @@ import { createClanOnline } from './addons/clan-online/index.js';
 import { createPocketBerserk } from './addons/pocket-berserk/index.js';
 import { createShortcutBar } from './addons/shortcut-bar/index.js';
 import { createQuickGroup } from './addons/quick-group/index.js';
+import { createTeleportLabels } from './addons/teleport-labels/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -82,6 +83,7 @@ function start() {
         manager.register(createClanOnline());
         manager.register(createPocketBerserk());
         manager.register(createQuickGroup());
+        manager.register(createTeleportLabels());
         manager.register(createShortcutBar());
         panel.connect(manager);
         manager.start();

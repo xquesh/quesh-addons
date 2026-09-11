@@ -140,7 +140,15 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 17, 'Manager siedemnastu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 18, 'Manager osiemnastu addonów');
+        const teleportIcon = document.createElement('div');
+        teleportIcon.className = 'item item-id-2001'; document.body.append(teleportIcon);
+        Engine.communication.parseJSON({ item: { 2001: { id: 2001, name: 'Kamień teleportujący', stat: 'teleport=1224,10,20' } } });
+        await wait(40);
+        assert(teleportIcon.querySelector('.qaddons-teleport-label')?.textContent === 'KEND', 'Podpisownik oznacza znany teleport');
+        manager.changeSettings('teleport-labels', { customLabels: { 1224: 'BAZA' } }); await wait(40);
+        assert(teleportIcon.querySelector('.qaddons-teleport-label')?.textContent === 'BAZA', 'Podpisownik odświeża własny podpis');
+        teleportIcon.remove();
         const shortcutBar = document.querySelector('#qaddons-shortcut-bar');
         assert(shortcutBar && document.querySelector('#qaddons-pocket-berserk')?.parentElement === shortcutBar, 'Przyciski dodatków trafiają na wspólną belkę');
         assert(shortcutBar.querySelectorAll('[data-qsb-hidden="false"]').length === 5, 'Belka domyślnie pokazuje pięć skrótów akcji');
@@ -367,16 +375,24 @@
             if (command.startsWith('enhancement&action=open')) setTimeout(() => Engine.communication.parseJSON({ enhancement: { itemId: id, upgradable: { upgradeLevel: 1, current: 5, max: 20 } } }), 0);
             if (command.startsWith('artisanship&action=open')) setTimeout(() => Engine.communication.parseJSON({ artisanship: { open: true } }), 0);
         };
-        const draggedItem = document.createElement('div'); draggedItem.className = 'item item-id-990'; draggedItem.style.backgroundImage = 'url("test-item.png")'; document.body.append(draggedItem);
+        const draggedItem = document.createElement('div'); draggedItem.className = 'item item-id-990'; draggedItem.style.backgroundImage = 'url("test-item.png")';
+        const draggedCanvas = document.createElement('canvas'); draggedCanvas.width = 2; draggedCanvas.height = 2; draggedCanvas.getContext('2d').fillStyle = '#ff0000'; draggedCanvas.getContext('2d').fillRect(0, 0, 2, 2); draggedItem.append(draggedCanvas); document.body.append(draggedItem);
         document.querySelector('#qaddons-enhancer-toggle').click();
         const enhancerSlot = document.querySelector('#qaddons-enhancer [data-slot="all"]');
         draggedItem.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, buttons: 1 }));
         enhancerSlot.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }));
         await wait(80);
-        assert(document.querySelector('#qaddons-enhancer [data-slot="all"] strong').textContent === 'Zbroja testowa', 'Przeciągnięcie ustawia cel Ulepszarki');
+        assert(document.querySelector('#qaddons-enhancer [data-slot="all"]').title.includes('Zbroja testowa'), 'Przeciągnięcie ustawia cel Ulepszarki');
         assert(document.querySelector('#qaddons-enhancer [data-slot="all"] .qe-item-preview>.item')?.style.backgroundImage.includes('test-item.png'), 'Slot Ulepszarki pokazuje grafikę przedmiotu z ekwipunku');
+        assert(document.querySelector('#qaddons-enhancer [data-slot="all"] canvas').getContext('2d').getImageData(0, 0, 1, 1).data[0] === 255, 'Slot kopiuje narysowaną grafikę canvas przedmiotu');
+        assert(!document.querySelector('#qaddons-enhancer [data-slot="all"] strong, #qaddons-enhancer [data-slot="all"] small'), 'Kompaktowy slot zawiera wyłącznie przedmiot');
         assert(!document.querySelector('#qaddons-enhancer .qe-slots').dataset.dragging, 'Stan przeciągania jest sprzątany');
-        document.querySelector('#qaddons-enhancer [data-close]').click(); draggedItem.remove();
+        manager.setEnabled('enhancer', false); manager.setEnabled('enhancer', true); await wait(30);
+        assert(!document.querySelector('#qaddons-enhancer').hidden, 'Ulepszarka pozostaje otwarta po ponownym uruchomieniu dodatku');
+        document.querySelector('#qaddons-enhancer [data-close]').click();
+        manager.setEnabled('enhancer', false); manager.setEnabled('enhancer', true); await wait(30);
+        assert(document.querySelector('#qaddons-enhancer').hidden, 'Ręczne zamknięcie Ulepszarki jest zapamiętane');
+        draggedItem.remove();
         Engine.items.testMyItems = previousEnhancerItems; window._g = previousGameCommand;
         Engine.hero = { d: { id: 7 } };
         Engine.communication.parseJSON({ f: { myteam: 1, w: {
@@ -574,7 +590,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: seventeen addons, quick group, shortcut bar, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: eighteen addons, teleport labels, quick group, shortcut bar, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {
