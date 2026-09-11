@@ -138,10 +138,10 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 16, 'Manager szesnastu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 17, 'Manager siedemnastu addonów');
         const shortcutBar = document.querySelector('#qaddons-shortcut-bar');
         assert(shortcutBar && document.querySelector('#qaddons-pocket-berserk')?.parentElement === shortcutBar, 'Przyciski dodatków trafiają na wspólną belkę');
-        assert(shortcutBar.querySelectorAll('[data-qsb-hidden="false"]').length === 4, 'Belka domyślnie pokazuje cztery skróty akcji');
+        assert(shortcutBar.querySelectorAll('[data-qsb-hidden="false"]').length === 5, 'Belka domyślnie pokazuje pięć skrótów akcji');
         const nightShortcut = shortcutBar.querySelector('[data-qsb-addon="night-mode"]');
         nightShortcut.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 2 }));
         assert(document.querySelector('#mtk-content h2')?.textContent === 'Tryb nocny', 'PPM otwiera konfigurację konkretnego dodatku');
@@ -161,6 +161,33 @@
         grip.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: lockedLeft + 80, clientY: shortcutBar.offsetTop + 3 }));
         grip.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }));
         assert(shortcutBar.offsetLeft === lockedLeft, 'Blokada uniemożliwia przesunięcie belki');
+        const quickGroupCommands = [];
+        const commandBeforeQuickGroup = window._g;
+        window._g = command => quickGroupCommands.push(command);
+        Engine.hero = { d: { id: 7, x: 10, y: 10 } };
+        Engine.party = { get: () => null };
+        Engine.others = { getAll: () => ({
+            2: { id: 2, nick: 'Znajomy', relation: 2, x: 20, y: 20 },
+            3: { id: 3, nick: 'Klanowicz', relation: 4, x: 8, y: 8 },
+            4: { id: 4, nick: 'Sojusznik', relation: 5, x: 9, y: 9 },
+            5: { id: 5, nick: 'Obcy', relation: 1, x: 10, y: 11 },
+            6: { id: 6, nick: 'Daleko', relation: 1, x: 30, y: 30 }
+        }) };
+        document.querySelector('#qaddons-quick-group').click();
+        assert(quickGroupCommands.includes('party&a=inv&id=2') && quickGroupCommands.includes('party&a=inv&id=3') && quickGroupCommands.includes('party&a=inv&id=4'), 'Szybka grupa zaprasza znajomych, klan i sojusz');
+        assert(!quickGroupCommands.includes('party&a=inv&id=5'), 'Obce postacie nie są domyślnie zapraszane');
+        manager.changeSettings('quick-group', { inviteRandos: true, randomInviteOrder: false });
+        quickGroupCommands.length = 0; document.querySelector('#qaddons-quick-group').click();
+        assert(quickGroupCommands.includes('party&a=inv&id=5') && !quickGroupCommands.includes('party&a=inv&id=6'), 'Opcja randomów zaprasza tylko postacie stojące obok');
+        quickGroupCommands.length = 0;
+        Engine.communication.parseJSON({ ask: { re: 'party&a=accept&answer=', q: 'Zaproszenie do grupy od [b]Znajomy[/b]' } });
+        assert(quickGroupCommands.includes('party&a=accept&answer=1'), 'Szybka grupa automatycznie akceptuje zaproszenie znajomego');
+        manager.changeSettings('quick-group', { acceptFriend: false, rejectOther: true });
+        quickGroupCommands.length = 0;
+        Engine.communication.parseJSON({ ask: { re: 'party&a=accept&answer=', q: 'Zaproszenie do grupy od [b]Obcy[/b]' } });
+        assert(quickGroupCommands.includes('party&a=accept&answer=0'), 'Szybka grupa odrzuca pozostałe zaproszenia zgodnie z konfiguracją');
+        window._g = commandBeforeQuickGroup;
+        delete Engine.party; delete Engine.others; delete Engine.hero;
         const chatFixture = document.createElement('div');
         chatFixture.className = 'new-chat-window';
         chatFixture.innerHTML = '<div class="chat-message-wrapper"><div class="scroll-pane" style="height:24px;overflow-y:auto"><div style="height:240px">Wiadomości</div></div></div>';
@@ -538,7 +565,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: sixteen addons, shortcut bar, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: seventeen addons, quick group, shortcut bar, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {

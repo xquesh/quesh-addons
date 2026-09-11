@@ -13,7 +13,8 @@ export const SHORTCUTS = Object.freeze([
     { id: 'chat-autoscroll', label: 'CHAT' },
     { id: 'auto-abyss', label: 'OTCH' },
     { id: 'clan-online', label: 'KL', buttonId: 'qaddons-clan-online-button', defaultVisible: true },
-    { id: 'pocket-berserk', label: 'BR', buttonId: 'qaddons-pocket-berserk', defaultVisible: true }
+    { id: 'pocket-berserk', label: 'BR', buttonId: 'qaddons-pocket-berserk', defaultVisible: true },
+    { id: 'quick-group', label: 'SG', buttonId: 'qaddons-quick-group', defaultVisible: true }
 ]);
 
 const BY_ID = new Map(SHORTCUTS.map(shortcut => [shortcut.id, shortcut]));

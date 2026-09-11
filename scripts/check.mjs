@@ -4,6 +4,7 @@ import './check-relogger.mjs';
 import './check-auto-abyss.mjs';
 import './check-clan-online.mjs';
 import './check-pocket-berserk.mjs';
+import './check-quick-group.mjs';
 import { selectedChannels, buttonLabel } from '../src/addons/detector-global/channels.js';
 assert.deepEqual(selectedChannels({}), ['LOCAL']);
 assert.deepEqual(selectedChannels({ channels: [] }), []);

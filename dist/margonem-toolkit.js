@@ -374,6 +374,7 @@
       const parser = original;
       wrapper = function(...args) {
         const forwarded = settleRequests(args[0]);
+        events2.emit("gamePacketBefore", forwarded);
         const result = parser.apply(this, [forwarded, ...args.slice(1)]);
         if (!stopped) publish(args[0]);
         return result;
@@ -476,7 +477,8 @@
     { id: "chat-autoscroll", label: "CHAT" },
     { id: "auto-abyss", label: "OTCH" },
     { id: "clan-online", label: "KL", buttonId: "qaddons-clan-online-button", defaultVisible: true },
-    { id: "pocket-berserk", label: "BR", buttonId: "qaddons-pocket-berserk", defaultVisible: true }
+    { id: "pocket-berserk", label: "BR", buttonId: "qaddons-pocket-berserk", defaultVisible: true },
+    { id: "quick-group", label: "SG", buttonId: "qaddons-quick-group", defaultVisible: true }
   ]);
   var BY_ID = new Map(SHORTCUTS.map((shortcut) => [shortcut.id, shortcut]));
   function shortcutFor(id) {
@@ -826,7 +828,7 @@
   var quesh_default = "data:image/png;base64,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";
 
   // src/version.js
-  var VERSION = "1.16.13";
+  var VERSION = "1.16.14";
 
   // src/core/updates.js
   var MANIFEST_URL = "https://xquesh.github.io/quesh-addons/dist/version.json";
@@ -4702,8 +4704,8 @@
     const read = (style, key) => [style.getPropertyValue(key), style.getPropertyPriority(key)];
     const equal = (a, b) => a[0] === b[0] && a[1] === b[1];
     const write = (style, key, value2) => value2[0] ? style.setProperty(key, ...value2) : style.removeProperty(key);
-    function restore(element, values) {
-      for (const [key, value2] of values) if (equal(read(element.style, key), value2.applied)) write(element.style, key, value2.previous);
+    function restore(element, values2) {
+      for (const [key, value2] of values2) if (equal(read(element.style, key), value2.applied)) write(element.style, key, value2.previous);
     }
     function sync() {
       queued = 0;
@@ -4712,21 +4714,21 @@
         targets.add(root);
         root.querySelectorAll(":scope *").forEach((element) => targets.add(element));
       }
-      for (const [element, values] of owned) if (!targets.has(element)) {
-        restore(element, values);
+      for (const [element, values2] of owned) if (!targets.has(element)) {
+        restore(element, values2);
         owned.delete(element);
       }
       for (const element of targets) {
         if (!element.style) continue;
-        let values = owned.get(element);
-        if (!values) {
-          values = /* @__PURE__ */ new Map();
-          owned.set(element, values);
+        let values2 = owned.get(element);
+        if (!values2) {
+          values2 = /* @__PURE__ */ new Map();
+          owned.set(element, values2);
         }
         for (const [key, applied] of properties) {
           const current = read(element.style, key);
-          const value2 = values.get(key);
-          if (!value2 || !equal(current, value2.applied)) values.set(key, { previous: current, applied });
+          const value2 = values2.get(key);
+          if (!value2 || !equal(current, value2.applied)) values2.set(key, { previous: current, applied });
           if (!equal(current, applied)) write(element.style, key, applied);
         }
       }
@@ -4735,7 +4737,7 @@
       if (!queued) queued = ctx.scheduler.frame(sync);
     }
     function update() {
-      owned.forEach((values, element) => restore(element, values));
+      owned.forEach((values2, element) => restore(element, values2));
       owned.clear();
       if (!typographyCss(ctx.settings)) {
         properties = [];
@@ -4751,7 +4753,7 @@
     }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
     ctx.events.on("notificationTextChanged", update);
     ctx.scheduler.cleanup(() => {
-      owned.forEach((values, element) => restore(element, values));
+      owned.forEach((values2, element) => restore(element, values2));
       owned.clear();
     });
     update();
@@ -4804,9 +4806,9 @@
   };
   var defaults2 = { channels: ["LOCAL"] };
   function selectedChannels(settings) {
-    const values = settings.channels === void 0 ? defaults2.channels : settings.channels;
-    if (!Array.isArray(values)) return [];
-    return [...new Set(values.filter((value2) => typeof value2 === "string" && Object.hasOwn(CHANNELS, value2)))];
+    const values2 = settings.channels === void 0 ? defaults2.channels : settings.channels;
+    if (!Array.isArray(values2)) return [];
+    return [...new Set(values2.filter((value2) => typeof value2 === "string" && Object.hasOwn(CHANNELS, value2)))];
   }
   function channelLabel(channels) {
     return channels.map((channel) => CHANNELS[channel].label).join(", ");
@@ -5247,8 +5249,8 @@
     const type = item?.getItemType?.() || item?.itemType;
     const legendary = type ? type === "t-leg" : Object.hasOwn(stats, "legendary") || stats.rarity === "legendary" || legendaryDom;
     if (!legendary) return null;
-    const values = [item?.getLegbonStat?.(), stats.legbon, stats.socket_injection_legbon, stats.socket_fleeting_legbon];
-    const codes = [...new Set(values.filter((value2) => typeof value2 === "string").map((value2) => value2.split(",")[0].trim()).filter((code) => Object.hasOwn(BONUSES, code)))];
+    const values2 = [item?.getLegbonStat?.(), stats.legbon, stats.socket_injection_legbon, stats.socket_fleeting_legbon];
+    const codes = [...new Set(values2.filter((value2) => typeof value2 === "string").map((value2) => value2.split(",")[0].trim()).filter((code) => Object.hasOwn(BONUSES, code)))];
     if (!codes.length) return null;
     return { name: codes.map((code) => BONUSES[code]).join(" / "), short: codes.map((code) => abbreviation(BONUSES[code])).join("/") };
   }
@@ -6496,7 +6498,7 @@ ${timers.length ? timers.map((timer) => `${timer.name}: ${timer.text}${timer.sta
     if (stats.binds != null || stats.soulbound != null || stats.permbound != null || "artisan_worthless" in stats) return false;
     const allowedRarity = settings.rarity?.enabled === false ? ["common"] : ["common", "unique", "heroic"].filter((key) => settings.rarity?.[key]);
     if (!allowedRarity.includes(stats.rarity || "common")) return false;
-    const allowedTypes = Object.entries(ITEM_TYPES).flatMap(([key, values]) => settings.types?.[key] === false ? [] : values);
+    const allowedTypes = Object.entries(ITEM_TYPES).flatMap(([key, values2]) => settings.types?.[key] === false ? [] : values2);
     return allowedTypes.includes(Number(item.cl));
   }
 
@@ -9217,6 +9219,245 @@ Klik: przełącz · PPM: ustawienia` : "Kieszonkowy berserk: oczekiwanie na usta
     };
   }
 
+  // src/addons/quick-group/data.js
+  var RELATION = Object.freeze({ NONE: 1, FRIEND: 2, CLAN: 4, ALLY: 5 });
+  var DEFAULTS12 = Object.freeze({
+    hotkey: { code: "KeyG", altKey: false, ctrlKey: false, shiftKey: false },
+    acceptAll: false,
+    acceptFriend: true,
+    acceptClan: false,
+    acceptAlly: false,
+    rejectOther: false,
+    inviteRandos: false,
+    randomInviteOrder: false
+  });
+  function normalizeHotkey(value2) {
+    if (typeof value2 === "string") return { code: value2 || "KeyG", altKey: false, ctrlKey: false, shiftKey: false };
+    return {
+      code: String(value2?.code || value2?.key || "KeyG"),
+      altKey: Boolean(value2?.altKey),
+      ctrlKey: Boolean(value2?.ctrlKey),
+      shiftKey: Boolean(value2?.shiftKey)
+    };
+  }
+  function matchesHotkey(event, value2) {
+    const hotkey = normalizeHotkey(value2);
+    return event.code === hotkey.code && event.altKey === hotkey.altKey && event.ctrlKey === hotkey.ctrlKey && event.shiftKey === hotkey.shiftKey;
+  }
+  function hotkeyLabel(value2) {
+    const hotkey = normalizeHotkey(value2);
+    return [...hotkey.ctrlKey ? ["Ctrl"] : [], ...hotkey.altKey ? ["Alt"] : [], ...hotkey.shiftKey ? ["Shift"] : [], hotkey.code.replace(/^(Key|Digit)/, "")].join("+");
+  }
+  function senderName(question) {
+    const text = String(question || "");
+    return (text.match(/\[b\]([^[]+)\[\/b\]/i) || text.match(/<b>([^<]+)<\/b>/i))?.[1]?.trim() || "";
+  }
+  function shouldAcceptInvite(settings, sender) {
+    if (settings.acceptAll) return true;
+    if (!sender) return Boolean(settings.acceptClan || settings.acceptFriend);
+    const relation = Number(sender.relation ?? sender.rel);
+    return relation === RELATION.CLAN && settings.acceptClan || relation === RELATION.FRIEND && settings.acceptFriend || relation === RELATION.ALLY && settings.acceptAlly;
+  }
+  function inviteCandidates(others, hero, partyIds2, blockedIds, settings) {
+    const candidates = others.filter((other) => {
+      const id = Number(other?.id);
+      if (!Number.isFinite(id) || partyIds2.has(String(id)) || blockedIds.has(String(id))) return false;
+      const relation = Number(other.relation ?? other.rel);
+      if ([RELATION.CLAN, RELATION.FRIEND, RELATION.ALLY].includes(relation)) return true;
+      return settings.inviteRandos && Math.abs(Number(hero.x) - Number(other.x)) <= 1 && Math.abs(Number(hero.y) - Number(other.y)) <= 1;
+    });
+    if (!settings.randomInviteOrder) return candidates;
+    for (let index = candidates.length - 1; index > 0; index--) {
+      const swap = Math.floor(Math.random() * (index + 1));
+      [candidates[index], candidates[swap]] = [candidates[swap], candidates[index]];
+    }
+    return candidates;
+  }
+
+  // src/addons/quick-group/style.js
+  var QUICK_GROUP_CSS = `
+#qaddons-quick-group{position:fixed;left:152px;bottom:68px;z-index:31000;width:32px;height:26px;padding:0;border:1px solid #777;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer}
+#qaddons-quick-group:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px rgba(255,255,255,.72)}
+#qaddons-quick-group[data-busy="true"]{color:#aaa;cursor:wait}
+.qqg-status{margin:7px 0;padding:7px 9px;border:1px solid #444;background:#080808;color:#aaa}
+`;
+
+  // src/addons/quick-group/runtime.js
+  function values(value2) {
+    if (value2 instanceof Map) return [...value2.values()];
+    if (Array.isArray(value2)) return value2;
+    return value2 && typeof value2 === "object" ? Object.values(value2) : [];
+  }
+  function currentOthers(page2) {
+    const model = page2.Engine?.others;
+    try {
+      return values(model?.getAll?.() || model?.others || model?.list || page2.g?.other).filter((other) => other && !other.del);
+    } catch {
+      return values(page2.g?.other).filter((other) => other && !other.del);
+    }
+  }
+  function heroData(page2) {
+    return page2.Engine?.hero?.d || page2.Engine?.hero || page2.g?.hero || {};
+  }
+  function partyData(page2, tracked) {
+    try {
+      return page2.Engine?.party?.get?.() || page2.Engine?.party?.d || page2.Engine?.party || tracked;
+    } catch {
+      return tracked;
+    }
+  }
+  function partyState(page2, tracked) {
+    const party = partyData(page2, tracked);
+    if (!party || typeof party !== "object") return { exists: false, ids: /* @__PURE__ */ new Set(), commanderId: null };
+    const source = party.members && typeof party.members === "object" ? party.members : party;
+    const members = Object.entries(source).filter(([key, member]) => /^\d+$/.test(key) || Number.isFinite(Number(member?.id)));
+    const ids = new Set(members.map(([key, member]) => String(member?.id ?? key)));
+    const commander = party.commander?.id ?? party.commander_id ?? party.commanderId ?? party.leader?.id ?? party.leader_id;
+    return { exists: ids.size > 0, ids, commanderId: commander == null ? null : String(commander) };
+  }
+  function editable2(target) {
+    return target?.closest?.('input,textarea,select,[contenteditable="true"]');
+  }
+  function showMessage(page2, text, error = false) {
+    if (typeof page2.message === "function") page2.message(text, error);
+    else console[error ? "error" : "info"](`[QADDONS: Szybka grupa] ${text}`);
+  }
+  function startQuickGroup(ctx) {
+    const page2 = ctx.game.page;
+    const blocked = /* @__PURE__ */ new Set();
+    let trackedParty = null;
+    let busy = false;
+    ctx.styles.set("runtime", QUICK_GROUP_CSS);
+    const button = document.createElement("button");
+    button.id = "qaddons-quick-group";
+    button.type = "button";
+    button.textContent = "SG";
+    button.title = "Szybka grupa — zaproś · PPM: ustawienia";
+    document.body.append(button);
+    function invite() {
+      if (busy || page2.Engine?.allInit !== true || typeof page2._g !== "function") return 0;
+      const hero = heroData(page2);
+      const party = partyState(page2, trackedParty);
+      if (party.exists && party.commanderId && party.commanderId !== String(hero.id)) {
+        showMessage(page2, "Tylko dowódca może zapraszać innych graczy do drużyny.", true);
+        return 0;
+      }
+      const candidates = inviteCandidates(currentOthers(page2), hero, party.ids, blocked, ctx.settings);
+      busy = true;
+      button.dataset.busy = "true";
+      for (const other of candidates) page2._g(`party&a=inv&id=${encodeURIComponent(Number(other.id))}`);
+      busy = false;
+      button.dataset.busy = "false";
+      showMessage(page2, candidates.length ? `Wysłano ${candidates.length} zaproszeń do grupy.` : "Brak postaci spełniających warunki zapraszania.");
+      return candidates.length;
+    }
+    function processPacket(packet) {
+      const list = Array.isArray(packet) ? packet.flat(Infinity) : [packet];
+      for (const data of list) {
+        if (!data || typeof data !== "object") continue;
+        if (Object.hasOwn(data, "party")) trackedParty = data.party;
+        if (data.town?.file) blocked.clear();
+        for (const emotion of values(data.emo)) {
+          const id = String(emotion?.source_id ?? emotion?.id ?? "");
+          if (!id) continue;
+          if (["battle", "stasis"].includes(emotion.name)) blocked.add(id);
+          else if (emotion.name === "noemo") blocked.delete(id);
+        }
+      }
+    }
+    function processInviteBefore(packet) {
+      const list = Array.isArray(packet) ? packet.flat(Infinity) : [packet];
+      for (const data of list) {
+        const ask = data?.ask;
+        if (!ask || String(ask.re || "") !== "party&a=accept&answer=") continue;
+        const nick = senderName(ask.q);
+        if (!nick) {
+          console.error("[QADDONS: Szybka grupa] Nie udało się odczytać nadawcy zaproszenia.", ask);
+          continue;
+        }
+        const sender = currentOthers(page2).find((other) => String(other.nick || other.name || "").toLocaleLowerCase("pl-PL") === nick.toLocaleLowerCase("pl-PL")) || null;
+        if (shouldAcceptInvite(ctx.settings, sender)) {
+          page2._g(`${ask.re}1`);
+          delete data.ask;
+          showMessage(page2, `Zaakceptowano grupę od ${nick}.`);
+        } else if (ctx.settings.rejectOther) {
+          page2._g(`${ask.re}0`);
+          delete data.ask;
+          showMessage(page2, `Odrzucono grupę od ${nick}.`);
+        }
+      }
+    }
+    ctx.scheduler.listen(button, "click", invite);
+    ctx.scheduler.listen(button, "contextmenu", (event) => {
+      event.preventDefault();
+      ctx.ui.openSettings(ctx.id);
+    });
+    ctx.scheduler.listen(document, "keydown", (event) => {
+      if (event.repeat || event.defaultPrevented || editable2(event.target) || !matchesHotkey(event, ctx.settings.hotkey)) return;
+      event.preventDefault();
+      invite();
+    }, { capture: true });
+    ctx.events.on("gamePacket", processPacket);
+    ctx.events.on("gamePacketBefore", processInviteBefore);
+    ctx.events.on("quickGroupInvite", invite);
+    ctx.scheduler.cleanup(() => button.remove());
+  }
+
+  // src/addons/quick-group/index.js
+  function createQuickGroup() {
+    return {
+      id: "quick-group",
+      name: "Szybka grupa",
+      description: "Zaprasza klanowiczów, znajomych i sojuszników oraz automatycznie obsługuje zaproszenia do grupy.",
+      defaultEnabled: true,
+      defaults: DEFAULTS12,
+      init(ctx) {
+        ctx.settings.hotkey = normalizeHotkey(ctx.settings.hotkey);
+        ctx.storage.save();
+      },
+      enable: startQuickGroup,
+      renderSettings(ctx) {
+        const section = document.createElement("section");
+        section.className = "mtk-addon-settings";
+        section.innerHTML = `<h2>Szybka grupa</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
+                <p>Kliknij <strong>SG</strong> na belce albo użyj skrótu, aby zaprosić klanowiczów, znajomych i sojuszników widocznych na mapie.</p>
+                <div class="ln-grid"><label class="ln-field">Skrót zapraszania<input type="text" readonly data-hotkey title="Kliknij i naciśnij kombinację"></label>
+                <label class="ln-switch"><input type="checkbox" data-setting="inviteRandos">Zapraszaj także obce postacie stojące obok</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="randomInviteOrder">Losowa kolejność zaproszeń</label></div>
+                <h2>Automatycznie akceptuj od</h2><div class="ln-grid">
+                <label class="ln-switch"><input type="checkbox" data-setting="acceptFriend">Znajomych</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="acceptClan">Klanowiczów</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="acceptAlly">Sojuszników klanu</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="acceptAll">Wszystkich</label>
+                <label class="ln-switch"><input type="checkbox" data-setting="rejectOther">Odrzucaj pozostałe zaproszenia</label></div>
+                <div class="ln-grid"><button class="ln-btn" type="button" data-invite>Zaproś teraz</button></div>`;
+        const enabled = section.querySelector("[data-enabled]");
+        const hotkey = section.querySelector("[data-hotkey]");
+        function sync() {
+          enabled.checked = ctx.enabled;
+          hotkey.value = hotkeyLabel(ctx.settings.hotkey);
+          for (const input of section.querySelectorAll("[data-setting]")) input.checked = Boolean(ctx.settings[input.dataset.setting]);
+          section.querySelector("[data-invite]").disabled = !ctx.enabled;
+        }
+        ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        for (const input of section.querySelectorAll("[data-setting]")) ctx.scheduler.listen(input, "change", () => ctx.changeSettings({ [input.dataset.setting]: input.checked }));
+        ctx.scheduler.listen(hotkey, "keydown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (["ControlLeft", "ControlRight", "AltLeft", "AltRight", "ShiftLeft", "ShiftRight"].includes(event.code)) return;
+          ctx.changeSettings({ hotkey: { code: event.code, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey } });
+          sync();
+        });
+        ctx.scheduler.listen(section.querySelector("[data-invite]"), "click", () => ctx.events.emit("quickGroupInvite"));
+        ctx.events.on("addonChanged", (event) => {
+          if (event.id === ctx.id) sync();
+        });
+        sync();
+        ctx.container.append(section);
+      }
+    };
+  }
+
   // src/main.js
   var page = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -9273,6 +9514,7 @@ Klik: przełącz · PPM: ustawienia` : "Kieszonkowy berserk: oczekiwanie na usta
       manager.register(createAutoAbyss());
       manager.register(createClanOnline());
       manager.register(createPocketBerserk());
+      manager.register(createQuickGroup());
       manager.register(createShortcutBar());
       panel.connect(manager);
       manager.start();

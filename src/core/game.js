@@ -59,6 +59,7 @@ export function createGame(page, events, scheduler, host = window) {
         const parser = original;
         wrapper = function (...args) {
             const forwarded = settleRequests(args[0]);
+            events.emit('gamePacketBefore', forwarded);
             const result = parser.apply(this, [forwarded, ...args.slice(1)]);
             if (!stopped) publish(args[0]);
             return result;
