@@ -15,7 +15,8 @@ export function createBuildSwitcher() {
                 <label class="ln-switch"><input type="checkbox" data-setting="minimalist">Tryb minimalistyczny</label>
                 <label class="ln-switch"><input type="checkbox" data-setting="disableTips">Wyłącz podpowiedzi</label>
                 <label class="ln-switch"><input type="checkbox" data-setting="grayHidden">Wyszarz zamiast ukrywać</label>
-                <label class="ln-field">Liczba kolumn<select data-setting="columns">${[1,2,3,4,5].map(value => `<option value="${value}">${value}</option>`).join('')}</select></label></div>`;
+                <label class="ln-field">Liczba kolumn<select data-setting="columns">${[1,2,3,4,5].map(value => `<option value="${value}">${value}</option>`).join('')}</select></label>
+                <button class="ln-btn" type="button" data-reset-geometry>Wyśrodkuj i przywróć rozmiar</button></div>`;
             const enabled = section.querySelector('[data-enabled]');
             function sync() {
                 enabled.checked = ctx.enabled;
@@ -23,6 +24,7 @@ export function createBuildSwitcher() {
             }
             ctx.scheduler.listen(enabled, 'change', () => ctx.setEnabled(enabled.checked));
             section.querySelectorAll('[data-setting]').forEach(input => ctx.scheduler.listen(input, 'change', () => ctx.changeSettings({ [input.dataset.setting]: input.type === 'checkbox' ? input.checked : Number(input.value) })));
+            ctx.scheduler.listen(section.querySelector('[data-reset-geometry]'), 'click', () => ctx.changeSettings({ windowX: null, windowY: null, windowWidth: 300, windowHeight: 150 }));
             ctx.events.on('addonChanged', event => { if (event.id === ctx.id) sync(); });
             sync(); ctx.container.append(section);
         }

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { garbageCandidates, itemIdentity } from '../src/addons/garbage-truck/data.js';
 import { exportSkillSet, learningQueue, parseSkillList, validateSkillSet } from '../src/addons/skill-set/data.js';
-import { buildItemIds, mergeBuildPacket, normalizeBuilds } from '../src/addons/build-switcher/data.js';
+import { buildItemIds, clampGeometry, mergeBuildPacket, normalizeBuilds } from '../src/addons/build-switcher/data.js';
 
 const expired = { id: 1, tpl: 101, loc: 'g', st: 0, name: 'Stary', checkExpires: () => true };
 const marked = { id: 2, tpl: 202, loc: 'g', st: 0, name: 'Znaczony', checkExpires: () => false };
@@ -32,4 +32,6 @@ mergeBuildPacket(state, { builds: { action: 'UPDATE_DATA', list: [{ id: 1, name:
 assert.equal(state.builds[0].name, 'PvP');
 mergeBuildPacket(state, { builds: { action: 'UPDATE_CURRENT_ID', currentId: 2 } });
 assert.equal(state.currentId, 2);
-console.log('OK: Zmieniacz zestawów odtwarza INIT, aktualizacje danych i zmianę aktywnego zestawu');
+assert.deepEqual(clampGeometry({ windowX: 999, windowY: -20, windowWidth: 400, windowHeight: 200 }, 640, 360), { x: 240, y: 0, width: 400, height: 200 });
+assert.deepEqual(clampGeometry({ windowWidth: 10, windowHeight: 10 }, 200, 80), { x: 0, y: 0, width: 220, height: 90 });
+console.log('OK: Zmieniacz zestawów odtwarza pakiety gry oraz ogranicza przenoszenie i resize do ekranu');

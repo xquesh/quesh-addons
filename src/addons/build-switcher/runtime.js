@@ -1,4 +1,4 @@
-import { buildItemIds, mergeBuildPacket, normalizeBuilds, readBuildState } from './data.js';
+import { buildItemIds, clampGeometry, mergeBuildPacket, normalizeBuilds, readBuildState } from './data.js';
 import { BUILD_SWITCHER_CSS } from './style.js';
 
 function packetList(packet) { return Array.isArray(packet) ? packet.flat(Infinity).filter(Boolean) : [packet].filter(Boolean); }
@@ -8,7 +8,7 @@ export function startBuildSwitcher(ctx) {
     const page = ctx.game.page;
     const initial = readBuildState(page);
     const state = { builds: initial.builds, currentId: initial.currentId, offers: initial.offers };
-    let menuId = 0; let busy = false;
+    let menuId = 0; let busy = false; let drag = null; let geometryTimer = 0; let applyingGeometry = false;
     ctx.styles.set('runtime', BUILD_SWITCHER_CSS);
     const button = document.createElement('button'); button.id = 'qaddons-build-switcher-button'; button.type = 'button'; button.textContent = 'ZES'; button.title = 'Zmieniacz zestawów';
     const panel = document.createElement('section'); panel.id = 'qaddons-build-switcher'; panel.hidden = ctx.settings.windowOpen === false;
@@ -18,6 +18,27 @@ export function startBuildSwitcher(ctx) {
     function hidden(id) { return ctx.settings.hiddenBuilds?.[id] === true; }
     function status(text) { panel.querySelector('[data-status]').textContent = text; }
     function setOpen(open) { panel.hidden = !open; if (ctx.settings.windowOpen !== open) ctx.changeSettings({ windowOpen: open }); }
+    function applyGeometry() {
+        const geometry = clampGeometry(ctx.settings, innerWidth, innerHeight);
+        applyingGeometry = true;
+        panel.style.left = `${geometry.x}px`; panel.style.top = `${geometry.y}px`;
+        panel.style.width = `${geometry.width}px`; panel.style.height = `${geometry.height}px`;
+        ctx.scheduler.frame(() => { applyingGeometry = false; });
+    }
+    function persistGeometry() {
+        if (panel.hidden || !panel.isConnected || applyingGeometry) return;
+        const geometry = clampGeometry({
+            windowX: panel.offsetLeft, windowY: panel.offsetTop,
+            windowWidth: panel.offsetWidth, windowHeight: panel.offsetHeight
+        }, innerWidth, innerHeight);
+        panel.style.left = `${geometry.x}px`; panel.style.top = `${geometry.y}px`;
+        const patch = { windowX: geometry.x, windowY: geometry.y, windowWidth: geometry.width, windowHeight: geometry.height };
+        if (Object.entries(patch).some(([key, value]) => Number(ctx.settings[key]) !== value)) ctx.changeSettings(patch);
+    }
+    function scheduleGeometrySave() {
+        ctx.scheduler.clearTimeout(geometryTimer);
+        geometryTimer = ctx.scheduler.timeout(persistGeometry, 180);
+    }
     function refreshEngine() {
         const next = readBuildState(page);
         if (next.builds.length) state.builds = next.builds;
@@ -107,11 +128,38 @@ export function startBuildSwitcher(ctx) {
         const action = event.target.closest('[data-action]')?.dataset.action;
         if (action === 'rename') rename(); if (action === 'preview') preview(); if (action === 'hide') toggleHidden();
     });
+    const header = panel.querySelector('header');
+    ctx.scheduler.listen(header, 'pointerdown', event => {
+        if (event.button !== 0 || event.target.closest('button')) return;
+        const rect = panel.getBoundingClientRect();
+        drag = { pointerId: event.pointerId, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top };
+        try { header.setPointerCapture?.(event.pointerId); } catch {}
+        event.preventDefault();
+    });
+    ctx.scheduler.listen(header, 'pointermove', event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        const geometry = clampGeometry({
+            windowX: event.clientX - drag.offsetX, windowY: event.clientY - drag.offsetY,
+            windowWidth: panel.offsetWidth, windowHeight: panel.offsetHeight
+        }, innerWidth, innerHeight);
+        panel.style.left = `${geometry.x}px`; panel.style.top = `${geometry.y}px`;
+    });
+    function finishDrag(event) {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        drag = null;
+        try { if (header.hasPointerCapture?.(event.pointerId)) header.releasePointerCapture(event.pointerId); } catch {}
+        persistGeometry();
+    }
+    ctx.scheduler.listen(header, 'pointerup', finishDrag);
+    ctx.scheduler.listen(header, 'pointercancel', finishDrag);
+    ctx.scheduler.listen(header, 'lostpointercapture', finishDrag);
+    if (typeof ResizeObserver === 'function') ctx.scheduler.observer(ResizeObserver, scheduleGeometrySave).observe(panel);
+    ctx.scheduler.listen(window, 'resize', () => { persistGeometry(); applyGeometry(); }, { passive: true });
     ctx.events.on('gamePacket', packet => {
         let changed = false; for (const data of packetList(packet)) changed = mergeBuildPacket(state, data) || changed;
         if (changed) render();
     });
-    ctx.events.on('buildSwitcherChanged', () => { panel.hidden = ctx.settings.windowOpen === false; render(); });
+    ctx.events.on('buildSwitcherChanged', () => { panel.hidden = ctx.settings.windowOpen === false; applyGeometry(); render(); });
     ctx.scheduler.cleanup(() => { button.remove(); panel.remove(); });
-    render();
+    applyGeometry(); render();
 }

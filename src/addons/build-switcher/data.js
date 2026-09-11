@@ -4,8 +4,23 @@ export const DEFAULTS = Object.freeze({
     disableTips: false,
     grayHidden: true,
     columns: 3,
-    hiddenBuilds: {}
+    hiddenBuilds: {},
+    windowX: null,
+    windowY: null,
+    windowWidth: 300,
+    windowHeight: 150
 });
+
+export function clampGeometry(settings, viewportWidth, viewportHeight) {
+    const maxWidth = Math.max(220, Number(viewportWidth) || 220);
+    const maxHeight = Math.max(90, Number(viewportHeight) || 90);
+    const width = Math.max(220, Math.min(maxWidth, Number(settings?.windowWidth) || 300));
+    const height = Math.max(90, Math.min(maxHeight, Number(settings?.windowHeight) || 150));
+    const fallbackX = Math.max(0, (maxWidth - width) / 2);
+    const x = Math.max(0, Math.min(maxWidth - width, settings?.windowX == null ? fallbackX : Number(settings.windowX) || 0));
+    const y = Math.max(0, Math.min(maxHeight - height, settings?.windowY == null ? 120 : Number(settings.windowY) || 0));
+    return { x: Math.round(x), y: Math.round(y), width: Math.round(width), height: Math.round(height) };
+}
 
 export function normalizeBuilds(source) {
     if (!source || typeof source !== 'object') return [];
