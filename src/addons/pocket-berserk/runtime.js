@@ -7,17 +7,15 @@ export function heroOperationalLevel(page, tracker) {
 }
 
 export function sendBerserkSetting(page, tracker, id, key, value) {
-    if (typeof page._g !== 'function') return false;
+    if (page.Engine?.allInit !== true || typeof page._g !== 'function') return false;
     const mode = tracker.modes[id];
     if (!mode) return false;
     if (key === 'lvlmin' || key === 'lvlmax') {
         const numeric = Number(value);
         if (!Number.isFinite(numeric)) return false;
         const offset = Math.max(OFFSET_MIN, Math.min(OFFSET_MAX, Math.round(numeric)));
-        mode[key] = offset;
         page._g(levelCommand(id, key, offset));
     } else {
-        mode[key || 'v'] = Boolean(value);
         page._g(settingCommand(id, key, value));
     }
     return true;

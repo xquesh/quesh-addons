@@ -12,9 +12,12 @@ export function createPocketBerserk() {
         description: 'Szybko przełącza agresywność potworów osobno dla gry solo i w grupie, z filtrami oraz zakresem poziomów.',
         defaultEnabled: true,
         defaults: DEFAULTS,
-        init: ctx => ctx.events.on('gamePacket', packet => {
-            if (updateBerserkTracker(tracker, packet)) ctx.events.emit('pocketBerserkDataChanged');
-        }),
+        init: ctx => {
+            if (ctx.game.latestSettings) updateBerserkTracker(tracker, ctx.game.latestSettings);
+            ctx.events.on('gamePacket', packet => {
+                if (updateBerserkTracker(tracker, packet)) ctx.events.emit('pocketBerserkDataChanged');
+            });
+        },
         enable: ctx => startPocketBerserk(ctx, tracker),
         onSettingsChange: ctx => ctx.events.emit('pocketBerserkChanged'),
         renderSettings(ctx) {

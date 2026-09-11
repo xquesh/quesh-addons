@@ -6,6 +6,7 @@ export function createGame(page, events, scheduler, host = window) {
     let started = false;
     let retry = 0;
     let layoutFrame = 0;
+    let latestSettings = null;
     const pending = new Set();
 
     function packets(packet) {
@@ -38,6 +39,7 @@ export function createGame(page, events, scheduler, host = window) {
     function publish(packet) {
         events.emit('gamePacket', packet);
         for (const data of packets(packet)) {
+            if (data?.settings) latestSettings = data;
             if (!data?.loot) continue;
             if (data.loot.init !== undefined) {
                 events.emit(data.loot.init ? 'lootOpened' : 'lootClosed', data);
@@ -102,7 +104,7 @@ export function createGame(page, events, scheduler, host = window) {
 
     function request(command, match, options = {}) {
         return new Promise((resolve, reject) => {
-            if (stopped || typeof page._g !== 'function') return reject(new Error('Gra nie jest jeszcze gotowa.'));
+            if (stopped || page.Engine?.allInit !== true || typeof page._g !== 'function') return reject(new Error('Gra nie jest jeszcze gotowa.'));
             const signal = options.signal;
             if (signal?.aborted) return reject(new DOMException('Żądanie anulowane.', 'AbortError'));
             const entry = { match, resolve, reject, strip: Array.isArray(options.strip) ? options.strip : [], releaseAbort: () => {} };
@@ -132,5 +134,9 @@ export function createGame(page, events, scheduler, host = window) {
         });
     }
 
-    return { page, start, destroy, request, get hooked() { return Boolean(communication); } };
+    return {
+        page, start, destroy, request,
+        get hooked() { return Boolean(communication); },
+        get latestSettings() { return latestSettings; }
+    };
 }

@@ -34,13 +34,27 @@ import { catchingChance, chanceLevel, eligibleMembers, isLegendary, requiredProf
 import { fightMembers } from '../src/addons/loot-chances/runtime.js';
 import { calendarReminder, expiredItems, freePromotions, resultSignature } from '../src/addons/reminder/data.js';
 import { compactPartyCss } from '../src/addons/compact-party/style.js';
-import { nightModeCss } from '../src/addons/night-mode/style.js';
+import { createMapBrightnessDrawable, normalizeNightSettings } from '../src/addons/night-mode/style.js';
 
-const nightCss = nightModeCss({ strength: 120, color: 'javascript:bad', vignette: false });
-assert.match(nightCss, /background:#07101c!important/);
-assert.match(nightCss, /opacity:0\.85!important/);
-assert.match(nightModeCss({ strength: 35, color: '#102030', vignette: true }), /radial-gradient\(circle at center,transparent 30%,#000 125%\),#102030/);
-console.log('OK: Tryb nocny ogranicza moc i kolor oraz przyciemnia wyłącznie warstwę mapy');
+assert.deepEqual(normalizeNightSettings({ strength: 120, color: 'javascript:bad', vignette: false }), {
+    strength: 85, color: '#000000', vignette: false
+});
+const nightCalls = [];
+const nightContext = {
+    canvas: { width: 10, height: 10 }, save: () => nightCalls.push('save'), restore: () => nightCalls.push('restore'),
+    fillRect: (...args) => nightCalls.push(['fillRect', ...args])
+};
+const nightDrawable = createMapBrightnessDrawable({ Engine: { getCanvasViewSize: () => ({ width: 640, height: 360 }) } },
+    () => ({ strength: 35, color: '#102030', vignette: false }));
+nightDrawable.draw(nightContext);
+assert.equal(nightContext.globalAlpha, 0.35);
+assert.equal(nightContext.fillStyle, '#102030');
+assert.deepEqual(nightCalls[1], ['fillRect', 0, 0, 640, 360]);
+assert.equal(nightDrawable.getOrder(), 1);
+nightDrawable.disable();
+nightDrawable.draw(nightContext);
+assert.equal(nightCalls.length, 3);
+console.log('OK: Tryb nocny rysuje półprzezroczystą warstwę bezpośrednio w rendererze mapy');
 
 const compactCss = compactPartyCss({ hideAvatars: true, showHpPoints: false, rowHeight: 2, fontSize: 99 });
 assert.match(compactCss, /height:16px!important/);
@@ -367,7 +381,7 @@ let parses = 0;
 let forwardedPacket = null;
 const parser = function (packet) { assert.equal(this, communication); parses++; forwardedPacket = packet; return packet.result; };
 const communication = { parseJSON: parser };
-const page = { Engine: { communication } };
+const page = { Engine: { communication, allInit: false } };
 const game = createGame(page, eventBus, createScheduler(window), window);
 game.start();
 const hooked = communication.parseJSON;
@@ -380,6 +394,11 @@ assert.equal(packets, 1);
 assert.equal(parses, 1);
 let sentCommand = '';
 page._g = command => { sentCommand = command; };
+await assert.rejects(game.request('audit&action=early', () => false), /gotowa/);
+assert.equal(sentCommand, '');
+page.Engine.allInit = true;
+communication.parseJSON({ settings: { action: 'INIT', list: [{ 34: { v: 1 } }] } });
+assert.equal(game.latestSettings.settings.action, 'INIT');
 const gameResponse = game.request('artisanship&action=open', packet => Boolean(packet.artisanship), { strip: ['artisanship'] });
 assert.equal(sentCommand, 'artisanship&action=open');
 communication.parseJSON({ result: 7, artisanship: { open: true } });

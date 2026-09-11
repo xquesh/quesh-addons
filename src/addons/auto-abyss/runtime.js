@@ -53,7 +53,7 @@ export function startAutoAbyss(ctx, tracker = {}) {
     }
 
     function send(command) {
-        if (typeof page._g !== 'function') throw new Error('Gra nie jest jeszcze gotowa.');
+        if (engine(page)?.allInit !== true || typeof page._g !== 'function') throw new Error('Gra nie jest jeszcze gotowa.');
         page._g(command);
     }
 
@@ -104,7 +104,7 @@ export function startAutoAbyss(ctx, tracker = {}) {
     }
 
     function act() {
-        if (ctx.scheduler.disposed || typeof page._g !== 'function') return;
+        if (ctx.scheduler.disposed || engine(page)?.allInit !== true || typeof page._g !== 'function') return;
         if (summaryPending) {
             schedule('nextmatch', () => {
                 send('fight&a=nextmatch');

@@ -48,6 +48,8 @@
     window.Engine = {
         allInit: false,
         ev: 1000,
+        getCanvasViewSize: () => ({ width: 600, height: 400 }),
+        renderer: { drawables: [], add(...drawables) { this.drawables.push(...drawables); } },
         items: {
             items: { bag: { id: 777, name: 'Torba podróżna', stat: 'rarity=normal' } },
             testMyItems: () => ({ expired: { id: 778, name: '<b>Stary przedmiot</b>', checkExpires: () => true } })
@@ -78,6 +80,11 @@
             }
         }
     };
+    const apiCallbacks = new Map();
+    window.API = {
+        addCallbackToEvent(name, callback) { const list = apiCallbacks.get(name) || []; list.push(callback); apiCallbacks.set(name, list); },
+        removeCallbackFromEvent(name, callback) { apiCallbacks.set(name, (apiCallbacks.get(name) || []).filter(entry => entry !== callback)); }
+    };
     window.fixtureOriginalParser = Engine.communication.parseJSON;
 </script>
 <script src="./detector-sanity.js"></script>
@@ -91,12 +98,17 @@
         const runtimeDeadline = Date.now() + 3000;
         while (!window.__MARGONEM_TOOLKIT__ && Date.now() < runtimeDeadline) await wait(20);
         assert(window.__MARGONEM_TOOLKIT__ && !window.__MARGONEM_TOOLKIT__.addons, 'QADDONS czeka na pełne Engine.allInit');
+        Engine.communication.parseJSON({ settings: { action: 'INIT', list: [
+            { 34: { v: 0, common: { v: 1 }, elite: { v: 1 }, elite2: { v: 0 }, lvlmin: { v: -10 }, lvlmax: { v: 13 } } },
+            { 35: { v: 1, common: { v: 1 }, elite: { v: 1 }, elite2: { v: 1 }, lvlmin: { v: -20 }, lvlmax: { v: 8 } } }
+        ] } });
         Engine.allInit = true;
         const startupDeadline = Date.now() + 5000;
         while (!window.__MARGONEM_TOOLKIT__?.addons && Date.now() < startupDeadline) await wait(20);
         assert(window.__MARGONEM_TOOLKIT__?.addons, 'Loader uruchomił runtime w kontekście strony');
         assert(typeof unsafeWindow === 'undefined', 'Runtime działa bez API Tampermonkey');
         const manager = __MARGONEM_TOOLKIT__.addons;
+        assert(document.querySelector('#qaddons-pocket-berserk')?.dataset.ready === 'true', 'Berserk zachowuje inicjalne ustawienia odebrane przed startem dodatków');
         const parser = Engine.communication.parseJSON;
         const gameLayer = document.querySelector('.game-layer');
         const initialPosition = gameLayer.style.position;
@@ -233,13 +245,20 @@
         manager.setEnabled('auto-abyss', false);
         window._g = commandBeforeAbyss;
         assert(document.querySelector('#qaddons-enhancer-toggle')?.textContent === 'UL', 'Przycisk Ulepszarki');
+        const drawableCount = Engine.renderer.drawables.length;
         manager.setEnabled('night-mode', true); await wait(20);
-        const nightOverlay = document.querySelector('.qaddons-night-mode');
-        assert(nightOverlay?.parentElement === gameLayer && getComputedStyle(nightOverlay).opacity === '0.45', 'Tryb nocny przyciemnia tylko mapę');
+        const nightDrawable = Engine.renderer.drawables.at(-1);
+        assert(Engine.renderer.drawables.length === drawableCount + 1 && nightDrawable?.getOrder() === 1, 'Tryb nocny dodaje warstwę do renderera mapy');
+        const nightDraws = [];
+        const nightContext = { canvas: {}, save() {}, restore() {}, fillRect(...args) { nightDraws.push([this.globalAlpha, this.fillStyle, ...args]); } };
+        nightDrawable.draw(nightContext);
+        assert(nightDraws[0][0] === 0.45 && nightDraws[0][2] === 0 && nightDraws[0][4] === 600, 'Tryb nocny rysuje półprzezroczystą warstwę w rozmiarze mapy');
         manager.changeSettings('night-mode', { strength: 70, color: '#102030', vignette: false }); await wait(20);
-        assert(getComputedStyle(nightOverlay).opacity === '0.7' && getComputedStyle(nightOverlay).backgroundColor === 'rgb(16, 32, 48)', 'Konfiguracja Trybu nocnego działa');
+        nightDraws.length = 0; nightDrawable.draw(nightContext);
+        assert(nightDraws[0][0] === 0.7 && nightDraws[0][1] === '#102030', 'Konfiguracja Trybu nocnego działa w rendererze gry');
         manager.setEnabled('night-mode', false);
-        assert(!document.querySelector('.qaddons-night-mode'), 'Wyłączenie usuwa warstwę Trybu nocnego');
+        nightDraws.length = 0; nightDrawable.draw(nightContext);
+        assert(nightDraws.length === 0, 'Wyłączenie zatrzymuje rysowanie Trybu nocnego');
         const partyFixture = document.createElement('div');
         partyFixture.className = 'party'; partyFixture.style.cssText = 'position:fixed;left:0;top:70px;width:290px';
         partyFixture.innerHTML = '<div class="party__list"><div class="party-member yellow" style="width:290px"><div class="member-hp-bar"></div><div class="table-wrapper"><div class="avatar"><div class="img-avatar-correct"></div></div><div class="info-wrapper"><div class="top-row"><div class="nickname"><div class="nickname-text">Bardzo długi nick postaci</div></div><div class="character-info">(492h|334h)</div></div><div class="bottom-row"><div class="hp-percent">(95%)</div><div class="hp-points">76 237 / 81 020</div><div class="info-icons"><div class="status-test"></div><div class="party__crown"></div></div></div></div></div></div></div><div class="party__professions">2b 1p 1m 1t 1h</div>';

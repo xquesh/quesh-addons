@@ -123,7 +123,7 @@ export function startReminder(ctx) {
     }
 
     async function check(force = false) {
-        if (checking || !ctx.enabled) return;
+        if (checking || !ctx.enabled || page.Engine?.allInit !== true) return;
         checking = true;
         ctx.events.emit('reminderStatus', { state: 'checking', text: 'Sprawdzanie…' });
         const next = { calendar: null, promotions: [], expired: [] };

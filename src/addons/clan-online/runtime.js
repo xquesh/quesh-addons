@@ -132,7 +132,7 @@ export function startClanOnline(ctx) {
     }
 
     async function refresh(force = false) {
-        if (busy || typeof page._g !== 'function') return;
+        if (busy || page.Engine?.allInit !== true || typeof page._g !== 'function') return;
         if (hasClan(page) === false) { members = []; message('Brak klanu'); render(); return; }
         if (!force && Date.now() - lastUpdate < 5000) return;
         busy = true;
@@ -152,7 +152,7 @@ export function startClanOnline(ctx) {
     }
 
     function tick() {
-        refresh();
+        if (!panel.hidden) refresh();
         const seconds = [7, 10, 15, 30, 60].includes(Number(ctx.settings.refreshInterval)) ? Number(ctx.settings.refreshInterval) : 10;
         ctx.scheduler.timeout(tick, seconds * 1000);
     }
@@ -202,6 +202,5 @@ export function startClanOnline(ctx) {
     ctx.events.on('clanOnlineChanged', () => { placePanel(); render(); });
     ctx.events.on('clanOnlineRefresh', () => refresh(true));
     ctx.scheduler.cleanup(() => { clearTimeout(geometryTimer); button.remove(); panel.remove(); });
-    ctx.scheduler.timeout(() => refresh(true), 900);
     tick();
 }

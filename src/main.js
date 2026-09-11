@@ -52,6 +52,7 @@ const toolkit = {
     }
 };
 page.__MARGONEM_TOOLKIT__ = toolkit;
+game.start();
 
 function start() {
     if (destroyed) return;
@@ -80,7 +81,6 @@ function start() {
         manager.register(createPocketBerserk());
         panel.connect(manager);
         manager.start();
-        game.start();
     } catch (error) {
         toolkit.destroy();
         console.error('[QADDONS start]', error);

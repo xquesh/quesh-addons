@@ -110,6 +110,7 @@ export function startEnhancer(ctx) {
         renderSlots(); scan();
     }
     async function gameRequest(command, match, strip = []) {
+        if (page.Engine?.allInit !== true) throw new Error('Gra nie jest jeszcze gotowa.');
         return ctx.game.request(command, match, { strip, timeout: 7000, signal: ctx.scheduler.signal });
     }
     function pause(milliseconds) {
@@ -267,7 +268,7 @@ export function startEnhancer(ctx) {
     ctx.events.on('gamePacket', packet => { const data = Array.isArray(packet) ? packet.flat(Infinity) : [packet]; const update = data.find(entry => entry?.enhancement?.progressing || entry?.enhancement?.upgradable); if (update) renderProgress(update.enhancement.progressing || update.enhancement.upgradable); });
     ctx.scheduler.cleanup(() => { clearDrag(); document.querySelectorAll('.qaddons-enhancer-buffer').forEach(node => node.classList.remove('qaddons-enhancer-buffer')); toggle.remove(); windowElement.remove(); });
     const tick = () => {
-        if (active && !busy) {
+        if (active && !busy && page.Engine?.allInit === true) {
             const count = scan().length;
             const threshold = Math.max(1, Math.min(126, Number(settings.bufferSize) || 25));
             const usable = settings.mode === 'regular' ? (target('all') ? candidateItems().length : 0)

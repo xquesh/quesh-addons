@@ -1,26 +1,18 @@
-import { nightModeCss } from './style.js';
+import { createMapBrightnessDrawable } from './style.js';
 
-const DEFAULTS = { strength: 45, color: '#07101c', vignette: true };
+const DEFAULTS = { strength: 45, color: '#000000', vignette: true };
 
 function startNightMode(ctx) {
-    const overlay = document.createElement('div');
-    overlay.className = 'qaddons-night-mode';
-    overlay.setAttribute('aria-hidden', 'true');
-
-    function mount() {
-        const layer = document.querySelector('.game-window-positioner .game-layer');
-        if (layer && overlay.parentElement !== layer) layer.append(overlay);
-    }
-
-    function apply() {
-        ctx.styles.set('runtime', nightModeCss(ctx.settings));
-        mount();
-    }
-
-    apply();
-    ctx.scheduler.observer(MutationObserver, mount).observe(document.body, { childList: true, subtree: true });
-    ctx.events.on('nightModeChanged', apply);
-    ctx.scheduler.cleanup(() => overlay.remove());
+    const page = ctx.game.page;
+    const drawable = createMapBrightnessDrawable(page, () => ctx.settings);
+    const addDrawable = () => page.Engine?.renderer?.add?.(drawable);
+    const api = page.API;
+    addDrawable();
+    api?.addCallbackToEvent?.('call_draw_add_to_renderer', addDrawable);
+    ctx.scheduler.cleanup(() => {
+        drawable.disable();
+        api?.removeCallbackFromEvent?.('call_draw_add_to_renderer', addDrawable);
+    });
 }
 
 export function createNightMode() {

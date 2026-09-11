@@ -19,7 +19,7 @@ export function startQuickSeller(ctx) {
 
     function available() {
         const shop = page.Engine?.shop;
-        return Boolean(shop && shop !== false && typeof shop.greatMerchant === 'function' && shop.basket && typeof shop.basket.finalize === 'function');
+        return Boolean(page.Engine?.allInit === true && shop && shop !== false && typeof shop.greatMerchant === 'function' && shop.basket && typeof shop.basket.finalize === 'function');
     }
     function refresh() {
         button.hidden = ctx.settings.showButton === false;
