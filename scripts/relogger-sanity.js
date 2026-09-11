@@ -88,11 +88,16 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         assert(disabledDuringRelog.every(Boolean), `Kafelki są blokowane tylko podczas zmiany postaci: ${disabledDuringRelog.join(',')} / ${bar().querySelector('.qr-status').textContent}`);
         await wait(1050);
         assert([...bar().querySelectorAll('.qr-card')].every(button => !button.disabled) && bar().querySelector('[data-hero="2"]')?.getAttribute('aria-current') === 'true', 'Kafelki odblokowują się po zmianie postaci');
-        Engine.changePlayer = { id: null, changePlayer() { this.id = 5; setTimeout(() => { this.id = null; }, 10); }, changePlayerRequest() { throw new Error('Pominięto natywną ścieżkę changePlayer'); } };
+        Engine.changePlayer = { id: null, changePlayer() { this.id = 5; setTimeout(() => Engine.communication.parseJSON({ logoff_time_left: 5 }), 0); setTimeout(() => { this.id = null; Engine.communication.parseJSON({ logoff_time_left: 0 }); }, 20); }, changePlayerRequest() { throw new Error('Pominięto natywną ścieżkę changePlayer'); } };
         bar().querySelector('[data-hero="5"]').click();
         assert([...bar().querySelectorAll('.qr-card')].every(button => button.disabled), 'Kafelki są zablokowane, gdy okno zmiany postaci jest otwarte');
-        await wait(1050);
+        await wait(100);
         assert([...bar().querySelectorAll('.qr-card')].every(button => !button.disabled) && Engine.hero.d.id === 2, 'Anulowanie zmiany postaci odblokowuje kafelki bez F5');
+        let recoveredHero = null;
+        Engine.changePlayer = { id: null, changePlayer(id) { this.id = id; setTimeout(() => Engine.communication.parseJSON({ logoff_time_left: 1 }), 0); }, reloadPlayer(id) { recoveredHero = id; this.id = null; Engine.hero = { d: { id } }; }, changePlayerRequest() { throw new Error('Pominięto natywną ścieżkę changePlayer'); } };
+        bar().querySelector('[data-hero="5"]').click();
+        await wait(3800);
+        assert(recoveredHero === 5 && Engine.hero.d.id === 5, 'Po zakończonym odliczaniu bez przełączenia dodatek kończy natywne przelogowanie');
         // Błąd pobrania nie usuwa poprawnie pobranej listy.
         window.fetch = async () => { throw new Error('fixture offline'); };
         bar().querySelector('[data-refresh]').click(); await wait(50);

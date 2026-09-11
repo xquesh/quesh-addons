@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { characterList, sortedHeroes, heroTimers, countdown, changeCharacter, relogTarget, heroLevel } from '../src/addons/relogger/data.js';
+import { characterList, sortedHeroes, heroTimers, countdown, changeCharacter, relogTarget, heroLevel, reloadCharacter } from '../src/addons/relogger/data.js';
 const list = characterList([{ id: 1, nick: 'A', lvl: 30, world: 'fobos' }, { id: 2, nick: 'B', lvl: 200, world: 'fobos' }, { id: 3, nick: 'C', world: 'katahha' }, { id: 4, nick: 'Bad', world: 'example.org' }]);
 assert.equal(list.length, 3);
 assert.deepEqual(sortedHeroes(list, 'fobos', 'level-desc').map(hero => hero.id), ['2', '1']);
@@ -17,6 +17,9 @@ assert.throws(() => relogTarget({ id: 2, world: 'evil.example' }, page), /Niepra
 changeCharacter(list[1], page, url => calls.push(url));
 assert.equal(calls[0][0], 'mchar_id'); assert.equal(calls[0][1], '2'); assert.equal(calls[0][4], 'margonem.pl'); assert.equal(calls[0][5], true);
 assert.equal(calls[1], 'https://fobos.margonem.pl/');
+calls.length = 0;
+assert.equal(reloadCharacter(list[1], page, url => calls.push(url)), 'reload');
+assert.equal(calls[0][0], 'mchar_id'); assert.equal(calls[1], 'https://fobos.margonem.pl/');
 const nativeCalls = [];
 const nativePage = { Engine: { allInit: true, hero: { d: { id: 1 } }, logOff: true, changePlayer: { id: null, changePlayer: id => nativeCalls.push(['changePlayer', id]), changePlayerRequest: id => nativeCalls.push(['request', id]) } }, location: { hostname: 'fobos.margonem.pl' } };
 assert.equal(changeCharacter(list[1], nativePage), 'native');

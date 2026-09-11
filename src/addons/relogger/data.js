@@ -35,19 +35,29 @@ export function heroTimers(data, heroId, now, fadeout = 600) {
             return { name: String(timer.name || 'Timer'), end, state, text: state === 'due' ? 'Czas minął' : countdown(end - now) };
         }).sort((a, b) => a.end - b.end);
 }
+export function characterDestination(hero, page) {
+    let domain = page.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
+    if (!domain) {
+        try { domain = new URL(page.Engine?.worldConfig?.getApiDomain?.()).hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1]; }
+        catch {}
+    }
+    if (!domain || !worldName(hero.world) || !/^\d+$/.test(String(hero.id))) throw new Error('Nieprawidłowy świat lub postać.');
+    return { url: `https://${hero.world}.margonem.${domain}/`, cookieDomain: `margonem.${domain}`, id: String(hero.id) };
+}
 export function relogTarget(hero, page) {
     const engine = page.Engine;
     if (engine?.allInit !== true) throw new Error('Poczekaj na załadowanie gry.');
     if (engine.changePlayer?.id != null) throw new Error('Zmiana postaci już trwa.');
     if (engine.dialogue && typeof engine.dialogue === 'object') throw new Error('Najpierw zamknij rozmowę z NPC.');
     if (String(engine.hero?.d?.id || page.getCookie?.('mchar_id')) === String(hero.id)) throw new Error('Ta postać jest już zalogowana.');
-    let domain = page.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
-    if (!domain) {
-        try { domain = new URL(engine.worldConfig?.getApiDomain?.()).hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1]; }
-        catch {}
-    }
-    if (!domain || !worldName(hero.world) || !/^\d+$/.test(String(hero.id))) throw new Error('Nieprawidłowy świat lub postać.');
-    return { url: `https://${hero.world}.margonem.${domain}/`, cookieDomain: `margonem.${domain}`, id: String(hero.id) };
+    return characterDestination(hero, page);
+}
+export function reloadCharacter(hero, page, navigate = url => page.location.replace(url)) {
+    const target = characterDestination(hero, page);
+    if (typeof page.setCookie !== 'function') throw new Error('Gra nie udostępnia zmiany postaci.');
+    page.setCookie('mchar_id', target.id, new Date(Date.now() + 30 * 86400000), '/', target.cookieDomain, true);
+    navigate(target.url);
+    return 'reload';
 }
 export function changeCharacter(hero, page, navigate = url => page.location.replace(url)) {
     const target = relogTarget(hero, page);
@@ -60,8 +70,5 @@ export function changeCharacter(hero, page, navigate = url => page.location.repl
         page.Engine.changePlayer.changePlayerRequest(Number(target.id));
         return 'native';
     }
-    if (typeof page.setCookie !== 'function') throw new Error('Gra nie udostępnia zmiany postaci.');
-    page.setCookie('mchar_id', target.id, new Date(Date.now() + 30 * 86400000), '/', target.cookieDomain, true);
-    navigate(target.url);
-    return 'reload';
+    return reloadCharacter(hero, page, navigate);
 }
