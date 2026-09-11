@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import './check-item-tools.mjs';
 import './check-relogger.mjs';
+import './check-auto-abyss.mjs';
 import { selectedChannels, buttonLabel } from '../src/addons/detector-global/channels.js';
 assert.deepEqual(selectedChannels({}), ['LOCAL']);
 assert.deepEqual(selectedChannels({ channels: [] }), []);

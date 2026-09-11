@@ -120,7 +120,7 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 12, 'Manager dwunastu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 13, 'Manager trzynastu addonów');
         const chatFixture = document.createElement('div');
         chatFixture.className = 'new-chat-window';
         chatFixture.innerHTML = '<div class="chat-message-wrapper"><div class="scroll-pane" style="height:24px;overflow-y:auto"><div style="height:240px">Wiadomości</div></div></div>';
@@ -153,6 +153,25 @@
         }
         const styleKeys = [...document.querySelectorAll('[data-mtk-style]')].map(node => node.dataset.mtkStyle);
         assert(new Set(styleKeys).size === styleKeys.length, 'Brak zduplikowanych arkuszy stylów po restarcie wszystkich dodatków');
+        const abyssCommands = [];
+        const commandBeforeAbyss = window._g;
+        window._g = command => abyssCommands.push(command);
+        manager.changeSettings('auto-abyss', { autoFight: true });
+        manager.setEnabled('auto-abyss', true);
+        Engine.communication.parseJSON({ matchmaking_state: 2, matchmaking_confirmation: { accept: 0, time_left: 15 } });
+        await wait(650);
+        assert(abyssCommands.includes('match&a=accept_opp&ans=1'), 'Auto Otchłań akceptuje przeciwnika');
+        Engine.communication.parseJSON({ matchmaking_state: 3, matchmaking_preparation: { opponent_prof: 'w', time_left: 15 } });
+        await wait(650);
+        assert(abyssCommands.includes('match&a=prepared'), 'Auto Otchłań potwierdza przygotowanie');
+        Engine.communication.parseJSON({ matchmaking_state: 5 });
+        await wait(550);
+        assert(abyssCommands.includes('fight&a=f&enabled=1'), 'Auto Otchłań uruchamia Auto F');
+        Engine.communication.parseJSON({ matchmaking_state: 0, match_summary: { daily_stage: { id: 1, points_cur: 3, points_max: 6 } } });
+        await wait(850);
+        assert(abyssCommands.includes('fight&a=nextmatch'), 'Auto Otchłań przechodzi do następnej walki');
+        manager.setEnabled('auto-abyss', false);
+        window._g = commandBeforeAbyss;
         assert(document.querySelector('#qaddons-enhancer-toggle')?.textContent === 'UL', 'Przycisk Ulepszarki');
         manager.setEnabled('night-mode', true); await wait(20);
         const nightOverlay = document.querySelector('.qaddons-night-mode');
@@ -405,7 +424,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: twelve addons, forced chat bottom, safe native relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: thirteen addons, auto abyss, forced chat bottom, safe native relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {

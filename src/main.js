@@ -19,6 +19,7 @@ import { createReminder } from './addons/reminder/index.js';
 import { createCompactParty } from './addons/compact-party/index.js';
 import { createNightMode } from './addons/night-mode/index.js';
 import { createChatAutoscroll } from './addons/chat-autoscroll/index.js';
+import { createAutoAbyss } from './addons/auto-abyss/index.js';
 
 const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -68,6 +69,7 @@ function start() {
         manager.register(createCompactParty());
         manager.register(createNightMode());
         manager.register(createChatAutoscroll());
+        manager.register(createAutoAbyss());
         panel.connect(manager);
         manager.start();
         game.start();
