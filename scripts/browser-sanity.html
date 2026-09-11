@@ -29,7 +29,7 @@
         <div class="positioner top"><div class="top-left main-buttons-container"><button class="widget-button">GRA</button></div></div>
         <div class="left-column main-column"></div>
         <div class="right-column main-column"></div>
-        <div class="positioner bottom"><div class="bottom-panel-of-bottom-positioner"><div class="hp-indicator-wrapper"></div></div></div>
+        <div class="positioner bottom"><div class="bottom-panel-of-bottom-positioner"><div class="hp-indicator-wrapper"></div><div class="slots right"><div class="usable-slot usable-slot-8" style="position:fixed;left:620px;top:560px;width:38px;height:38px"><div class="help-number">8</div></div></div></div></div>
     </div>
 </div>
 <div class="mAlert-layer"><div class="big-messages"><span style="font-size:15px;color:rgb(160, 170, 180)">Komunikat</span></div></div>
@@ -197,7 +197,9 @@
         await wait(20);
         const berserkButton = document.querySelector('#qaddons-pocket-berserk');
         assert(berserkButton?.dataset.ready === 'true' && berserkButton.dataset.enabled === 'false', 'Kieszonkowy berserk odczytuje ustawienia solo');
-        assert(berserkButton.parentElement.matches('.bottom-panel-of-bottom-positioner'), 'Przycisk BR jest osadzony na dolnej belce gry');
+        const slotEightRect = document.querySelector('.usable-slot-8').getBoundingClientRect();
+        const berserkRect = berserkButton.getBoundingClientRect();
+        assert(berserkButton.dataset.anchored === 'true' && berserkRect.left >= slotEightRect.right + 3, 'Przycisk BR jest osadzony obok slotu 8, poza slotami przedmiotów');
         berserkButton.click();
         assert(berserkCommands.includes('settings&action=update&id=34&v=1'), 'Przycisk BR przełącza berserk solo');
         Engine.communication.parseJSON({ party: { members: { 7: { id: 7 }, 9: { id: 9 } } } }); await wait(20);

@@ -22,10 +22,9 @@ export function createPocketBerserk() {
             const section = document.createElement('section');
             section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Kieszonkowy berserk</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Mały przycisk <strong>BR</strong> przełącza tryb właściwy dla gry solo albo grupy. Kliknij go prawym przyciskiem, aby wrócić do tej konfiguracji.</p>
+                <p>Mały przycisk <strong>BR</strong> obok slotu 8 przełącza tryb właściwy dla gry solo albo grupy. Kliknij go prawym przyciskiem, aby wrócić do tej konfiguracji.</p>
                 <div class="qpb-status" data-status>Oczekiwanie na ustawienia gry…</div>
-                <div class="ln-grid"><label class="ln-switch"><input type="checkbox" data-setting="showButton">Pokaż przycisk BR na dolnej belce</label>
-                <label class="ln-field">Położenie na dolnej belce<input type="range" min="0" max="100" step="1" data-setting="buttonHorizontal"><output data-button-position></output></label></div>
+                <div class="ln-grid"><label class="ln-switch"><input type="checkbox" data-setting="showButton">Pokaż przycisk BR obok slotu 8</label></div>
                 <div class="qpb-columns" data-modes></div>`;
             const modes = section.querySelector('[data-modes]');
             for (const id of [SOLO_BERSERK_ID, GROUP_BERSERK_ID]) {
@@ -45,8 +44,6 @@ export function createPocketBerserk() {
             function sync() {
                 enabled.checked = ctx.enabled;
                 section.querySelector('[data-setting="showButton"]').checked = ctx.settings.showButton !== false;
-                section.querySelector('[data-setting="buttonHorizontal"]').value = String(ctx.settings.buttonHorizontal);
-                section.querySelector('[data-button-position]').textContent = `${ctx.settings.buttonHorizontal}%`;
                 const level = heroOperationalLevel(ctx.game.page, tracker);
                 for (const box of section.querySelectorAll('[data-mode]')) {
                     const mode = tracker.modes[Number(box.dataset.mode)];

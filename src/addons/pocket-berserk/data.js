@@ -4,8 +4,7 @@ export const OFFSET_MIN = -50;
 export const OFFSET_MAX = 13;
 
 export const DEFAULTS = Object.freeze({
-    showButton: true,
-    buttonHorizontal: 82
+    showButton: true
 });
 
 export const DEFAULT_MODE = Object.freeze({

@@ -30,11 +30,27 @@ export function startPocketBerserk(ctx, tracker) {
     button.id = 'qaddons-pocket-berserk';
     button.type = 'button';
     button.textContent = 'BR';
-    function mountButton() {
-        const host = document.querySelector('.bottom-panel-of-bottom-positioner') || document.querySelector('.positioner.bottom');
-        const target = host || document.body;
-        if (button.parentElement !== target) target.append(button);
-        button.dataset.fallback = String(!host);
+    document.body.append(button);
+    let positionFrame = 0;
+    function positionButton() {
+        positionFrame = 0;
+        const slot = document.querySelector('.bottom-panel-of-bottom-positioner .usable-slot-8, .positioner.bottom .usable-slot-8, .usable-slot-8');
+        const rect = slot?.getBoundingClientRect();
+        if (rect?.width > 0 && rect?.height > 0) {
+            const rightSide = rect.right + 4;
+            const left = rightSide + button.offsetWidth <= window.innerWidth ? rightSide : Math.max(0, rect.left - button.offsetWidth - 4);
+            button.style.left = `${Math.round(left)}px`;
+            button.style.top = `${Math.round(rect.top + (rect.height - button.offsetHeight) / 2)}px`;
+            button.dataset.anchored = 'true';
+            return;
+        }
+        const bar = document.querySelector('.bottom-panel-of-bottom-positioner, .positioner.bottom')?.getBoundingClientRect();
+        button.style.left = `${Math.max(4, Math.min(window.innerWidth - button.offsetWidth - 4, (bar?.right || window.innerWidth) - button.offsetWidth - 4))}px`;
+        button.style.top = `${Math.max(4, Math.min(window.innerHeight - button.offsetHeight - 4, (bar?.bottom || window.innerHeight - 64) - button.offsetHeight - 3))}px`;
+        button.dataset.anchored = 'false';
+    }
+    function schedulePosition() {
+        if (!positionFrame) positionFrame = ctx.scheduler.frame(positionButton);
     }
 
     function currentId() { return tracker.inParty ? GROUP_BERSERK_ID : SOLO_BERSERK_ID; }
@@ -42,11 +58,11 @@ export function startPocketBerserk(ctx, tracker) {
         const id = currentId();
         const mode = tracker.modes[id];
         button.hidden = ctx.settings.showButton === false;
-        button.style.setProperty('--qpb-x', `${Math.max(0, Math.min(100, Number(ctx.settings.buttonHorizontal) || 82))}%`);
         button.dataset.ready = String(Boolean(mode));
         button.dataset.enabled = String(Boolean(mode?.v));
         const scope = tracker.inParty ? 'w grupie' : 'solo';
         button.title = mode ? `Kieszonkowy berserk: ${scope} — ${mode.v ? 'włączony' : 'wyłączony'}\nKlik: przełącz · PPM: ustawienia` : 'Kieszonkowy berserk: oczekiwanie na ustawienia gry';
+        schedulePosition();
     }
 
     ctx.scheduler.listen(button, 'click', () => {
@@ -63,8 +79,9 @@ export function startPocketBerserk(ctx, tracker) {
     });
     ctx.events.on('pocketBerserkDataChanged', render);
     ctx.events.on('pocketBerserkChanged', render);
-    ctx.scheduler.observer(MutationObserver, mountButton).observe(document.body, { childList: true, subtree: true });
-    ctx.scheduler.listen(window, 'resize', render, { passive: true });
+    ctx.scheduler.observer(MutationObserver, schedulePosition).observe(document.body, { childList: true, subtree: true });
+    ctx.scheduler.listen(window, 'resize', schedulePosition, { passive: true });
+    ctx.events.on('layoutChanged', schedulePosition);
     ctx.scheduler.cleanup(() => button.remove());
-    mountButton(); render();
+    render();
 }

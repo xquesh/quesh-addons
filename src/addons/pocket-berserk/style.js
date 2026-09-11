@@ -1,6 +1,5 @@
 export const POCKET_BERSERK_CSS = `
-#qaddons-pocket-berserk{position:absolute;left:var(--qpb-x,82%);bottom:3px;transform:translateX(-50%);z-index:31000;box-sizing:border-box;width:30px;height:26px;padding:0;border:1px solid #666;border-radius:0;background:#050505;color:#888;font:700 10px Arial;cursor:pointer;pointer-events:auto}
-#qaddons-pocket-berserk[data-fallback="true"]{position:fixed;bottom:68px}
+#qaddons-pocket-berserk{position:fixed;left:0;top:0;z-index:31000;box-sizing:border-box;width:30px;height:26px;padding:0;border:1px solid #666;border-radius:0;background:#050505;color:#888;font:700 10px Arial;cursor:pointer;pointer-events:auto}
 #qaddons-pocket-berserk:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px rgba(255,255,255,.72)}
 #qaddons-pocket-berserk[data-enabled="true"]{color:#fff;border-color:#aaa;text-shadow:0 0 5px #fff;box-shadow:0 0 7px rgba(255,255,255,.45)}
 #qaddons-pocket-berserk[data-ready="false"]{opacity:.55;cursor:wait}
