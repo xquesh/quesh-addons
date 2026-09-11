@@ -1,4 +1,4 @@
-import { characterList, worldName, sortedHeroes, heroTimers, changeCharacter, heroLevel } from './data.js';
+import { characterList, worldName, sortedHeroes, heroTimers, referenceRelog, heroLevel } from './data.js';
 import { barStyle } from './style.js';
 
 export function startRelogger(ctx) {
@@ -127,9 +127,8 @@ export function startRelogger(ctx) {
     }
     function relog(hero) {
         if (!hero) return;
-        if (page.getCookie?.('user_id') !== account) { error = 'Konto się zmieniło. Odśwież listę postaci.'; updateTimers(); return; }
         try {
-            changeCharacter(hero, page);
+            referenceRelog(hero.id, hero.world, page);
             error = '';
         }
         catch (cause) {

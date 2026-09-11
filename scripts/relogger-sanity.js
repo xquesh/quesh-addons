@@ -56,7 +56,7 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         bar().querySelector('[data-hero="1"]').dispatchEvent(new Event('pointerover', { bubbles: true }));
         assert(bar().querySelector('.qr-details').textContent.includes('<b>Heros A</b>') && !bar().querySelector('.qr-details b'), 'Nazwy timerów wyświetlane jako tekst');
         bar().querySelector('[data-hero="1"]').click();
-        assert(bar().querySelector('.qr-status').textContent.includes('już zalogowana'), 'Kliknięcie bieżącej postaci nie przelogowuje');
+        assert(bar().querySelector('.qr-status').textContent.includes('już na tej postaci'), 'Kliknięcie bieżącej postaci nie przelogowuje');
         const worldButton = bar().querySelector('[data-world-toggle]');
         worldButton.click();
         assert(!bar().querySelector('.qr-world-menu').hidden, 'Mały przycisk otwiera wybór świata');

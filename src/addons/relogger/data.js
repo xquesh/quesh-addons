@@ -35,32 +35,15 @@ export function heroTimers(data, heroId, now, fadeout = 600) {
             return { name: String(timer.name || 'Timer'), end, state, text: state === 'due' ? 'Czas minął' : countdown(end - now) };
         }).sort((a, b) => a.end - b.end);
 }
-export function characterDestination(hero, page) {
-    let domain = typeof page.getMainDomain === 'function' ? page.getMainDomain() : '';
-    if (!/^(pl|com)$/.test(domain)) domain = page.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
-    if (!domain) {
-        try { domain = new URL(page.Engine?.worldConfig?.getApiDomain?.()).hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1]; }
-        catch {}
-    }
-    if (!domain || !worldName(hero.world) || !/^\d+$/.test(String(hero.id))) throw new Error('Nieprawidłowy świat lub postać.');
-    return { url: `https://${hero.world}.margonem.${domain}`, cookieDomain: `margonem.${domain}`, id: String(hero.id) };
-}
-export function relogTarget(hero, page) {
-    const engine = page.Engine;
-    if (engine?.allInit !== true) throw new Error('Poczekaj na załadowanie gry.');
-    if (engine.changePlayer?.id != null) throw new Error('Zmiana postaci już trwa.');
-    if (engine.dialogue && typeof engine.dialogue === 'object') throw new Error('Najpierw zamknij rozmowę z NPC.');
-    if (String(engine.hero?.d?.id || page.getCookie?.('mchar_id')) === String(hero.id)) throw new Error('Ta postać jest już zalogowana.');
-    return characterDestination(hero, page);
-}
-export function reloadCharacter(hero, page, navigate = url => page.location.replace(url)) {
-    const target = characterDestination(hero, page);
-    if (typeof page.setCookie !== 'function') throw new Error('Gra nie udostępnia zmiany postaci.');
-    page.setCookie('mchar_id', target.id, new Date(Date.now() + 2592e6), '/', target.cookieDomain, true);
-    navigate(target.url);
-    return 'reload';
-}
-export function changeCharacter(hero, page, navigate = url => page.location.replace(url)) {
-    relogTarget(hero, page);
-    return reloadCharacter(hero, page, navigate);
+export function referenceRelog(characterId, world, page) {
+    if (page.Engine.allInit !== true) return false;
+    if (page.Engine.changePlayer?.id !== null && page.Engine.changePlayer?.id !== undefined) return false;
+    const currentId = page.Engine.hero.d.id || page.getCookie('mchar_id') || undefined;
+    if (characterId == currentId) throw new Error('Jesteś już na tej postaci!');
+    if (typeof page.Engine.dialogue === 'object') return false;
+    const expires = new Date();
+    expires.setTime(expires.getTime() + 2592e6);
+    page.setCookie('mchar_id', `${characterId}`, expires, '/', `margonem.${page.getMainDomain()}`, true);
+    page.location.replace(`https://${world}.margonem.${page.getMainDomain()}`);
+    return true;
 }
