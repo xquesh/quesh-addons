@@ -778,7 +778,7 @@
   var quesh_default = "data:image/png;base64,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";
 
   // src/version.js
-  var VERSION = "1.14.0";
+  var VERSION = "1.15.0";
 
   // src/core/updates.js
   var MANIFEST_URL = "https://xquesh.github.io/quesh-addons/dist/version.json";
@@ -8353,6 +8353,363 @@ ${avatar}
     };
   }
 
+  // src/addons/clan-online/data.js
+  var DEFAULTS9 = Object.freeze({
+    showButton: true,
+    searchEnabled: true,
+    showCoordinates: true,
+    wrapLocation: false,
+    fontSize: 11,
+    refreshInterval: 10,
+    sort: "level-desc",
+    windowX: null,
+    windowY: 70
+  });
+  var PROFESSION_NAMES = Object.freeze({
+    w: "Wojownik",
+    p: "Paladyn",
+    b: "Tancerz ostrzy",
+    m: "Mag",
+    t: "Tropiciel",
+    h: "Łowca"
+  });
+  function memberFromTuple(tuple) {
+    if (!Array.isArray(tuple) || tuple.length < 10) return null;
+    const id = Number(tuple[0]);
+    if (!Number.isFinite(id)) return null;
+    return {
+      id,
+      nick: String(tuple[1] ?? ""),
+      level: Number(tuple[2]) || 0,
+      operationLevel: Number(tuple[3]) || 0,
+      profession: String(tuple[4] ?? "").toLowerCase(),
+      location: String(tuple[5] ?? ""),
+      x: Number(tuple[6]),
+      y: Number(tuple[7]),
+      rank: Number(tuple[8]) || 0,
+      offlineTime: Number(tuple[9]) || 0,
+      icon: String(tuple[10] ?? "")
+    };
+  }
+  function parseClanMembers(raw) {
+    if (!Array.isArray(raw)) return [];
+    const tuples = Array.isArray(raw[0]) ? raw : Array.from({ length: Math.floor(raw.length / 11) }, (_, index) => raw.slice(index * 11, index * 11 + 11));
+    return tuples.map(memberFromTuple).filter(Boolean);
+  }
+  function onlineMembers(raw) {
+    return parseClanMembers(raw).filter((member) => member.offlineTime <= 0);
+  }
+  function memberLevel(member) {
+    const level = member.operationLevel > 0 ? `${member.level}|${member.operationLevel}` : String(member.level);
+    return `${level}${member.profession}`;
+  }
+  function filterMembers(members, query = "") {
+    const phrase = String(query).trim().toLocaleLowerCase("pl-PL");
+    if (!phrase) return [...members];
+    return members.filter((member) => [member.nick, member.location, memberLevel(member), PROFESSION_NAMES[member.profession]].some((value2) => String(value2 || "").toLocaleLowerCase("pl-PL").includes(phrase)));
+  }
+  function sortMembers(members, mode = "level-desc") {
+    const result = [...members];
+    const text = (value2) => String(value2 || "").toLocaleLowerCase("pl-PL");
+    if (mode === "name") result.sort((a, b) => text(a.nick).localeCompare(text(b.nick), "pl"));
+    else if (mode === "profession") result.sort((a, b) => text(a.profession).localeCompare(text(b.profession), "pl") || b.level - a.level);
+    else if (mode === "location") result.sort((a, b) => text(a.location).localeCompare(text(b.location), "pl") || text(a.nick).localeCompare(text(b.nick), "pl"));
+    else if (mode === "level-asc") result.sort((a, b) => a.level - b.level || text(a.nick).localeCompare(text(b.nick), "pl"));
+    else result.sort((a, b) => b.level - a.level || text(a.nick).localeCompare(text(b.nick), "pl"));
+    return result;
+  }
+  function hasClan(page2) {
+    const hero = page2.Engine?.hero?.d || page2.Engine?.hero || page2.g?.hero;
+    if (!hero) return null;
+    const clan = hero.clan ?? hero.clanId ?? hero.clan_id;
+    if (clan && typeof clan === "object") return true;
+    return Boolean(clan || hero.clanname || hero.clanName);
+  }
+
+  // src/addons/clan-online/style.js
+  var CLAN_ONLINE_CSS = `
+#qaddons-clan-online-button{position:relative;display:inline-grid;place-items:center;vertical-align:top;box-sizing:border-box;width:44px;height:44px;padding:0;border:1px solid #555;border-radius:0;background:#050505;color:#eee;font:700 10px Arial;cursor:pointer}
+#qaddons-clan-online-button:hover{border-color:#fff;color:#fff;box-shadow:0 0 8px rgba(255,255,255,.72)}
+#qaddons-clan-online-button[hidden]{display:none!important}
+#qaddons-clan-online-button .qco-badge{position:absolute;right:2px;top:2px;min-width:12px;height:12px;padding:0 2px;box-sizing:border-box;background:#111;border:1px solid #777;color:#fff;font:700 8px/10px Arial}
+#qaddons-clan-online{position:fixed;z-index:32000;width:370px;max-width:calc(100vw - 12px);height:310px;display:flex;flex-direction:column;border:1px solid #777;background:#000;color:#ddd;box-shadow:0 5px 20px rgba(0,0,0,.9);font:11px/1.25 Arial}
+#qaddons-clan-online[hidden]{display:none}
+#qaddons-clan-online .qco-head{height:29px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 6px 0 9px;border-bottom:1px solid #333;background:#090909;color:#fff;font-weight:700;cursor:move;user-select:none}
+#qaddons-clan-online .qco-head button{width:23px;height:22px;padding:0;border:0;background:transparent;color:#bbb;font-size:17px;cursor:pointer}
+#qaddons-clan-online .qco-head button:hover{color:#fff;text-shadow:0 0 6px #fff}
+#qaddons-clan-online .qco-tools{display:grid;grid-template-columns:minmax(0,1fr) 128px 27px;gap:4px;padding:5px;border-bottom:1px solid #292929}
+#qaddons-clan-online input,#qaddons-clan-online select{box-sizing:border-box;height:24px;min-width:0;border:1px solid #444;border-radius:0;background:#090909;color:#ddd;padding:2px 5px;font:11px Arial;outline:0}
+#qaddons-clan-online input:focus,#qaddons-clan-online select:focus{border-color:#aaa}
+#qaddons-clan-online .qco-refresh{height:24px;border:1px solid #555;border-radius:0;background:#111;color:#ddd;cursor:pointer}
+#qaddons-clan-online .qco-refresh:hover{border-color:#aaa;color:#fff}
+#qaddons-clan-online .qco-list{min-height:0;flex:1;overflow:auto;padding:3px 5px 5px}
+#qaddons-clan-online .qco-row{position:relative;display:grid;grid-template-columns:minmax(105px,1fr) minmax(110px,1.25fr) 25px;align-items:center;min-height:22px;border-bottom:1px solid #252525;font-size:var(--qco-font-size,11px)}
+#qaddons-clan-online .qco-row:hover{background:#111}
+#qaddons-clan-online .qco-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-weight:700}
+#qaddons-clan-online .qco-level{color:#aaa;font-weight:400}
+#qaddons-clan-online .qco-location{min-width:0;text-align:right;color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#qaddons-clan-online[data-wrap="true"] .qco-location{white-space:normal;overflow-wrap:anywhere}
+#qaddons-clan-online .qco-invite{justify-self:end;width:20px;height:18px;padding:0;border:1px solid #555;border-radius:0;background:#0b0b0b;color:#ddd;font:700 12px Arial;cursor:pointer}
+#qaddons-clan-online .qco-invite:hover{border-color:#fff;color:#fff;box-shadow:0 0 5px rgba(255,255,255,.5)}
+#qaddons-clan-online .qco-invite:disabled{opacity:.35;cursor:default;box-shadow:none}
+#qaddons-clan-online .qco-empty{padding:18px 8px;text-align:center;color:#999}
+#qaddons-clan-online .qco-foot{height:23px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-top:1px solid #292929;color:#888;font-size:10px}
+`;
+
+  // src/addons/clan-online/runtime.js
+  function packetList3(packet) {
+    return Array.isArray(packet) ? packet.flat(Infinity).filter(Boolean) : [packet].filter(Boolean);
+  }
+  function partyIds(packet) {
+    const party = packet?.party;
+    if (!party || typeof party !== "object") return null;
+    const members = party.members && typeof party.members === "object" ? party.members : party;
+    return new Set(Object.entries(members).map(([key, value2]) => String(value2?.id ?? key)));
+  }
+  function startClanOnline(ctx) {
+    const page2 = ctx.game.page;
+    let members = [];
+    let party = /* @__PURE__ */ new Set();
+    let search = "";
+    let busy = false;
+    let lastUpdate = 0;
+    let drag = null;
+    ctx.styles.set("runtime", CLAN_ONLINE_CSS);
+    const button = document.createElement("button");
+    button.id = "qaddons-clan-online-button";
+    button.type = "button";
+    button.title = "Klanowicze online";
+    button.innerHTML = '<span>KL</span><span class="qco-badge">0</span>';
+    const panel2 = document.createElement("section");
+    panel2.id = "qaddons-clan-online";
+    panel2.hidden = true;
+    panel2.innerHTML = `<header class="qco-head"><span>Klanowicze online <b data-count>(0)</b></span><button type="button" data-close aria-label="Zamknij">×</button></header>
+        <div class="qco-tools"><input type="search" data-search placeholder="Szukaj nicku, lokacji, profesji…"><select data-sort>
+            <option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nick A–Z</option><option value="profession">Profesja</option><option value="location">Lokacja</option>
+        </select><button type="button" class="qco-refresh" data-refresh title="Odśwież">↻</button></div>
+        <div class="qco-list" data-list></div><footer class="qco-foot"><span data-status>Oczekiwanie na dane gry</span><span data-time></span></footer>`;
+    document.body.append(panel2);
+    const list = panel2.querySelector("[data-list]");
+    const status = panel2.querySelector("[data-status]");
+    const time = panel2.querySelector("[data-time]");
+    const searchInput = panel2.querySelector("[data-search]");
+    const sortSelect = panel2.querySelector("[data-sort]");
+    function heroId3() {
+      return String(page2.Engine?.hero?.d?.id ?? page2.Engine?.hero?.id ?? page2.g?.hero?.id ?? "");
+    }
+    function mountButton() {
+      const host = document.querySelector(".top-left.main-buttons-container, .main-buttons-container, .interface-layer .top-left");
+      if (host && button.parentElement !== host) host.append(button);
+      else if (!host && !button.isConnected) document.body.append(button);
+    }
+    function placePanel() {
+      const width = 370;
+      const x = ctx.settings.windowX == null ? Math.max(6, window.innerWidth - width - 12) : Number(ctx.settings.windowX);
+      panel2.style.left = `${Math.max(0, Math.min(window.innerWidth - Math.min(width, window.innerWidth - 12), x || 0))}px`;
+      panel2.style.top = `${Math.max(0, Math.min(window.innerHeight - 80, Number(ctx.settings.windowY) || 70))}px`;
+    }
+    function message(text) {
+      status.textContent = text;
+    }
+    function render() {
+      const visible = sortMembers(filterMembers(members, search), ctx.settings.sort);
+      button.hidden = ctx.settings.showButton === false;
+      button.querySelector(".qco-badge").textContent = String(members.length);
+      panel2.querySelector("[data-count]").textContent = `(${members.length})`;
+      panel2.dataset.wrap = String(Boolean(ctx.settings.wrapLocation));
+      panel2.style.setProperty("--qco-font-size", `${Math.max(9, Math.min(14, Number(ctx.settings.fontSize) || 11))}px`);
+      searchInput.hidden = ctx.settings.searchEnabled === false;
+      panel2.querySelector(".qco-tools").style.gridTemplateColumns = ctx.settings.searchEnabled === false ? "minmax(0,1fr) 27px" : "";
+      sortSelect.value = ctx.settings.sort;
+      list.replaceChildren();
+      if (!visible.length) {
+        const empty = document.createElement("div");
+        empty.className = "qco-empty";
+        empty.textContent = hasClan(page2) === false ? "Nie należysz do żadnego klanu." : members.length ? "Brak wyników wyszukiwania." : "Brak klanowiczów online.";
+        list.append(empty);
+        return;
+      }
+      const ownId = heroId3();
+      for (const member of visible) {
+        const row = document.createElement("div");
+        row.className = "qco-row";
+        const name = document.createElement("span");
+        name.className = "qco-name";
+        name.title = `${member.nick} · ${PROFESSION_NAMES[member.profession] || member.profession}`;
+        const nick = document.createTextNode(member.nick + " ");
+        const level = document.createElement("span");
+        level.className = "qco-level";
+        level.textContent = `(${memberLevel(member)})`;
+        name.append(nick, level);
+        const location = document.createElement("span");
+        location.className = "qco-location";
+        const coordinates = Number.isFinite(member.x) && Number.isFinite(member.y) ? ` (${member.x},${member.y})` : "";
+        location.textContent = member.location + (ctx.settings.showCoordinates ? coordinates : "");
+        location.title = member.location + coordinates;
+        const invite = document.createElement("button");
+        invite.type = "button";
+        invite.className = "qco-invite";
+        invite.dataset.invite = String(member.id);
+        invite.textContent = "+";
+        invite.title = party.has(String(member.id)) ? "Postać jest już w grupie" : "Zaproś do grupy";
+        invite.disabled = String(member.id) === ownId || party.has(String(member.id));
+        row.append(name, location, invite);
+        list.append(row);
+      }
+    }
+    async function refresh(force = false) {
+      if (busy || typeof page2._g !== "function") return;
+      if (hasClan(page2) === false) {
+        members = [];
+        message("Brak klanu");
+        render();
+        return;
+      }
+      if (!force && Date.now() - lastUpdate < 5e3) return;
+      busy = true;
+      message("Odświeżanie…");
+      try {
+        const packet = await ctx.game.request("clan&a=members", (data) => Array.isArray(data?.members), {
+          strip: ["members"],
+          timeout: 6e3,
+          signal: ctx.scheduler.signal
+        });
+        members = onlineMembers(packet.members);
+        lastUpdate = Date.now();
+        time.textContent = new Date(lastUpdate).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        message(`Online: ${members.length}`);
+        render();
+      } catch (error) {
+        if (error?.name !== "AbortError") message(error?.message || "Nie udało się pobrać listy.");
+      } finally {
+        busy = false;
+      }
+    }
+    function tick() {
+      refresh();
+      const seconds = [7, 10, 15, 30, 60].includes(Number(ctx.settings.refreshInterval)) ? Number(ctx.settings.refreshInterval) : 10;
+      ctx.scheduler.timeout(tick, seconds * 1e3);
+    }
+    mountButton();
+    placePanel();
+    render();
+    ctx.scheduler.observer(MutationObserver, mountButton).observe(document.body, { childList: true, subtree: true });
+    ctx.scheduler.listen(button, "click", () => {
+      panel2.hidden = !panel2.hidden;
+      if (!panel2.hidden) refresh(true);
+    });
+    ctx.scheduler.listen(panel2.querySelector("[data-close]"), "click", () => {
+      panel2.hidden = true;
+    });
+    ctx.scheduler.listen(panel2.querySelector("[data-refresh]"), "click", () => refresh(true));
+    ctx.scheduler.listen(searchInput, "input", () => {
+      search = searchInput.value;
+      render();
+    });
+    ctx.scheduler.listen(sortSelect, "change", () => {
+      ctx.changeSettings({ sort: sortSelect.value });
+      render();
+    });
+    ctx.scheduler.listen(list, "click", (event) => {
+      const invite = event.target.closest("[data-invite]");
+      if (!invite || invite.disabled || typeof page2._g !== "function") return;
+      page2._g(`party&a=inv&id=${encodeURIComponent(invite.dataset.invite)}`);
+      invite.disabled = true;
+      invite.title = "Zaproszenie wysłane";
+      message("Wysłano zaproszenie do grupy.");
+    });
+    ctx.scheduler.listen(panel2.querySelector(".qco-head"), "pointerdown", (event) => {
+      if (event.target.closest("button")) return;
+      const rect = panel2.getBoundingClientRect();
+      drag = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    });
+    ctx.scheduler.listen(panel2.querySelector(".qco-head"), "pointermove", (event) => {
+      if (!drag) return;
+      panel2.style.left = `${Math.max(0, Math.min(window.innerWidth - panel2.offsetWidth, event.clientX - drag.x))}px`;
+      panel2.style.top = `${Math.max(0, Math.min(window.innerHeight - panel2.offsetHeight, event.clientY - drag.y))}px`;
+    });
+    ctx.scheduler.listen(panel2.querySelector(".qco-head"), "pointerup", () => {
+      if (!drag) return;
+      drag = null;
+      ctx.changeSettings({ windowX: Math.round(parseFloat(panel2.style.left)), windowY: Math.round(parseFloat(panel2.style.top)) });
+    });
+    ctx.scheduler.listen(window, "resize", placePanel, { passive: true });
+    ctx.events.on("gamePacket", (packet) => {
+      for (const data of packetList3(packet)) {
+        const next = partyIds(data);
+        if (next) party = next;
+      }
+      if (!panel2.hidden) render();
+    });
+    ctx.events.on("clanOnlineChanged", () => {
+      placePanel();
+      render();
+    });
+    ctx.events.on("clanOnlineRefresh", () => refresh(true));
+    ctx.scheduler.cleanup(() => {
+      button.remove();
+      panel2.remove();
+    });
+    ctx.scheduler.timeout(() => refresh(true), 900);
+    tick();
+  }
+
+  // src/addons/clan-online/index.js
+  function createClanOnline() {
+    return {
+      id: "clan-online",
+      name: "Klanowicze online",
+      description: "Kompaktowa lista klanowiczów online z lokacją, wyszukiwaniem, sortowaniem i zapraszaniem do grupy.",
+      defaultEnabled: true,
+      defaults: DEFAULTS9,
+      enable: startClanOnline,
+      onSettingsChange: (ctx) => ctx.events.emit("clanOnlineChanged"),
+      renderSettings(ctx) {
+        const section = document.createElement("section");
+        section.className = "mtk-addon-settings";
+        section.innerHTML = `<h2>Klanowicze online</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
+                <p>Przycisk <strong>KL</strong> na górnej belce otwiera kompaktową listę osób online. Plus po prawej wysyła zaproszenie do grupy.</p>
+                <h2>Lista</h2><div class="ln-grid">
+                    <label class="ln-switch"><input type="checkbox" data-setting="showButton">Pokaż przycisk KL</label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="searchEnabled">Pokaż wyszukiwarkę</label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="showCoordinates">Pokaż współrzędne</label>
+                    <label class="ln-switch"><input type="checkbox" data-setting="wrapLocation">Zawijaj długie nazwy lokacji</label>
+                    <label class="ln-field">Rozmiar czcionki<input type="range" min="9" max="14" step="1" data-setting="fontSize"><output data-font-size></output></label>
+                    <label class="ln-field">Odświeżanie<select data-setting="refreshInterval"><option value="7">Co 7 sekund</option><option value="10">Co 10 sekund</option><option value="15">Co 15 sekund</option><option value="30">Co 30 sekund</option><option value="60">Co minutę</option></select></label>
+                    <label class="ln-field">Domyślne sortowanie<select data-setting="sort"><option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nick A–Z</option><option value="profession">Profesja</option><option value="location">Lokacja</option></select></label>
+                </div><div class="ln-grid"><button class="ln-btn" type="button" data-open>Otwórz listę</button><button class="ln-btn" type="button" data-refresh>Odśwież teraz</button><button class="ln-btn" type="button" data-reset>Przywróć pozycję okna</button></div>`;
+        const enabled = section.querySelector("[data-enabled]");
+        function sync() {
+          enabled.checked = ctx.enabled;
+          for (const input of section.querySelectorAll("[data-setting]")) {
+            const value2 = ctx.settings[input.dataset.setting];
+            if (input.type === "checkbox") input.checked = Boolean(value2);
+            else input.value = String(value2);
+          }
+          section.querySelector("[data-font-size]").textContent = `${ctx.settings.fontSize}px`;
+          section.querySelectorAll("button").forEach((button) => {
+            button.disabled = !ctx.enabled;
+          });
+        }
+        sync();
+        ctx.scheduler.listen(enabled, "change", () => ctx.setEnabled(enabled.checked));
+        for (const input of section.querySelectorAll("[data-setting]")) ctx.scheduler.listen(input, input.type === "range" ? "input" : "change", () => {
+          const value2 = input.type === "checkbox" ? input.checked : input.type === "range" || input.dataset.setting === "refreshInterval" ? Number(input.value) : input.value;
+          ctx.changeSettings({ [input.dataset.setting]: value2 });
+          sync();
+        });
+        ctx.scheduler.listen(section.querySelector("[data-open]"), "click", () => document.querySelector("#qaddons-clan-online-button")?.click());
+        ctx.scheduler.listen(section.querySelector("[data-refresh]"), "click", () => ctx.events.emit("clanOnlineRefresh"));
+        ctx.scheduler.listen(section.querySelector("[data-reset]"), "click", () => ctx.changeSettings({ windowX: null, windowY: 70 }));
+        ctx.events.on("addonChanged", (event) => {
+          if (event.id === ctx.id) sync();
+        });
+        ctx.container.append(section);
+      }
+    };
+  }
+
   // src/main.js
   var page = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   page.__MARGONEM_TOOLKIT__?.destroy?.();
@@ -8402,6 +8759,7 @@ ${avatar}
       manager.register(createNightMode());
       manager.register(createChatAutoscroll());
       manager.register(createAutoAbyss());
+      manager.register(createClanOnline());
       panel.connect(manager);
       manager.start();
       game.start();

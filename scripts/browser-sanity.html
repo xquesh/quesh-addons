@@ -120,7 +120,7 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 13, 'Manager trzynastu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 14, 'Manager czternastu addonów');
         const chatFixture = document.createElement('div');
         chatFixture.className = 'new-chat-window';
         chatFixture.innerHTML = '<div class="chat-message-wrapper"><div class="scroll-pane" style="height:24px;overflow-y:auto"><div style="height:240px">Wiadomości</div></div></div>';
@@ -153,6 +153,31 @@
         }
         const styleKeys = [...document.querySelectorAll('[data-mtk-style]')].map(node => node.dataset.mtkStyle);
         assert(new Set(styleKeys).size === styleKeys.length, 'Brak zduplikowanych arkuszy stylów po restarcie wszystkich dodatków');
+        const clanCommands = [];
+        const commandBeforeClan = window._g;
+        Engine.hero = { d: { id: 7, clan: 42 } };
+        window._g = command => {
+            clanCommands.push(command);
+            if (command === 'clan&a=members') setTimeout(() => Engine.communication.parseJSON({ members: [
+                7, 'Quesh', 200, 250, 'm', 'Ithan', 10, 11, 1, 0, 'mage.png',
+                8, 'Offline', 120, 0, 'h', 'Torneg', 2, 3, 2, 12345, 'hunter.png',
+                9, 'Klanowicz', 300, 0, 'w', 'Dom Orków', 5, 6, 3, 0, 'warrior.png'
+            ] }), 0);
+        };
+        document.querySelector('#qaddons-clan-online-button').click();
+        await wait(80);
+        assert(!document.querySelector('#qaddons-clan-online').hidden, 'Przycisk KL otwiera listę klanowiczów');
+        assert(document.querySelectorAll('#qaddons-clan-online .qco-row').length === 2, 'Lista pokazuje wyłącznie klanowiczów online');
+        assert(document.querySelector('#qaddons-clan-online').textContent.includes('Klanowicz') && !document.querySelector('#qaddons-clan-online').textContent.includes('Offline'), 'Lista zawiera nick, a pomija osobę offline');
+        const clanSearch = document.querySelector('#qaddons-clan-online [data-search]');
+        clanSearch.value = 'Ithan'; clanSearch.dispatchEvent(new Event('input', { bubbles: true }));
+        assert(document.querySelectorAll('#qaddons-clan-online .qco-row').length === 1, 'Wyszukiwarka filtruje po lokacji');
+        clanSearch.value = ''; clanSearch.dispatchEvent(new Event('input', { bubbles: true }));
+        document.querySelector('#qaddons-clan-online [data-invite="9"]').click();
+        assert(clanCommands.includes('party&a=inv&id=9'), 'Plus zaprasza klanowicza do grupy');
+        document.querySelector('#qaddons-clan-online [data-close]').click();
+        window._g = commandBeforeClan;
+        delete Engine.hero;
         const abyssCommands = [];
         const commandBeforeAbyss = window._g;
         window._g = command => abyssCommands.push(command);
@@ -424,7 +449,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: thirteen addons, auto abyss, forced chat bottom, safe native relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: fourteen addons, clan online, auto abyss, forced chat bottom, safe native relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {
