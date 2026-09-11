@@ -1,4 +1,5 @@
 import { createScheduler } from './scheduler.js';
+import { shortcutFor } from './shortcuts.js';
 
 export function createAddonManager(services) {
     const registry = new Map();
@@ -35,8 +36,11 @@ export function createAddonManager(services) {
         if (destroyed) throw new Error('Addon manager zniszczony');
         if (!/^[a-z][a-z0-9-]*$/.test(definition.id)) throw new Error('Niepoprawne id addonu');
         if (registry.has(definition.id)) throw new Error(`Powtórzone id: ${definition.id}`);
+        const entry = services.settings.addon(definition);
+        const shortcut = shortcutFor(definition.id);
+        if (shortcut && typeof entry.settings.showOnBar !== 'boolean') entry.settings.showOnBar = shortcut.defaultVisible === true;
         const record = {
-            definition, entry: services.settings.addon(definition),
+            definition, entry,
             initialized: false, running: false, runtime: null, lifetime: null
         };
         registry.set(definition.id, record);
@@ -93,6 +97,7 @@ export function createAddonManager(services) {
         Object.assign(record.entry.settings, patch);
         services.settings.save();
         if (record.running) record.definition.onSettingsChange?.(record.runtime);
+        services.events.emit('addonSettingsChanged', { id, patch });
     }
 
     function renderSettings(id, container) {
@@ -110,7 +115,18 @@ export function createAddonManager(services) {
             views.delete(dispose);
         };
         views.add(dispose);
-        try { close = record.definition.renderSettings?.(view); }
+        try {
+            close = record.definition.renderSettings?.(view);
+            if (shortcutFor(record.definition.id)) {
+                const section = document.createElement('section');
+                section.className = 'mtk-addon-settings';
+                section.innerHTML = '<h2>Belka skrótów</h2><label class="ln-switch"><input type="checkbox" data-show-on-bar>Pokaż ten dodatek na belce skrótów</label>';
+                const input = section.querySelector('[data-show-on-bar]');
+                input.checked = record.entry.settings.showOnBar === true;
+                view.scheduler.listen(input, 'change', () => changeSettings(record.definition.id, { showOnBar: input.checked }));
+                container.append(section);
+            }
+        }
         catch (error) { dispose(); throw error; }
         return dispose;
     }
@@ -145,7 +161,8 @@ export function createAddonManager(services) {
         register, start, setEnabled, changeSettings, renderSettings, destroy,
         list: () => [...registry.values()].map(record => ({
             id: record.definition.id, name: record.definition.name,
-            description: record.definition.description, enabled: record.running
+            description: record.definition.description, enabled: record.running,
+            showOnBar: record.entry.settings.showOnBar === true
         }))
     };
 }

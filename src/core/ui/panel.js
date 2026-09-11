@@ -150,6 +150,7 @@ export function createPanel(settings, styles, scheduler, events) {
 
     return {
         connect(addonManager) { manager = addonManager; }, open, close, openSettings, showAddons,
+        listAddons() { return manager?.list?.() || []; },
         destroy() { closeSettings(); scheduler.destroy(); button.remove(); panel.remove(); style.clear(); }
     };
 }

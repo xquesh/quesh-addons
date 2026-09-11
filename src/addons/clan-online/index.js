@@ -14,9 +14,8 @@ export function createClanOnline() {
             const section = document.createElement('section');
             section.className = 'mtk-addon-settings';
             section.innerHTML = `<h2>Klanowicze online</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
-                <p>Przycisk <strong>KL</strong> na górnej belce otwiera kompaktową listę osób online. Plus po prawej wysyła zaproszenie do grupy.</p>
+                <p>Przycisk <strong>KL</strong> na belce skrótów otwiera kompaktową listę osób online. Plus po prawej wysyła zaproszenie do grupy.</p>
                 <h2>Lista</h2><div class="ln-grid">
-                    <label class="ln-switch"><input type="checkbox" data-setting="showButton">Pokaż przycisk KL</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="searchEnabled">Pokaż wyszukiwarkę</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="showCoordinates">Pokaż współrzędne</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="wrapLocation">Zawijaj długie nazwy lokacji</label>
@@ -41,7 +40,7 @@ export function createClanOnline() {
                 ctx.changeSettings({ [input.dataset.setting]: value });
                 sync();
             });
-            ctx.scheduler.listen(section.querySelector('[data-open]'), 'click', () => document.querySelector('#qaddons-clan-online-button')?.click());
+            ctx.scheduler.listen(section.querySelector('[data-open]'), 'click', () => ctx.events.emit('clanOnlineOpen'));
             ctx.scheduler.listen(section.querySelector('[data-refresh]'), 'click', () => ctx.events.emit('clanOnlineRefresh'));
             ctx.scheduler.listen(section.querySelector('[data-reset]'), 'click', () => ctx.changeSettings({ windowX: null, windowY: 70, windowWidth: 370, windowHeight: 310 }));
             ctx.events.on('addonChanged', event => { if (event.id === ctx.id) sync(); });

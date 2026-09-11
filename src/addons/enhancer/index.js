@@ -21,7 +21,6 @@ export function createEnhancer() {
             section.innerHTML = `<h2>Ulepszarka</h2><label class="mtk-enabled"><input type="checkbox" data-enabled> Dodatek aktywny</label>
                 <p>Przycisk <strong>UL</strong> otwiera małe okno dodatku. Przeciągnij przedmiot z ekwipunku bezpośrednio na odpowiedni slot. Prawy przycisk myszy czyści slot.</p>
                 <h2>Działanie</h2><div class="ln-grid">
-                    <label class="ln-switch"><input type="checkbox" data-setting="showWindowButton">Pokaż przycisk UL</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="rememberActive">Zapamiętaj stan AUTO</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="messages">Pokazuj komunikaty gry</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="highlight">Podświetl składniki w torbach</label>

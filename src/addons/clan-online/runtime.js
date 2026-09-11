@@ -30,7 +30,7 @@ export function startClanOnline(ctx) {
     button.innerHTML = '<span>KL</span><span class="qco-badge">0</span>';
     const panel = document.createElement('section');
     panel.id = 'qaddons-clan-online';
-    panel.hidden = true;
+    panel.hidden = ctx.settings.windowOpen === false;
     panel.innerHTML = `<header class="qco-head"><span>Klanowicze online <b data-count>(0)</b></span><button type="button" data-close aria-label="Zamknij">×</button></header>
         <div class="qco-tools"><input type="search" data-search placeholder="Szukaj nicku, lokacji, profesji…"><select data-sort>
             <option value="level-desc">Poziom malejąco</option><option value="level-asc">Poziom rosnąco</option><option value="name">Nick A–Z</option><option value="profession">Profesja</option><option value="location">Lokacja</option>
@@ -49,6 +49,7 @@ export function startClanOnline(ctx) {
     }
 
     function mountButton() {
+        if (button.closest('#qaddons-shortcut-bar')) return;
         const host = document.querySelector('.top-left.main-buttons-container, .main-buttons-container, .interface-layer .top-left');
         if (host && button.parentElement !== host) host.append(button);
         else if (!host && !button.isConnected) document.body.append(button);
@@ -82,6 +83,13 @@ export function startClanOnline(ctx) {
 
     function message(text) {
         status.textContent = text;
+    }
+
+    function setPanelOpen(open) {
+        const next = Boolean(open);
+        panel.hidden = !next;
+        if (ctx.settings.windowOpen !== next) ctx.changeSettings({ windowOpen: next });
+        if (next) refresh(true);
     }
 
     function render() {
@@ -161,8 +169,8 @@ export function startClanOnline(ctx) {
     placePanel();
     render();
     ctx.scheduler.observer(MutationObserver, mountButton).observe(document.body, { childList: true, subtree: true });
-    ctx.scheduler.listen(button, 'click', () => { panel.hidden = !panel.hidden; if (!panel.hidden) refresh(true); });
-    ctx.scheduler.listen(panel.querySelector('[data-close]'), 'click', () => { panel.hidden = true; });
+    ctx.scheduler.listen(button, 'click', () => setPanelOpen(panel.hidden));
+    ctx.scheduler.listen(panel.querySelector('[data-close]'), 'click', () => setPanelOpen(false));
     ctx.scheduler.listen(panel.querySelector('[data-refresh]'), 'click', () => refresh(true));
     ctx.scheduler.listen(searchInput, 'input', () => { search = searchInput.value; render(); });
     ctx.scheduler.listen(sortSelect, 'change', () => { ctx.changeSettings({ sort: sortSelect.value }); render(); });
@@ -200,6 +208,7 @@ export function startClanOnline(ctx) {
         if (!panel.hidden) render();
     });
     ctx.events.on('clanOnlineChanged', () => { placePanel(); render(); });
+    ctx.events.on('clanOnlineOpen', () => setPanelOpen(true));
     ctx.events.on('clanOnlineRefresh', () => refresh(true));
     ctx.scheduler.cleanup(() => { clearTimeout(geometryTimer); button.remove(); panel.remove(); });
     tick();

@@ -109,6 +109,7 @@
         assert(typeof unsafeWindow === 'undefined', 'Runtime działa bez API Tampermonkey');
         const manager = __MARGONEM_TOOLKIT__.addons;
         assert(document.querySelector('#qaddons-pocket-berserk')?.dataset.ready === 'true', 'Berserk zachowuje inicjalne ustawienia odebrane przed startem dodatków');
+        assert(document.querySelector('#qaddons-clan-online')?.hidden === false, 'Lista klanowiczów jest domyślnie otwarta');
         const parser = Engine.communication.parseJSON;
         const gameLayer = document.querySelector('.game-layer');
         const initialPosition = gameLayer.style.position;
@@ -137,7 +138,29 @@
         await waitForUpdate('error');
         checkUpdates.click();
         await waitForUpdate('current');
-        assert(document.querySelectorAll('.mtk-addon').length === 15, 'Manager piętnastu addonów');
+        assert(document.querySelectorAll('.mtk-addon').length === 16, 'Manager szesnastu addonów');
+        const shortcutBar = document.querySelector('#qaddons-shortcut-bar');
+        assert(shortcutBar && document.querySelector('#qaddons-pocket-berserk')?.parentElement === shortcutBar, 'Przyciski dodatków trafiają na wspólną belkę');
+        assert(shortcutBar.querySelectorAll('[data-qsb-hidden="false"]').length === 4, 'Belka domyślnie pokazuje cztery skróty akcji');
+        const nightShortcut = shortcutBar.querySelector('[data-qsb-addon="night-mode"]');
+        nightShortcut.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 2 }));
+        assert(document.querySelector('#mtk-content h2')?.textContent === 'Tryb nocny', 'PPM otwiera konfigurację konkretnego dodatku');
+        const showNightOnBar = document.querySelector('#mtk-content [data-show-on-bar]');
+        assert(showNightOnBar && showNightOnBar.checked === false, 'Każdy dodatek ma opcję widoczności na belce');
+        showNightOnBar.checked = true; showNightOnBar.dispatchEvent(new Event('change', { bubbles: true })); await wait(30);
+        assert(nightShortcut.dataset.qsbHidden === 'false', 'Checkbox pokazuje wybrany dodatek na belce');
+        const grip = shortcutBar.querySelector('.qsb-grip');
+        const oldBarLeft = shortcutBar.offsetLeft;
+        grip.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: oldBarLeft + 3, clientY: shortcutBar.offsetTop + 3 }));
+        grip.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: oldBarLeft + 43, clientY: shortcutBar.offsetTop + 23 }));
+        grip.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }));
+        assert(shortcutBar.offsetLeft >= oldBarLeft + 35, 'Uchwyt przesuwa wspólną belkę');
+        manager.changeSettings('shortcut-bar', { locked: true });
+        const lockedLeft = shortcutBar.offsetLeft;
+        grip.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: lockedLeft + 3, clientY: shortcutBar.offsetTop + 3 }));
+        grip.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: lockedLeft + 80, clientY: shortcutBar.offsetTop + 3 }));
+        grip.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }));
+        assert(shortcutBar.offsetLeft === lockedLeft, 'Blokada uniemożliwia przesunięcie belki');
         const chatFixture = document.createElement('div');
         chatFixture.className = 'new-chat-window';
         chatFixture.innerHTML = '<div class="chat-message-wrapper"><div class="scroll-pane" style="height:24px;overflow-y:auto"><div style="height:240px">Wiadomości</div></div></div>';
@@ -181,7 +204,7 @@
                 9, 'Klanowicz', 300, 0, 'w', 'Dom Orków', 5, 6, 3, 0, 'warrior.png'
             ] }), 0);
         };
-        document.querySelector('#qaddons-clan-online-button').click();
+        document.querySelector('#qaddons-clan-online [data-refresh]').click();
         await wait(80);
         assert(!document.querySelector('#qaddons-clan-online').hidden, 'Przycisk KL otwiera listę klanowiczów');
         assert(document.querySelectorAll('#qaddons-clan-online .qco-row').length === 2, 'Lista pokazuje wyłącznie klanowiczów online');
@@ -198,8 +221,11 @@
         assert(clanCommands.includes('party&a=inv&id=9'), 'Plus zaprasza klanowicza do grupy');
         document.querySelector('#qaddons-clan-online [data-close]').click();
         manager.setEnabled('clan-online', false); manager.setEnabled('clan-online', true);
+        assert(document.querySelector('#qaddons-clan-online').hidden, 'Zamknięcie listy klanowiczów jest zapamiętywane');
         document.querySelector('#qaddons-clan-online-button').click(); await wait(30);
         assert(document.querySelector('#qaddons-clan-online').offsetWidth === 510 && document.querySelector('#qaddons-clan-online').offsetHeight === 260, 'Klanowicze online pamiętają zmieniony rozmiar');
+        manager.setEnabled('clan-online', false); manager.setEnabled('clan-online', true);
+        assert(!document.querySelector('#qaddons-clan-online').hidden, 'Otwarte okno klanowiczów pozostaje otwarte po ponownym uruchomieniu dodatku');
         document.querySelector('#qaddons-clan-online [data-close]').click();
         window._g = commandBeforeClan;
         delete Engine.hero;
@@ -216,7 +242,7 @@
         assert(berserkButton?.dataset.ready === 'true' && berserkButton.dataset.enabled === 'false', 'Kieszonkowy berserk odczytuje ustawienia solo');
         const slotEightRect = document.querySelector('.usable-slot-8').getBoundingClientRect();
         const berserkRect = berserkButton.getBoundingClientRect();
-        assert(berserkButton.dataset.anchored === 'true' && berserkRect.left >= slotEightRect.right + 3, 'Przycisk BR jest osadzony obok slotu 8, poza slotami przedmiotów');
+        assert(berserkButton.dataset.anchored === 'dock' && berserkButton.parentElement === document.querySelector('#qaddons-shortcut-bar'), 'Przycisk BR jest osadzony na wspólnej belce skrótów');
         berserkButton.click();
         assert(berserkCommands.includes('settings&action=update&id=34&v=1'), 'Przycisk BR przełącza berserk solo');
         Engine.communication.parseJSON({ party: { members: { 7: { id: 7 }, 9: { id: 9 } } } }); await wait(20);
@@ -512,7 +538,7 @@
         assert(!document.querySelector('[data-mtk-style]'), 'Cleanup wszystkich styli');
         assert(!document.getElementById('mtk-panel'), 'Cleanup panelu');
         assert(fixtureErrors.length === 0, fixtureErrors.join('\n'));
-        document.getElementById('result').textContent = 'PASS: fifteen addons, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
+        document.getElementById('result').textContent = 'PASS: sixteen addons, shortcut bar, pocket berserk, resizable clan online, auto abyss, forced chat bottom, reference relogging, night mode, enhancer item preview, compact party, reminder, loot chances, quick seller, item tools, detector, notification typography, lifecycle, singleton';
     }
     window.addEventListener('DOMContentLoaded', () => {
         run().catch(error => {

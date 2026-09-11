@@ -32,6 +32,12 @@ export function startPocketBerserk(ctx, tracker) {
     let positionFrame = 0;
     function positionButton() {
         positionFrame = 0;
+        if (button.closest('#qaddons-shortcut-bar')) {
+            button.style.left = '';
+            button.style.top = '';
+            button.dataset.anchored = 'dock';
+            return;
+        }
         const slot = document.querySelector('.bottom-panel-of-bottom-positioner .usable-slot-8, .positioner.bottom .usable-slot-8, .usable-slot-8');
         const rect = slot?.getBoundingClientRect();
         if (rect?.width > 0 && rect?.height > 0) {

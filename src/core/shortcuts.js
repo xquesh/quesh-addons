@@ -1,0 +1,20 @@
+export const SHORTCUTS = Object.freeze([
+    { id: 'legendary-notificator', label: 'LEG' },
+    { id: 'notification-position', label: 'POW' },
+    { id: 'detector-global', label: 'WYK' },
+    { id: 'item-tools', label: 'ITEM' },
+    { id: 'relogger', label: 'REL' },
+    { id: 'quick-seller', label: 'SPR', buttonId: 'qaddons-quick-seller', defaultVisible: true },
+    { id: 'enhancer', label: 'UL', buttonId: 'qaddons-enhancer-toggle', defaultVisible: true },
+    { id: 'loot-chances', label: '%' },
+    { id: 'reminder', label: 'PRZ', buttonId: 'qaddons-reminder-button' },
+    { id: 'compact-party', label: 'GR' },
+    { id: 'night-mode', label: 'NOC' },
+    { id: 'chat-autoscroll', label: 'CHAT' },
+    { id: 'auto-abyss', label: 'OTCH' },
+    { id: 'clan-online', label: 'KL', buttonId: 'qaddons-clan-online-button', defaultVisible: true },
+    { id: 'pocket-berserk', label: 'BR', buttonId: 'qaddons-pocket-berserk', defaultVisible: true }
+]);
+
+const BY_ID = new Map(SHORTCUTS.map(shortcut => [shortcut.id, shortcut]));
+export function shortcutFor(id) { return BY_ID.get(id) || null; }

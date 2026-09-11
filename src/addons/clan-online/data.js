@@ -1,5 +1,6 @@
 export const DEFAULTS = Object.freeze({
     showButton: true,
+    windowOpen: true,
     searchEnabled: true,
     showCoordinates: true,
     wrapLocation: false,

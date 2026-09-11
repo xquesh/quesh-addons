@@ -22,6 +22,7 @@ let socket;
 let command;
 let runtimeRequests = 0;
 let versionRequests = 0;
+const runtimeErrors = [];
 try {
     const runtimeBody = (await readFile('dist/margonem-toolkit.js')).toString('base64');
     const versionBody = await readFile('dist/version.json', 'utf8');
@@ -42,6 +43,11 @@ try {
     const pending = new Map();
     socket.addEventListener('message', event => {
         const response = JSON.parse(event.data);
+        if (response.method === 'Runtime.exceptionThrown') {
+            const details = response.params.exceptionDetails;
+            runtimeErrors.push(details.exception?.description || details.text || 'Runtime exception');
+            return;
+        }
         if (response.method === 'Fetch.requestPaused') {
             const isVersion = new URL(response.params.request.url).pathname.endsWith('/version.json');
             if (isVersion) versionRequests++;
@@ -77,6 +83,7 @@ try {
         urlPattern: 'https://xquesh.github.io/quesh-addons/dist/version.json*',
         requestStage: 'Request'
     }] });
+    await command('Runtime.enable');
     await command('Page.bringToFront');
     await command('Page.navigate', { url: pathToFileURL(resolve('scripts/browser-sanity.html')).href });
     let summary = '';
@@ -86,7 +93,7 @@ try {
         summary = result.result?.value || '';
         if (/^(PASS|FAIL):/.test(summary)) break;
     }
-    if (!summary.startsWith('PASS:')) throw new Error(summary || 'Browser sanity timeout');
+    if (!summary.startsWith('PASS:')) throw new Error([summary || 'Browser sanity timeout', ...runtimeErrors].join('\n'));
     if (runtimeRequests !== 1) throw new Error(`Expected one runtime request from installer, got ${runtimeRequests}`);
     if (versionRequests < 4) throw new Error('Missing automatic/manual version checks');
     console.log(summary);

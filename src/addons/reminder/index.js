@@ -22,7 +22,6 @@ export function createReminder() {
                     <label class="ln-switch"><input type="checkbox" data-setting="expiredEnabled">Powiadamiaj o nieaktywnych przedmiotach</label>
                 </div><p>Usuwanie jest zawsze ręczne i wymaga drugiego kliknięcia. Przedmiotu usuniętego w ten sposób nie można odzyskać.</p>
                 <h2>Sprawdzanie</h2><div class="ln-grid">
-                    <label class="ln-switch"><input type="checkbox" data-setting="showButton">Pokaż mały przycisk PRZ</label>
                     <label class="ln-field">Odstęp automatycznego sprawdzania<select data-setting="checkInterval"><option value="60">1 minuta</option><option value="300">5 minut</option><option value="600">10 minut</option><option value="1800">30 minut</option></select></label>
                     <button class="ln-btn" type="button" data-check>Sprawdź teraz</button>
                 </div><p data-status role="status">Gotowa.</p>`;
