@@ -1,4 +1,4 @@
-export const defaults = { sort: 'level-desc', barPosition: 'bottom', horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: '' };
+export const defaults = { sort: 'level-desc', barPosition: 'bottom', horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: '', switchMode: 'direct' };
 export function worldName(value) { return typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value) ? value : ''; }
 export function characterList(data) {
     if (!Array.isArray(data)) throw new Error('Serwer nie zwrócił listy postaci.');
@@ -60,6 +60,10 @@ export function reloadCharacter(hero, page, navigate = url => page.location.repl
     return 'reload';
 }
 export function changeCharacter(hero, page, navigate = url => page.location.replace(url)) {
+    relogTarget(hero, page);
+    return reloadCharacter(hero, page, navigate);
+}
+export function changeCharacterNative(hero, page) {
     const target = relogTarget(hero, page);
     if (page.Engine?.logOff) throw new Error('Trwa już wylogowywanie. Anuluj je przed zmianą postaci.');
     if (typeof page.Engine?.changePlayer?.changePlayerRequest === 'function') {
@@ -70,5 +74,5 @@ export function changeCharacter(hero, page, navigate = url => page.location.repl
         page.Engine.changePlayer.changePlayer(Number(target.id));
         return 'native';
     }
-    return reloadCharacter(hero, page, navigate);
+    return reloadCharacter(hero, page);
 }

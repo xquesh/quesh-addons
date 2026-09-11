@@ -1,4 +1,4 @@
-import { characterList, worldName, sortedHeroes, heroTimers, changeCharacter, heroLevel, reloadCharacter } from './data.js';
+import { characterList, worldName, sortedHeroes, heroTimers, changeCharacter, changeCharacterNative, heroLevel, reloadCharacter } from './data.js';
 import { barStyle } from './style.js';
 
 export function startRelogger(ctx) {
@@ -149,10 +149,12 @@ export function startRelogger(ctx) {
         try {
             reloggingFrom = String(page.Engine?.hero?.d?.id || '');
             relogTargetHero = hero;
-            changeCharacter(hero, page); relogging = true; error = '';
+            if (settings.switchMode === 'native') changeCharacterNative(hero, page);
+            else changeCharacter(hero, page);
+            relogging = true; error = '';
             reloggingObserved = page.Engine?.changePlayer?.id != null;
             relogStartedAt = Date.now();
-            relogDeadline = relogStartedAt + 7000;
+            relogDeadline = settings.switchMode === 'native' ? relogStartedAt + 7000 : 0;
             entries.forEach(button => { button.disabled = true; }); updateTimers();
             relogTimeout = scheduler.timeout(() => unlockRelog('Zmiana postaci nie zakończyła się. Możesz spróbować ponownie.'), 14000);
         }

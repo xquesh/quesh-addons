@@ -80,7 +80,7 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         horizontal.value = '100'; horizontal.dispatchEvent(new Event('input', { bubbles: true }));
         assert(bar().getBoundingClientRect().left > left, 'Suwak przesuwa pasek poziomo');
         Engine.serverStorage = { get: () => undefined };
-        manager.changeSettings('relogger', { selectedWorld: 'fobos' });
+        manager.changeSettings('relogger', { selectedWorld: 'fobos', switchMode: 'native' });
         assert(bar().querySelectorAll('.qr-card').length === 9, 'Brak timerów nie blokuje postaci');
         Engine.changePlayer = { id: null, changePlayer() { throw new Error('Nie używaj changePlayer z ukrytym stop/start'); }, changePlayerRequest(id) { this.id = id; setTimeout(() => { Engine.hero = { d: { id } }; this.id = null; }, 10); } };
         bar().querySelector('[data-hero="2"]').click();
@@ -118,7 +118,7 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         for (const key of ['allInit', 'worldConfig', 'hero', 'changePlayer', 'serverStorage', 'windowsData']) Engine[key] = previous[key];
         anchor.style.cssText = anchorStyle;
         topAnchor.style.cssText = topAnchorStyle;
-        manager.changeSettings('relogger', { barPosition: 'bottom', horizontal: 100, selectedWorld: '', showWorldButton: true });
+        manager.changeSettings('relogger', { barPosition: 'bottom', horizontal: 100, selectedWorld: '', showWorldButton: true, switchMode: 'direct' });
         manager.setEnabled('relogger', true);
     }
 };
