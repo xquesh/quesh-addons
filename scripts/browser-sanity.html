@@ -85,6 +85,8 @@
         addCallbackToEvent(name, callback) { const list = apiCallbacks.get(name) || []; list.push(callback); apiCallbacks.set(name, list); },
         removeCallbackFromEvent(name, callback) { apiCallbacks.set(name, (apiCallbacks.get(name) || []).filter(entry => entry !== callback)); }
     };
+    window.fixtureAlertCalls = [];
+    window.mAlert = (...args) => { fixtureAlertCalls.push(args); return 'native-alert'; };
     window.fixtureOriginalParser = Engine.communication.parseJSON;
 </script>
 <script src="./detector-sanity.js"></script>
@@ -186,6 +188,13 @@
         quickGroupCommands.length = 0;
         Engine.communication.parseJSON({ ask: { re: 'party&a=accept&answer=', q: 'Zaproszenie do grupy od [b]Obcy[/b]' } });
         assert(quickGroupCommands.includes('party&a=accept&answer=0'), 'Szybka grupa odrzuca pozostałe zaproszenia zgodnie z konfiguracją');
+        quickGroupCommands.length = 0; fixtureAlertCalls.length = 0;
+        assert(window.mAlert('Klanowicz przyzywa do siebie swoją drużynę.') === 'native-alert', 'Przywołanie pozostaje ręczne przy wyłączonej opcji');
+        assert(fixtureAlertCalls.length === 1 && quickGroupCommands.length === 0, 'Wyłączona opcja przekazuje komunikat do gry');
+        manager.changeSettings('quick-group', { autoAcceptSummon: true });
+        assert(window.mAlert({ q: '<b>Klanowicz</b> przyzywa do siebie swoją drużynę.' }) === false, 'Automatyczne przywołanie ukrywa okno potwierdzenia');
+        assert(quickGroupCommands.includes('party&a=acceptsummon&answer=1'), 'Szybka grupa automatycznie przechodzi po przywołaniu');
+        assert(fixtureAlertCalls.length === 1, 'Automatyczne przywołanie nie przekazuje obsłużonego komunikatu do gry');
         window._g = commandBeforeQuickGroup;
         delete Engine.party; delete Engine.others; delete Engine.hero;
         const chatFixture = document.createElement('div');

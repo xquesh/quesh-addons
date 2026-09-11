@@ -1,4 +1,4 @@
-import { inviteCandidates, matchesHotkey, senderName, shouldAcceptInvite } from './data.js';
+import { inviteCandidates, matchesHotkey, PARTY_SUMMON_ACCEPT_COMMAND, partySummonPrompt, senderName, shouldAcceptInvite } from './data.js';
 import { QUICK_GROUP_CSS } from './style.js';
 
 function values(value) {
@@ -45,6 +45,8 @@ export function startQuickGroup(ctx) {
     const blocked = new Set();
     let trackedParty = null;
     let busy = false;
+    let originalAlert = null;
+    let alertWrapper = null;
     ctx.styles.set('runtime', QUICK_GROUP_CSS);
     const button = document.createElement('button');
     button.id = 'qaddons-quick-group'; button.type = 'button'; button.textContent = 'SG';
@@ -103,6 +105,22 @@ export function startQuickGroup(ctx) {
         }
     }
 
+    function hookPartySummon() {
+        if (alertWrapper || typeof page.mAlert !== 'function') return;
+        originalAlert = page.mAlert;
+        alertWrapper = function (...args) {
+            if (ctx.settings.autoAcceptSummon && partySummonPrompt(args[0]) && typeof page._g === 'function') {
+                page._g(PARTY_SUMMON_ACCEPT_COMMAND);
+                showMessage(page, 'Automatycznie zaakceptowano przywołanie drużyny.');
+                return false;
+            }
+            return originalAlert.apply(this, args);
+        };
+        page.mAlert = alertWrapper;
+    }
+
+    hookPartySummon();
+
     ctx.scheduler.listen(button, 'click', invite);
     ctx.scheduler.listen(button, 'contextmenu', event => { event.preventDefault(); ctx.ui.openSettings(ctx.id); });
     ctx.scheduler.listen(document, 'keydown', event => {
@@ -112,5 +130,8 @@ export function startQuickGroup(ctx) {
     ctx.events.on('gamePacket', processPacket);
     ctx.events.on('gamePacketBefore', processInviteBefore);
     ctx.events.on('quickGroupInvite', invite);
-    ctx.scheduler.cleanup(() => button.remove());
+    ctx.scheduler.cleanup(() => {
+        if (page.mAlert === alertWrapper) page.mAlert = originalAlert;
+        button.remove();
+    });
 }

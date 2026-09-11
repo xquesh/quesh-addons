@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { hotkeyLabel, inviteCandidates, matchesHotkey, RELATION, senderName, shouldAcceptInvite } from '../src/addons/quick-group/data.js';
+import { hotkeyLabel, inviteCandidates, matchesHotkey, PARTY_SUMMON_ACCEPT_COMMAND, partySummonPrompt, RELATION, senderName, shouldAcceptInvite } from '../src/addons/quick-group/data.js';
 
 const settings = { inviteRandos: false, randomInviteOrder: false, acceptAll: false, acceptFriend: true, acceptClan: false, acceptAlly: false };
 const others = [
@@ -17,4 +17,8 @@ assert.equal(shouldAcceptInvite(settings, { relation: RELATION.FRIEND }), true);
 assert.equal(shouldAcceptInvite(settings, { relation: RELATION.CLAN }), false);
 assert.equal(matchesHotkey({ code: 'KeyG', ctrlKey: true, altKey: false, shiftKey: false }, { code: 'KeyG', ctrlKey: true }), true);
 assert.equal(hotkeyLabel({ code: 'KeyG', ctrlKey: true, shiftKey: true }), 'Ctrl+Shift+G');
-console.log('OK: Szybka grupa filtruje relacje, sąsiedztwo, grupę, stany walki i zaproszenia');
+assert.equal(partySummonPrompt('Kolega przyzywa do siebie swoją drużynę.'), true);
+assert.equal(partySummonPrompt({ q: '<b>Friend</b> is summoning your party.' }), true);
+assert.equal(partySummonPrompt('Zaproszenie do grupy'), false);
+assert.equal(PARTY_SUMMON_ACCEPT_COMMAND, 'party&a=acceptsummon&answer=1');
+console.log('OK: Szybka grupa filtruje relacje, sąsiedztwo, grupę, stany walki, zaproszenia i przywołania');

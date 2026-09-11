@@ -7,9 +7,23 @@ export const DEFAULTS = Object.freeze({
     acceptClan: false,
     acceptAlly: false,
     rejectOther: false,
+    autoAcceptSummon: false,
     inviteRandos: false,
     randomInviteOrder: false
 });
+
+export const PARTY_SUMMON_ACCEPT_COMMAND = 'party&a=acceptsummon&answer=1';
+const PARTY_SUMMON_PHRASES = Object.freeze([
+    'przyzywa do siebie swoją drużynę',
+    'is summoning your party'
+]);
+
+export function partySummonPrompt(value) {
+    const message = typeof value === 'string' ? value : value?.q;
+    if (typeof message !== 'string') return false;
+    const normalized = message.toLocaleLowerCase('pl-PL');
+    return PARTY_SUMMON_PHRASES.some(phrase => normalized.includes(phrase));
+}
 
 export function normalizeHotkey(value) {
     if (typeof value === 'string') return { code: value || 'KeyG', altKey: false, ctrlKey: false, shiftKey: false };

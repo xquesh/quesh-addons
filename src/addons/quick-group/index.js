@@ -4,7 +4,7 @@ import { startQuickGroup } from './runtime.js';
 export function createQuickGroup() {
     return {
         id: 'quick-group', name: 'Szybka grupa',
-        description: 'Zaprasza klanowiczów, znajomych i sojuszników oraz automatycznie obsługuje zaproszenia do grupy.',
+        description: 'Zaprasza graczy oraz automatycznie obsługuje zaproszenia i przywołania drużyny.',
         defaultEnabled: true, defaults: DEFAULTS,
         init(ctx) {
             ctx.settings.hotkey = normalizeHotkey(ctx.settings.hotkey);
@@ -24,6 +24,8 @@ export function createQuickGroup() {
                 <label class="ln-switch"><input type="checkbox" data-setting="acceptAlly">Sojuszników klanu</label>
                 <label class="ln-switch"><input type="checkbox" data-setting="acceptAll">Wszystkich</label>
                 <label class="ln-switch"><input type="checkbox" data-setting="rejectOther">Odrzucaj pozostałe zaproszenia</label></div>
+                <h2>Przywołanie drużyny</h2><div class="ln-grid">
+                <label class="ln-switch"><input type="checkbox" data-setting="autoAcceptSummon">Automatycznie przechodź po przywołaniu drużyny</label></div>
                 <div class="ln-grid"><button class="ln-btn" type="button" data-invite>Zaproś teraz</button></div>`;
             const enabled = section.querySelector('[data-enabled]');
             const hotkey = section.querySelector('[data-hotkey]');
