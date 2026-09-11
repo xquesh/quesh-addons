@@ -80,26 +80,9 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         horizontal.value = '100'; horizontal.dispatchEvent(new Event('input', { bubbles: true }));
         assert(bar().getBoundingClientRect().left > left, 'Suwak przesuwa pasek poziomo');
         Engine.serverStorage = { get: () => undefined };
-        manager.changeSettings('relogger', { selectedWorld: 'fobos', switchMode: 'native' });
+        manager.changeSettings('relogger', { selectedWorld: 'fobos' });
         assert(bar().querySelectorAll('.qr-card').length === 9, 'Brak timerów nie blokuje postaci');
-        Engine.changePlayer = { id: null, changePlayer() { throw new Error('Nie używaj changePlayer z ukrytym stop/start'); }, changePlayerRequest(id) { this.id = id; setTimeout(() => { Engine.hero = { d: { id } }; this.id = null; }, 10); } };
-        bar().querySelector('[data-hero="2"]').click();
-        const disabledDuringRelog = [...bar().querySelectorAll('.qr-card')].map(button => button.disabled);
-        assert(disabledDuringRelog.every(Boolean), `Kafelki są blokowane tylko podczas zmiany postaci: ${disabledDuringRelog.join(',')} / ${bar().querySelector('.qr-status').textContent}`);
-        await wait(1050);
-        assert([...bar().querySelectorAll('.qr-card')].every(button => !button.disabled) && bar().querySelector('[data-hero="2"]')?.getAttribute('aria-current') === 'true', 'Kafelki odblokowują się po zmianie postaci');
-        Engine.changePlayer = { id: null, changePlayer() { throw new Error('Nie używaj changePlayer z ukrytym stop/start'); }, changePlayerRequest() { this.id = 5; setTimeout(() => Engine.communication.parseJSON({ logoff_time_left: 5 }), 0); setTimeout(() => { this.id = null; Engine.communication.parseJSON({ logoff_time_left: 0 }); }, 20); } };
-        bar().querySelector('[data-hero="5"]').click();
-        assert([...bar().querySelectorAll('.qr-card')].every(button => button.disabled), 'Kafelki są zablokowane, gdy okno zmiany postaci jest otwarte');
-        await wait(100);
-        assert([...bar().querySelectorAll('.qr-card')].every(button => !button.disabled) && Engine.hero.d.id === 2, 'Anulowanie zmiany postaci odblokowuje kafelki bez F5');
-        let recoveredHero = null;
-        Engine.changePlayer = { id: null, changePlayer() { throw new Error('Nie używaj changePlayer z ukrytym stop/start'); }, changePlayerRequest(id) { this.id = id; setTimeout(() => Engine.communication.parseJSON({ logoff_time_left: 1 }), 0); }, reloadPlayer(id) { recoveredHero = id; this.id = null; Engine.hero = { d: { id } }; } };
-        bar().querySelector('[data-hero="5"]').click();
-        await wait(2800);
-        assert(recoveredHero === null && [...bar().querySelectorAll('.qr-card')].every(button => button.disabled), 'Przelogawka nie przerywa operacji po dwóch sekundach');
-        await wait(5700);
-        assert(recoveredHero === 5 && Engine.hero.d.id === 5, 'Po zakończonym odliczaniu bez przełączenia dodatek kończy natywne przelogowanie');
+        assert(!view.querySelector('[data-setting="switchMode"]'), 'Brak wyboru trybu przelogowania');
         // Błąd pobrania nie usuwa poprawnie pobranej listy.
         window.fetch = async () => { throw new Error('fixture offline'); };
         bar().querySelector('[data-refresh]').click(); await wait(50);
@@ -118,7 +101,7 @@ window.runReloggerChecks = async function(manager, assert, wait) {
         for (const key of ['allInit', 'worldConfig', 'hero', 'changePlayer', 'serverStorage', 'windowsData']) Engine[key] = previous[key];
         anchor.style.cssText = anchorStyle;
         topAnchor.style.cssText = topAnchorStyle;
-        manager.changeSettings('relogger', { barPosition: 'bottom', horizontal: 100, selectedWorld: '', showWorldButton: true, switchMode: 'direct' });
+        manager.changeSettings('relogger', { barPosition: 'bottom', horizontal: 100, selectedWorld: '', showWorldButton: true });
         manager.setEnabled('relogger', true);
     }
 };

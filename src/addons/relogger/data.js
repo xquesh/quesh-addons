@@ -1,4 +1,4 @@
-export const defaults = { sort: 'level-desc', barPosition: 'bottom', horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: '', switchMode: 'direct' };
+export const defaults = { sort: 'level-desc', barPosition: 'bottom', horizontal: 100, showWorldButton: true, showTimers: true, hotkeys: false, selectedWorld: '' };
 export function worldName(value) { return typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value) ? value : ''; }
 export function characterList(data) {
     if (!Array.isArray(data)) throw new Error('Serwer nie zwrócił listy postaci.');
@@ -36,13 +36,14 @@ export function heroTimers(data, heroId, now, fadeout = 600) {
         }).sort((a, b) => a.end - b.end);
 }
 export function characterDestination(hero, page) {
-    let domain = page.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
+    let domain = typeof page.getMainDomain === 'function' ? page.getMainDomain() : '';
+    if (!/^(pl|com)$/.test(domain)) domain = page.location.hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1];
     if (!domain) {
         try { domain = new URL(page.Engine?.worldConfig?.getApiDomain?.()).hostname.match(/(?:^|\.)margonem\.(pl|com)$/)?.[1]; }
         catch {}
     }
     if (!domain || !worldName(hero.world) || !/^\d+$/.test(String(hero.id))) throw new Error('Nieprawidłowy świat lub postać.');
-    return { url: `https://${hero.world}.margonem.${domain}/`, cookieDomain: `margonem.${domain}`, id: String(hero.id) };
+    return { url: `https://${hero.world}.margonem.${domain}`, cookieDomain: `margonem.${domain}`, id: String(hero.id) };
 }
 export function relogTarget(hero, page) {
     const engine = page.Engine;
@@ -52,30 +53,14 @@ export function relogTarget(hero, page) {
     if (String(engine.hero?.d?.id || page.getCookie?.('mchar_id')) === String(hero.id)) throw new Error('Ta postać jest już zalogowana.');
     return characterDestination(hero, page);
 }
-export function reloadCharacter(hero, page, navigate = url => page.location.replace(url), schedule = (callback, delay) => page.setTimeout(callback, delay)) {
+export function reloadCharacter(hero, page, navigate = url => page.location.replace(url)) {
     const target = characterDestination(hero, page);
     if (typeof page.setCookie !== 'function') throw new Error('Gra nie udostępnia zmiany postaci.');
-    const canCloseSession = typeof page._g === 'function' && typeof page.setTimeout === 'function';
-    if (canCloseSession) page._g('logoff&a=start');
-    page.setCookie('mchar_id', target.id, new Date(Date.now() + 30 * 86400000), '/', target.cookieDomain, true);
-    if (canCloseSession) schedule(() => navigate(target.url), 500);
-    else navigate(target.url);
+    page.setCookie('mchar_id', target.id, new Date(Date.now() + 2592e6), '/', target.cookieDomain, true);
+    navigate(target.url);
     return 'reload';
 }
 export function changeCharacter(hero, page, navigate = url => page.location.replace(url)) {
     relogTarget(hero, page);
     return reloadCharacter(hero, page, navigate);
-}
-export function changeCharacterNative(hero, page) {
-    const target = relogTarget(hero, page);
-    if (page.Engine?.logOff) throw new Error('Trwa już wylogowywanie. Anuluj je przed zmianą postaci.');
-    if (typeof page.Engine?.changePlayer?.changePlayerRequest === 'function') {
-        page.Engine.changePlayer.changePlayerRequest(Number(target.id));
-        return 'native';
-    }
-    if (typeof page.Engine?.changePlayer?.changePlayer === 'function') {
-        page.Engine.changePlayer.changePlayer(Number(target.id));
-        return 'native';
-    }
-    return reloadCharacter(hero, page);
 }
