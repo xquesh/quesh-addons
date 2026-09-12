@@ -15,7 +15,6 @@ export function createTeleportLabels() {
                 <h2>Wygląd podpisów</h2><div class="ln-grid">
                     <label class="ln-switch"><input type="checkbox" data-setting="labels">Wyświetlaj podpisy</label>
                     <label class="ln-switch"><input type="checkbox" data-setting="bold">Pogrubienie</label>
-                    <label class="ln-field">Pozycja<select data-setting="position"><option value="bottom">Na dole</option><option value="top">Na górze</option></select></label>
                     <label class="ln-field">Rozmiar (7–14 px)<input type="number" min="7" max="14" data-setting="fontSize"></label>
                     <label class="ln-field">Kolor<input type="color" data-setting="color"></label>
                     <label class="ln-field">Cień / poświata<select data-setting="shadow"><option value="outline">Obrys</option><option value="soft">Miękki cień</option><option value="glow">Poświata</option><option value="none">Brak</option></select></label>

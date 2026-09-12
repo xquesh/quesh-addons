@@ -146,6 +146,7 @@
         Engine.communication.parseJSON({ item: { 2001: { id: 2001, name: 'Kamień teleportujący do Ithan', stat: 'teleport=99999,10,20' } } });
         await wait(40);
         assert(teleportIcon.querySelector('.qaddons-teleport-label')?.textContent === 'ITH', 'Podpisownik wyciąga cel nieznanego teleportu z nazwy');
+        assert(getComputedStyle(teleportIcon.querySelector('.qaddons-teleport-label')).top === '0px', 'Podpisownik umieszcza tekst nad licznikiem sztuk');
         manager.changeSettings('teleport-labels', { customLabels: { 99999: 'BAZA' } }); await wait(40);
         assert(teleportIcon.querySelector('.qaddons-teleport-label')?.textContent === 'BAZA', 'Podpisownik odświeża własny podpis');
         teleportIcon.remove();

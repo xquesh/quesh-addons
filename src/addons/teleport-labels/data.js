@@ -6,8 +6,7 @@ export const DEFAULTS = Object.freeze({
     bold: true,
     shadow: 'outline',
     shadowColor: '#000000',
-    shadowStrength: 3,
-    position: 'bottom'
+    shadowStrength: 3
 });
 
 // Skróty map używane przez teleporty Margonem. Kluczem jest pierwszy parametr statystyki teleport.

@@ -6,8 +6,7 @@ export function teleportLabelsCss(settings) {
     const shadow = settings.shadow === 'none' ? 'none' : settings.shadow === 'soft' ? `0 1px ${Math.max(1, strength)}px ${shadowColor}`
         : settings.shadow === 'glow' ? `0 0 ${Math.max(1, strength)}px ${shadowColor},0 0 ${Math.max(2, strength * 2)}px ${shadowColor}`
             : `-1px -1px 0 ${shadowColor},1px -1px 0 ${shadowColor},-1px 1px 0 ${shadowColor},1px 1px 0 ${shadowColor}`;
-    const vertical = settings.position === 'top' ? 'top:0' : 'bottom:0';
     return `
-.qaddons-teleport-label{position:absolute!important;${vertical};left:50%;z-index:24;max-width:64px;transform:translateX(-50%);overflow:visible;pointer-events:none!important;color:${color}!important;background:transparent!important;border:0!important;padding:0!important;font:${settings.bold === false ? 'normal' : 'bold'} ${size}px/${size + 1}px Arial,sans-serif!important;text-align:center!important;white-space:nowrap;text-shadow:${shadow}!important;}
+.qaddons-teleport-label{position:absolute!important;top:0!important;bottom:auto!important;left:50%;z-index:24;max-width:64px;transform:translateX(-50%);overflow:visible;pointer-events:none!important;color:${color}!important;background:transparent!important;border:0!important;padding:0!important;font:${settings.bold === false ? 'normal' : 'bold'} ${size}px/${size + 1}px Arial,sans-serif!important;text-align:center!important;white-space:nowrap;text-shadow:${shadow}!important;}
 `;
 }

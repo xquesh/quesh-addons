@@ -20,4 +20,5 @@ const custom = parseCustomLabels('1224=ith\nname:Domina Ecclesiae=dom\nbłędny'
 assert.deepEqual(custom, { 1224: 'ITH', 'name:Domina Ecclesiae': 'DOM' });
 assert.equal(serializeCustomLabels(custom), '1224=ITH\nname:Domina Ecclesiae=DOM');
 assert.match(teleportLabelsCss({ fontSize: 9, color: '#ffffff', shadow: 'glow', shadowColor: '#ffffff', shadowStrength: 4 }), /0 0 8px #ffffff/);
+assert.match(teleportLabelsCss({ fontSize: 9 }), /top:0!important;bottom:auto!important/);
 console.log('OK: Podpisownik rozpoznaje teleporty, custom_teleport, przywołania oraz własne etykiety');
