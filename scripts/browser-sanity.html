@@ -211,13 +211,13 @@
         const commandBeforeQuickGroup = window._g;
         window._g = command => quickGroupCommands.push(command);
         Engine.hero = { d: { id: 7, x: 10, y: 10 } };
-        Engine.party = { get: () => null };
-        Engine.others = { getAll: () => ({
-            2: { id: 2, nick: 'Znajomy', relation: 2, x: 20, y: 20 },
-            3: { id: 3, nick: 'Klanowicz', relation: 4, x: 8, y: 8 },
-            4: { id: 4, nick: 'Sojusznik', relation: 5, x: 9, y: 9 },
-            5: { id: 5, nick: 'Obcy', relation: 1, x: 10, y: 11 },
-            6: { id: 6, nick: 'Daleko', relation: 1, x: 30, y: 30 }
+        Engine.party = { isPartyPlayers: () => false, getMembers: () => undefined };
+        Engine.others = { check: () => ({
+            2: { d: { id: 2, nick: 'Znajomy', relation: 2, x: 20, y: 20 } },
+            3: { d: { id: 3, nick: 'Klanowicz', relation: 4, x: 8, y: 8 } },
+            4: { d: { id: 4, nick: 'Sojusznik', relation: 5, x: 9, y: 9 } },
+            5: { d: { id: 5, nick: 'Obcy', relation: 1, x: 10, y: 11 } },
+            6: { d: { id: 6, nick: 'Daleko', relation: 1, x: 30, y: 30 } }
         }) };
         document.querySelector('#qaddons-quick-group').click();
         assert(quickGroupCommands.includes('party&a=inv&id=2') && quickGroupCommands.includes('party&a=inv&id=3') && quickGroupCommands.includes('party&a=inv&id=4'), 'Szybka grupa zaprasza znajomych, klan i sojusz');

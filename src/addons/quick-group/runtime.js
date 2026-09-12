@@ -1,4 +1,4 @@
-import { inviteCandidates, matchesHotkey, PARTY_SUMMON_ACCEPT_COMMAND, partySummonPrompt, senderName, shouldAcceptInvite } from './data.js';
+import { inviteCandidates, matchesHotkey, normalizeOthers, PARTY_SUMMON_ACCEPT_COMMAND, partySummonPrompt, senderName, shouldAcceptInvite } from './data.js';
 import { QUICK_GROUP_CSS } from './style.js';
 
 function values(value) {
@@ -10,8 +10,11 @@ function values(value) {
 function currentOthers(page) {
     const model = page.Engine?.others;
     try {
-        return values(model?.getAll?.() || model?.others || model?.list || page.g?.other).filter(other => other && !other.del);
-    } catch { return values(page.g?.other).filter(other => other && !other.del); }
+        const sources = [model?.check?.(), model?.getAll?.(), model?.others, model?.list, page.g?.other];
+        const found = new Map();
+        for (const source of sources) for (const other of normalizeOthers(source)) found.set(other.id, other);
+        return [...found.values()];
+    } catch { return normalizeOthers(page.g?.other); }
 }
 
 function heroData(page) {
@@ -26,6 +29,14 @@ function partyData(page, tracked) {
 function partyState(page, tracked) {
     const party = partyData(page, tracked);
     if (!party || typeof party !== 'object') return { exists: false, ids: new Set(), commanderId: null };
+    try {
+        const current = party.getMembers?.();
+        if (current instanceof Map) {
+            const ids = new Set([...current.entries()].map(([key, member]) => String(member?.id ?? key)));
+            const leader = [...current.entries()].find(([, member]) => member?.leader || member?.commander);
+            return { exists: party.isPartyPlayers?.() ?? ids.size > 0, ids, commanderId: leader ? String(leader[1]?.id ?? leader[0]) : null };
+        }
+    } catch {}
     const source = party.members && typeof party.members === 'object' ? party.members : party;
     const members = Object.entries(source).filter(([key, member]) => /^\d+$/.test(key) || Number.isFinite(Number(member?.id)));
     const ids = new Set(members.map(([key, member]) => String(member?.id ?? key)));
@@ -61,11 +72,14 @@ export function startQuickGroup(ctx) {
             showMessage(page, 'Tylko dowódca może zapraszać innych graczy do drużyny.', true);
             return 0;
         }
-        const candidates = inviteCandidates(currentOthers(page), hero, party.ids, blocked, ctx.settings);
+        const others = currentOthers(page);
+        const candidates = inviteCandidates(others, hero, party.ids, blocked, ctx.settings);
         busy = true; button.dataset.busy = 'true';
         for (const other of candidates) page._g(`party&a=inv&id=${encodeURIComponent(Number(other.id))}`);
         busy = false; button.dataset.busy = 'false';
-        showMessage(page, candidates.length ? `Wysłano ${candidates.length} zaproszeń do grupy.` : 'Brak postaci spełniających warunki zapraszania.');
+        showMessage(page, candidates.length ? `Wysłano ${candidates.length} zaproszeń do grupy.` : others.length
+            ? `Na mapie jest ${others.length} postaci, ale żadna nie spełnia ustawionych warunków zapraszania.`
+            : 'Nie udało się odczytać żadnej postaci z aktualnej mapy.', !candidates.length);
         return candidates.length;
     }
 

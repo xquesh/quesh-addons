@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { hotkeyLabel, inviteCandidates, matchesHotkey, PARTY_SUMMON_ACCEPT_COMMAND, partySummonPrompt, RELATION, senderName, shouldAcceptInvite } from '../src/addons/quick-group/data.js';
+import { hotkeyLabel, inviteCandidates, matchesHotkey, normalizeOthers, PARTY_SUMMON_ACCEPT_COMMAND, partySummonPrompt, RELATION, senderName, shouldAcceptInvite } from '../src/addons/quick-group/data.js';
 
 const settings = { inviteRandos: false, randomInviteOrder: false, acceptAll: false, acceptFriend: true, acceptClan: false, acceptAlly: false };
 const others = [
@@ -21,4 +21,10 @@ assert.equal(partySummonPrompt('Kolega przyzywa do siebie swoją drużynę.'), t
 assert.equal(partySummonPrompt({ q: '<b>Friend</b> is summoning your party.' }), true);
 assert.equal(partySummonPrompt('Zaproszenie do grupy'), false);
 assert.equal(PARTY_SUMMON_ACCEPT_COMMAND, 'party&a=acceptsummon&answer=1');
-console.log('OK: Szybka grupa filtruje relacje, sąsiedztwo, grupę, stany walki, zaproszenia i przywołania');
+assert.deepEqual(normalizeOthers({ 22: { d: { id: 22, nick: 'Aktualny klient', relation: 4, x: 7, y: 8 } }, 23: { d: { id: 23, nick: 'Usunięty', del: 1 } } }), [
+    { id: 22, nick: 'Aktualny klient', relation: 4, x: 7, y: 8 }
+]);
+assert.deepEqual(normalizeOthers({ 24: { id: 24, nick: 'Stary format', rel: 2, x: 3, y: 4 } }), [
+    { id: 24, nick: 'Stary format', rel: 2, relation: 2, x: 3, y: 4 }
+]);
+console.log('OK: Szybka grupa czyta aktualne Engine.others.check(), filtruje relacje, grupę, stany walki, zaproszenia i przywołania');

@@ -25,6 +25,25 @@ export function partySummonPrompt(value) {
     return PARTY_SUMMON_PHRASES.some(phrase => normalized.includes(phrase));
 }
 
+export function normalizeOthers(source) {
+    const entries = source instanceof Map ? [...source.entries()] : Array.isArray(source)
+        ? source.map((value, index) => [index, value]) : source && typeof source === 'object' ? Object.entries(source) : [];
+    return entries.map(([key, raw]) => {
+        const data = raw?.d && typeof raw.d === 'object' ? raw.d : raw;
+        if (!data || typeof data !== 'object' || data.del || raw?.del) return null;
+        const id = Number(data.id ?? raw?.id ?? key);
+        if (!Number.isFinite(id)) return null;
+        return {
+            ...data,
+            id,
+            nick: String(data.nick ?? data.name ?? raw?.nick ?? raw?.name ?? ''),
+            relation: data.relation ?? data.rel ?? raw?.relation ?? raw?.rel,
+            x: Number(data.x ?? raw?.x ?? raw?.rx),
+            y: Number(data.y ?? raw?.y ?? raw?.ry)
+        };
+    }).filter(Boolean);
+}
+
 export function normalizeHotkey(value) {
     if (typeof value === 'string') return { code: value || 'KeyG', altKey: false, ctrlKey: false, shiftKey: false };
     return {
