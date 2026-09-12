@@ -46,6 +46,23 @@ export function onlineMembers(raw) {
     return parseClanMembers(raw).filter(member => member.offlineTime <= 0);
 }
 
+export function stripClanMembers(packet) {
+    let stripped = false;
+    const visit = value => {
+        if (Array.isArray(value)) {
+            value.forEach(visit);
+            return;
+        }
+        if (!value || typeof value !== 'object') return;
+        if (Object.hasOwn(value, 'members')) {
+            delete value.members;
+            stripped = true;
+        }
+    };
+    visit(packet);
+    return stripped;
+}
+
 export function memberLevel(member) {
     const level = member.operationLevel > 0 ? `${member.level}|${member.operationLevel}` : String(member.level);
     return `${level}${member.profession}`;

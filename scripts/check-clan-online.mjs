@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { filterMembers, hasClan, memberLevel, onlineMembers, parseClanMembers, sortMembers } from '../src/addons/clan-online/data.js';
+import { filterMembers, hasClan, memberLevel, onlineMembers, parseClanMembers, sortMembers, stripClanMembers } from '../src/addons/clan-online/data.js';
 
 const raw = [
     7, 'Żerca', 200, 250, 'm', 'Ithan', 10, 11, 1, 0, 'mage.png',
@@ -18,5 +18,9 @@ assert.deepEqual(sortMembers(onlineMembers(raw), 'name').map(member => member.id
 assert.equal(hasClan({ Engine: { hero: { d: { clan: 42 } } } }), true);
 assert.equal(hasClan({ Engine: { hero: { d: { clan: 0 } } } }), false);
 assert.equal(hasClan({}), null);
+const latePacket = [{ e: 'ok' }, { members: raw, keep: true }];
+assert.equal(stripClanMembers(latePacket), true);
+assert.equal(Object.hasOwn(latePacket[1], 'members'), false);
+assert.equal(latePacket[1].keep, true);
 
-console.log('OK: Klanowicze online parsuje rekordy 11-polowe, filtruje online, wyszukuje i sortuje');
+console.log('OK: Klanowicze online parsuje rekordy 11-polowe, filtruje online, wyszukuje, sortuje i blokuje późne odpowiedzi natywnego okna');

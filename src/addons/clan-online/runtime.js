@@ -1,4 +1,4 @@
-import { filterMembers, hasClan, memberLevel, onlineMembers, PROFESSION_NAMES, sortMembers } from './data.js';
+import { filterMembers, hasClan, memberLevel, onlineMembers, PROFESSION_NAMES, sortMembers, stripClanMembers } from './data.js';
 import { CLAN_ONLINE_CSS } from './style.js';
 
 function packetList(packet) {
@@ -21,6 +21,8 @@ export function startClanOnline(ctx) {
     let lastUpdate = 0;
     let drag = null;
     let geometryTimer = 0;
+    let membersRequestActive = false;
+    let suppressLateMembersResponse = false;
 
     ctx.styles.set('runtime', CLAN_ONLINE_CSS);
     const button = document.createElement('button');
@@ -140,10 +142,11 @@ export function startClanOnline(ctx) {
     }
 
     async function refresh(force = false) {
-        if (busy || page.Engine?.allInit !== true || typeof page._g !== 'function') return;
+        if (busy || document.hidden || page.Engine?.allInit !== true || typeof page._g !== 'function') return;
         if (hasClan(page) === false) { members = []; message('Brak klanu'); render(); return; }
         if (!force && Date.now() - lastUpdate < 5000) return;
         busy = true;
+        membersRequestActive = true;
         message('Odświeżanie…');
         try {
             const packet = await ctx.game.request('clan&a=members', data => Array.isArray(data?.members), {
@@ -155,8 +158,14 @@ export function startClanOnline(ctx) {
             message(`Online: ${members.length}`);
             render();
         } catch (error) {
-            if (error?.name !== 'AbortError') message(error?.message || 'Nie udało się pobrać listy.');
-        } finally { busy = false; }
+            if (error?.name !== 'AbortError') {
+                suppressLateMembersResponse = true;
+                message(error?.message || 'Nie udało się pobrać listy.');
+            }
+        } finally {
+            membersRequestActive = false;
+            busy = false;
+        }
     }
 
     function tick() {
@@ -206,6 +215,13 @@ export function startClanOnline(ctx) {
             if (next) party = next;
         }
         if (!panel.hidden) render();
+    });
+    ctx.events.on('gamePacketBefore', packet => {
+        if (!membersRequestActive && !suppressLateMembersResponse) return;
+        if (stripClanMembers(packet)) suppressLateMembersResponse = false;
+    });
+    ctx.events.on('visibilityChanged', hidden => {
+        if (!hidden && !panel.hidden) refresh();
     });
     ctx.events.on('clanOnlineChanged', () => { placePanel(); render(); });
     ctx.events.on('clanOnlineOpen', () => setPanelOpen(true));
