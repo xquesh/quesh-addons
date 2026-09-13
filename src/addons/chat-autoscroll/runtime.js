@@ -11,17 +11,25 @@ export function startChatAutoscroll(ctx) {
 
     function forceBottom(update = false) {
         queued = 0;
-        if (!ctx.enabled) return;
+        if (!ctx.enabled || document.hidden) return;
+        let needsEngineSync = update;
+        let foundPane = false;
+        for (const wrapper of document.querySelectorAll(CHAT_WRAPPER)) {
+            const pane = wrapper.querySelector(':scope > .scroll-pane') || wrapper.querySelector('.scroll-pane');
+            const bottom = pane ? Math.max(0, pane.scrollHeight - pane.clientHeight) : 0;
+            if (!pane) continue;
+            foundPane = true;
+            if (Math.abs(pane.scrollTop - bottom) > 1) {
+                pane.scrollTop = bottom;
+                needsEngineSync = true;
+            }
+        }
+        if (!needsEngineSync && foundPane) return;
         try {
             const chat = page.Engine?.chatController?.getChatMessageWrapper?.();
             if (update) chat?.updateScroll?.();
             chat?.setScrollOnBottom?.();
         } catch {}
-        for (const wrapper of document.querySelectorAll(CHAT_WRAPPER)) {
-            const pane = wrapper.querySelector(':scope > .scroll-pane') || wrapper.querySelector('.scroll-pane');
-            const bottom = pane ? Math.max(0, pane.scrollHeight - pane.clientHeight) : 0;
-            if (pane && Math.abs(pane.scrollTop - bottom) > 1) pane.scrollTop = bottom;
-        }
     }
 
     function queue() {

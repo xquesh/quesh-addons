@@ -34,6 +34,11 @@ export function keepTextStyle(ctx) {
         }
     }
     function queue() { if (!queued) queued = ctx.scheduler.frame(sync); }
+    function touchesMessages(node, descendants = false) {
+        const element = node?.nodeType === 1 ? node : node?.parentElement;
+        return Boolean(element?.matches?.(MESSAGE_ROOTS) || element?.closest?.(MESSAGE_ROOTS) ||
+            descendants && element?.querySelector?.(MESSAGE_ROOTS));
+    }
     function update() {
         owned.forEach((values, element) => restore(element, values)); owned.clear();
         if (!typographyCss(ctx.settings)) { properties = []; return; }
@@ -43,7 +48,8 @@ export function keepTextStyle(ctx) {
         sync();
     }
     ctx.scheduler.observer(MutationObserver, records => {
-        if (records.some(record => record.type === 'childList' || record.target.closest?.(MESSAGE_ROOTS))) queue();
+        if (records.some(record => touchesMessages(record.target) ||
+            [...record.addedNodes, ...record.removedNodes].some(node => touchesMessages(node, true)))) queue();
     }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
     ctx.events.on('notificationTextChanged', update);
     ctx.scheduler.cleanup(() => { owned.forEach((values, element) => restore(element, values)); owned.clear(); });

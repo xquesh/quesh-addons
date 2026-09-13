@@ -83,7 +83,6 @@ export function startPocketBerserk(ctx, tracker) {
     });
     ctx.events.on('pocketBerserkDataChanged', render);
     ctx.events.on('pocketBerserkChanged', render);
-    ctx.scheduler.observer(MutationObserver, schedulePosition).observe(document.body, { childList: true, subtree: true });
     ctx.scheduler.listen(window, 'resize', schedulePosition, { passive: true });
     ctx.events.on('layoutChanged', schedulePosition);
     ctx.scheduler.cleanup(() => button.remove());

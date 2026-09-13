@@ -285,6 +285,12 @@ export function startDetectorGlobal(ctx, report = () => {}) {
         if (!scheduler.disposed && !syncFrame) syncFrame = scheduler.frame(sync);
     }
 
+    function touchesDetector(node, descendants = false) {
+        const element = node?.nodeType === 1 ? node : node?.parentElement;
+        return Boolean(element?.matches?.(ROOT_SELECTOR) || element?.closest?.(ROOT_SELECTOR) ||
+            descendants && element?.querySelector?.(ROOT_SELECTOR));
+    }
+
     page.__WYKRYWACZ_GLOBAL_EXACT__?.destroy?.();
     const api = { version: '1.1.0', sync: requestSync, destroy: () => scheduler.destroy() };
     page.__WYKRYWACZ_GLOBAL_EXACT__ = api;
@@ -297,7 +303,10 @@ export function startDetectorGlobal(ctx, report = () => {}) {
         const button = event.target.closest?.(`.${GLOBAL_CLASS}`);
         if (button && buttons.has(button)) onGlobalClick(event, button.closest(ROOT_SELECTOR), button);
     }, { capture: true });
-    scheduler.observer(MutationObserver, requestSync).observe(document.documentElement, { childList: true, subtree: true });
+    scheduler.observer(MutationObserver, records => {
+        if (records.some(record => touchesDetector(record.target) ||
+            [...record.addedNodes, ...record.removedNodes].some(node => touchesDetector(node, true)))) requestSync();
+    }).observe(document.documentElement, { childList: true, subtree: true });
     ctx.events.on('detectorChannelsChanged', () => buttons.forEach(updateButton));
     scheduler.cleanup(() => {
         buttons.forEach(button => button.remove());

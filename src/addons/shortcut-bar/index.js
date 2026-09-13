@@ -98,7 +98,6 @@ function startShortcutBar(ctx) {
     ctx.events.on('shortcutBarChanged', place);
     ctx.events.on('addonSettingsChanged', scheduleCollect);
     ctx.events.on('addonChanged', scheduleCollect);
-    ctx.scheduler.observer(MutationObserver, scheduleCollect).observe(document.body, { childList: true, subtree: true });
     ctx.scheduler.cleanup(() => {
         for (const button of bar.querySelectorAll('.qsb-addon-button')) {
             if (button.classList.contains('qsb-generated')) continue;

@@ -144,8 +144,15 @@ export function createPanel(settings, styles, scheduler, events) {
     }
     document.body.append(panel);
     mountButton();
-    const buttonHostObserver = scheduler.observer(MutationObserver, mountButton);
-    buttonHostObserver.observe(document.body, { childList: true, subtree: true });
+    const buttonHostRoot = button.parentElement?.parentElement;
+    if (buttonHostRoot) scheduler.observer(MutationObserver, () => {
+        if (!button.isConnected) mountButton();
+    }).observe(buttonHostRoot, { childList: true, subtree: true });
+    const keepButtonMounted = () => {
+        if (!button.isConnected) mountButton();
+        scheduler.timeout(keepButtonMounted, 2000);
+    };
+    scheduler.timeout(keepButtonMounted, 2000);
     updates.check();
 
     return {

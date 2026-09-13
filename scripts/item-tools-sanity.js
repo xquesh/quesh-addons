@@ -46,13 +46,13 @@ window.runItemToolsChecks = async function(manager, assert, wait) {
         assert(drawable.draw(context) === 42 && context.getImageData(0, 0, 32, 32).data.some((value, index) => index % 4 === 3 && value > 0), 'Tekst na canvas z zachowaniem wyniku rysowania');
         assert(context.getImageData(0, 0, 1, 1).data[3] === 0, 'Brak tła ikony na canvas');
         item.stat = 'rarity=legendary;socket_injection_legbon=verycrit,17';
-        await wait(650);
+        Engine.communication.parseJSON({ item: { 901: item } }); await wait(150);
         assert(badge()?.textContent === 'CBK', 'Bonus CBK z gniazda zbroi bez zwykłego legbon');
         item.stat = 'rarity=legendary;legbon=glare';
-        await wait(650);
+        Engine.communication.parseJSON({ item: { 901: item } }); await wait(150);
         assert(badge()?.textContent === 'OŚ', 'Polskie znaki w skrócie');
         item.stat = 'rarity=legendary';
-        await wait(650);
+        Engine.communication.parseJSON({ item: { 901: item } }); await wait(150);
         assert(!badge(), 'Usunięcie starej etykiety przy braku bonusu');
         item.stat = 'rarity=legendary;legbon=critred';
 

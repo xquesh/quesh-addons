@@ -218,6 +218,15 @@ assert.doesNotMatch(await readFile('src/addons/notification-position/index.js', 
 assert.match(await readFile('src/addons/legendary-notificator/test-loot.js', 'utf8'), /comm\.parseJSON\( fakeLoot \)/);
 assert.doesNotMatch(source, /querySelectorAll\(\s*['"]\*['"]\s*\)/);
 console.log('OK: składnia, header, brak runtime imports, pojedynczy centralny hook, rozdzielenie addonów');
+const teleportRuntime = await readFile('src/addons/teleport-labels/runtime.js', 'utf8');
+const itemToolsRuntime = await readFile('src/addons/item-tools/runtime.js', 'utf8');
+assert.match(teleportRuntime, /MAX_ITEM_CACHE\s*=\s*1000/);
+assert.match(teleportRuntime, /if \(changed\) schedule\(\)/);
+assert.match(teleportRuntime, /timeout\(poll, 2500\)/);
+assert.match(itemToolsRuntime, /timeout\(poll, 2500\)/);
+assert.doesNotMatch(await readFile('src/addons/shortcut-bar/index.js', 'utf8'), /observer\(MutationObserver/);
+assert.doesNotMatch(await readFile('src/addons/pocket-berserk/runtime.js', 'utf8'), /observer\(MutationObserver/);
+console.log('OK: kosztowne skany są filtrowane, cache podpisów ograniczony, brak obserwatorów belki reagujących na cały interfejs');
 
 const legacy = (await readFile('legacy/legendary-notificator-v6.2.1.txt', 'utf8')).replace(/\r\n/g, '\n');
 const allowedChanges = new Set([

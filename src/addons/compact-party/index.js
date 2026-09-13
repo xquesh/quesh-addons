@@ -19,6 +19,9 @@ function createSummary() {
 
 function startCompactParty(ctx) {
     let frame = 0;
+    const partySelector = '.party .party__list';
+    let observedParty = null;
+    let partyObserver = null;
 
     function applyStyles() {
         ctx.styles.set('layout', compactPartyCss(ctx.settings));
@@ -69,16 +72,39 @@ function startCompactParty(ctx) {
     }
 
     function requestSync(records = []) {
-        if (records.length && records.every(record => record.target.parentElement?.closest?.('.qaddons-party-summary'))) return;
+        if (records.length && !records.some(record => {
+            if (record.target.parentElement?.closest?.('.qaddons-party-summary')) return false;
+            if (record.target.closest?.(partySelector)) return true;
+            return [...record.addedNodes, ...record.removedNodes].some(node => node.nodeType === 1 &&
+                (node.matches?.('.party,.party__list,.party-member') || node.querySelector?.(partySelector)));
+        })) return;
         if (!frame) frame = ctx.scheduler.frame(sync);
+    }
+
+    function mountPartyObserver() {
+        const next = document.querySelector(partySelector);
+        if (next === observedParty) return;
+        partyObserver?.disconnect();
+        partyObserver = null;
+        observedParty = next;
+        if (next) {
+            partyObserver = ctx.scheduler.observer(MutationObserver, requestSync);
+            partyObserver.observe(next, {
+                childList: true, subtree: true, characterData: true, attributes: true,
+                attributeFilter: ['class', 'style', 'bar-percent']
+            });
+        }
+        requestSync();
     }
 
     applyStyles();
     sync();
-    ctx.scheduler.observer(MutationObserver, requestSync).observe(document.body, {
-        childList: true, subtree: true, characterData: true, attributes: true,
-        attributeFilter: ['class', 'style', 'bar-percent']
-    });
+    mountPartyObserver();
+    ctx.scheduler.observer(MutationObserver, records => {
+        if (!observedParty?.isConnected || records.some(record =>
+            [...record.addedNodes].some(node => node.nodeType === 1 &&
+                (node.matches?.('.party,.party__list') || node.querySelector?.(partySelector))))) mountPartyObserver();
+    }).observe(document.body, { childList: true, subtree: true });
     ctx.events.on('compactPartyChanged', () => { applyStyles(); requestSync(); });
     ctx.scheduler.cleanup(() => document.querySelectorAll('.qaddons-party-summary').forEach(node => {
         node.parentElement?.style.removeProperty('--qaddons-party-actions-width');

@@ -3,6 +3,8 @@ import { createTooltipTools } from './tooltip.js';
 import { bonusStyle, bonusFont, bonusCss } from './bonus-style.js';
 
 const ITEM_SELECTOR = '.item, .bottomItem';
+const ITEM_RELEVANT_SELECTOR = '.item,.bottomItem,.tip-wrapper';
+const QADDONS_ITEM_DECORATION = '.qaddons-item-bonus,[data-qaddons-item-extra],.qaddons-teleport-label';
 const HIGHLIGHTS = '.item .highlight.h-exist,.bottomItem .highlight.h-exist,.item .icon.h-exist,.bottomItem .icon.h-exist';
 export function startItemTools(ctx) {
     const { scheduler, settings } = ctx;
@@ -137,6 +139,12 @@ export function startItemTools(ctx) {
         badges(); tooltips(); groundAppearance(); groundBadges();
     }
     function queue() { if (!pending) pending = scheduler.timeout(scan, 80); }
+    function touchesItems(node, descendants = false) {
+        const element = node?.nodeType === 1 ? node : node?.parentElement;
+        if (!element || element.closest?.('.qaddons-item-bonus,[data-qaddons-item-extra]')) return false;
+        return Boolean(element.matches?.(ITEM_RELEVANT_SELECTOR) || element.closest?.(ITEM_RELEVANT_SELECTOR) ||
+            descendants && element.querySelector?.(ITEM_RELEVANT_SELECTOR));
+    }
     function apply() {
         const frame = imageUrl(settings.activeFrame);
         const overlay = imageUrl(settings.activeOverlay);
@@ -154,11 +162,22 @@ export function startItemTools(ctx) {
     }
     // Obserwator reaguje na wymianę ikon i tooltipów. Poll uzupełnia zmiany danych bez mutacji DOM.
     scheduler.observer(MutationObserver, records => {
-        if (records.some(record => !record.target.closest?.('.qaddons-item-bonus,[data-qaddons-item-extra]') &&
-            (record.type !== 'childList' || [...record.addedNodes, ...record.removedNodes].some(node => node.nodeType !== 1 || !node.matches('.qaddons-item-bonus,[data-qaddons-item-extra]'))))) queue();
-    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'data-item-type', 'data-item-id', 'data-hid'], characterData: true });
-    const poll = () => { queue(); scheduler.timeout(poll, 500); };
+        if (records.some(record => {
+            const changed = [...record.addedNodes, ...record.removedNodes];
+            if (record.type === 'childList' && changed.length && changed.every(node => node.nodeType === 1 && node.matches?.(QADDONS_ITEM_DECORATION))) return false;
+            return touchesItems(record.target) || changed.some(node => touchesItems(node, true));
+        })) queue();
+    }).observe(document.body, { childList: true, subtree: true });
+    const poll = () => {
+        if (!document.hidden) queue();
+        scheduler.timeout(poll, 2500);
+    };
     ctx.events.on('itemToolsChanged', apply);
+    ctx.events.on('gamePacket', packet => {
+        const list = Array.isArray(packet) ? packet.flat(Infinity) : [packet];
+        if (list.some(data => data?.item || data?.loot || data?.town?.file)) queue();
+    });
+    ctx.events.on('visibilityChanged', hidden => { if (!hidden) queue(); });
     scheduler.cleanup(() => {
         groundDraws.forEach(restore => restore()); groundDraws.clear(); restoreGround();
         document.querySelectorAll('.qaddons-item-bonus,[data-qaddons-item-extra]').forEach(node => node.remove());

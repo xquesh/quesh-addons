@@ -177,7 +177,11 @@ export function startClanOnline(ctx) {
     mountButton();
     placePanel();
     render();
-    ctx.scheduler.observer(MutationObserver, mountButton).observe(document.body, { childList: true, subtree: true });
+    const keepButtonMounted = () => {
+        if (!button.isConnected) mountButton();
+        ctx.scheduler.timeout(keepButtonMounted, 1000);
+    };
+    ctx.scheduler.timeout(keepButtonMounted, 1000);
     ctx.scheduler.listen(button, 'click', () => setPanelOpen(panel.hidden));
     ctx.scheduler.listen(panel.querySelector('[data-close]'), 'click', () => setPanelOpen(false));
     ctx.scheduler.listen(panel.querySelector('[data-refresh]'), 'click', () => refresh(true));
