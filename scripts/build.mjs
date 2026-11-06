@@ -23,9 +23,11 @@ const options = {
                     const header = await readFile('src/userscript-header.txt', 'utf8');
                     const loader = await readFile('src/installer.js', 'utf8');
                     await writeFile('dist/installer.user.js', `${header.trim()}\n\n${loader.trim()}\n`.replace(/\r\n/g, '\n'));
+                    const forumTheme = await readFile('src/forum-dark.user.js', 'utf8');
+                    await writeFile('dist/forum-dark.user.js', forumTheme.replace(/\r\n/g, '\n'));
                     await rm('dist/margonem-toolkit.user.js', { force: true });
                     await writeFile('dist/version.json', JSON.stringify({ version: VERSION }, null, 2) + '\n');
-                    for (const file of [options.outfile, 'dist/installer.user.js']) {
+                    for (const file of [options.outfile, 'dist/installer.user.js', 'dist/forum-dark.user.js']) {
                         execFileSync(process.execPath, ['--check', file], { stdio: 'inherit' });
                     }
                     console.log('Runtime and installer syntax: OK');

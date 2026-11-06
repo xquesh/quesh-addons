@@ -167,11 +167,12 @@ assert.equal(itemEligible(enhancerItem, structuredClone(ENHANCER_DEFAULTS), new 
 console.log('OK: Ulepszarka filtruje wyposażone, związane, wykluczone i niedozwolone rzadkości');
 const files = await listFiles('src');
 const sourceFiles = files.filter(file => file.endsWith('.js'));
-for (const path of [...sourceFiles, ...await listFiles('scripts'), 'dist/installer.user.js', 'dist/margonem-toolkit.js']) {
+for (const path of [...sourceFiles, ...await listFiles('scripts'), 'dist/installer.user.js', 'dist/margonem-toolkit.js', 'dist/forum-dark.user.js']) {
     if (/\.(?:mjs|js)$/.test(path)) execFileSync(process.execPath, ['--check', path]);
 }
 const bundle = (await readFile('dist/margonem-toolkit.js', 'utf8')).replace(/\r\n/g, '\n');
 const installer = (await readFile('dist/installer.user.js', 'utf8')).replace(/\r\n/g, '\n');
+const forumTheme = (await readFile('dist/forum-dark.user.js', 'utf8')).replace(/\r\n/g, '\n');
 assert.ok(bundle.startsWith('(() => {'));
 assert.doesNotMatch(bundle, /==UserScript==|@(?:match|grant|updateURL|downloadURL)/);
 assert.ok(installer.startsWith('// ==UserScript==\n// @name         QADDONS'));
@@ -179,7 +180,10 @@ assert.match(installer, /@grant\s+none/);
 assert.ok(Buffer.byteLength(installer) < 2048, 'Installer powinien pozostać małym loaderem');
 assert.ok(installer.trimEnd().split('\n').length <= 50);
 assert.doesNotMatch(installer, /createAddonManager|localStorage|__MARGONEM_TOOLKIT__|createPanel|createLegendaryNotificator|createNotificationPosition/);
-assert.deepEqual((await listFiles('dist')).sort(), ['dist/installer.user.js', 'dist/margonem-toolkit.js', 'dist/version.json']);
+assert.deepEqual((await listFiles('dist')).sort(), ['dist/forum-dark.user.js', 'dist/installer.user.js', 'dist/margonem-toolkit.js', 'dist/version.json']);
+assert.ok(forumTheme.startsWith('// ==UserScript==\n// @name         QADDONS — Ciemne forum Margonem'));
+assert.match(forumTheme, /^\/\/ @match        https:\/\/forum\.margonem\.pl\/\*$/m);
+assert.doesNotMatch(forumTheme, /^\/\/ @match        https:\/\/\*\.margonem\.pl/m);
 for (const domain of ['pl', 'com']) {
     assert.ok(installer.includes(`// @match        https://*.margonem.${domain}/*`));
     assert.ok(installer.includes(`// @exclude      https://forum.margonem.${domain}/*`));
