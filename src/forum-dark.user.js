@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QADDONS — Ciemne forum Margonem
 // @namespace    quesh.addons
-// @version      1.0.1
+// @version      1.0.2
 // @description  Ciemny, czytelny motyw forum Margonem.
 // @match        https://forum.margonem.pl/*
 // @match        http://forum.margonem.pl/*
@@ -26,8 +26,8 @@
         #forum h1, #forum h2, #forum h3, #forum h4 { color:#f2f5f8 !important; text-shadow:none !important; }
         #forum h2 { padding:12px 14px; margin:0 0 12px; border-left:3px solid #b752d6; background:linear-gradient(90deg,#24172d,#0c0c0d); font-size:18px; }
         #forum .ncatg, #forum .topics, #posts { border-color:#343039 !important; }
-        #forum .ncatg td, #forum .topics td, #posts td { border:1px solid #343039 !important; background:#121214 !important; color:#d9dde3 !important; }
-        #forum .ncatg tr:hover td, #forum .topics tr:hover td { background:#201827 !important; }
+        #forum .ncatg > tbody > tr > td, #forum .topics > tbody > tr > td, #posts > tbody > tr > td { border-color:#343039 !important; color:#d9dde3 !important; }
+        #forum .ncatg > tbody > tr:hover > td, #forum .topics > tbody > tr:hover > td { background:#201827 !important; }
         #forum .ncatbar, #forum .catbar, #forum .topics th { color:#f4f1f6 !important; background:#271b30 !important; border:1px solid #574264 !important; font-size:13px !important; height:36px !important; }
         #forum .topics .sticky, #forum .sticky { background:#2a2615 !important; }
         #forum .topics .topname { text-align:left; }
@@ -40,8 +40,6 @@
         #posts td.pcont { border-color:#39313f !important; background:#0e0e10 !important; color:#d8dde3 !important; line-height:1.5; }
         #posts td.pbar { border-color:#39313f !important; background:#171319 !important; color:#a9a0ac !important; }
         #posts .nickwood, #posts h3 { background:#26192e !important; color:#f3edf6 !important; }
-        #posts .puser center, #posts table.repbar { background:#1b1520 !important; }
-        #posts .sepbar { height:0 !important; background:none !important; }
         .pavatar { border:1px solid #55435e; background:#080808; }
         blockquote { width:auto !important; margin:12px 4px !important; padding:12px !important; border:1px solid #584365 !important; border-left:3px solid #b752d6 !important; background:#18131d !important; color:#d5cbd9 !important; }
         code, pre { padding:10px !important; border:1px solid #3b3340 !important; background:#070708 !important; color:#e4d7ff !important; white-space:pre-wrap !important; overflow:auto; }
