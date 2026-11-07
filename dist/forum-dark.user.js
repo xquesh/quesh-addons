@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QADDONS — Ciemne forum Margonem
 // @namespace    quesh.addons
-// @version      1.0.2
+// @version      1.0.3
 // @description  Ciemny, czytelny motyw forum Margonem.
 // @match        https://forum.margonem.pl/*
 // @match        http://forum.margonem.pl/*
@@ -56,6 +56,9 @@
         #bans, #bans td, #bans th, #artlist, #artlist td, #artlist th, #polllist, #polllist td, #polllist th, #menulist, #menulist td, #menulist th { border-color:#344250 !important; color:#dbe3ea !important; background:#161d24 !important; }
         #bans tr, #bans tr:hover { background:#1b222a !important; color:#dbe3ea !important; }
         #forum img, .pcont img { max-width:100%; height:auto; }
+        /* Avatar jest arkuszem klatek — jego kontener 32×48 wycina jedną postać. */
+        #forum .pavatar_new a img { max-width:none !important; width:auto !important; height:auto !important; }
+        #forum img.pavatar { width:32px !important; height:48px !important; max-width:none !important; }
     `;
 
     const style = document.createElement('style');
