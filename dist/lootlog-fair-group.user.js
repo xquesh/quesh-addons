@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.0.6
+// @version      1.0.7
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.0.6';
+    const VERSION = '1.0.7';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -116,11 +116,11 @@
         const names = new Set();
         for (const entry of arraysIn(payload).flat()) {
             if (!entry || typeof entry !== 'object') continue;
-            const name = String(entry.npcName ?? entry.name ?? '').trim();
+            const name = String(entry.npcName ?? entry.npc?.name ?? '').trim();
             // Zapytanie ma już npcType=TITAN. Widok top-NPC nie zawsze odsyła
-            // npcType przy każdym rekordzie, więc nie filtrujemy go drugi raz.
-            const id = Number(entry.npcId ?? entry.id);
-            if (name && Number.isFinite(id)) names.add(name);
+            // npcType ani npcId przy każdym rekordzie, więc nie filtrujemy go drugi raz.
+            // Nazwa wystarcza do listy; ID zostanie dopasowane przy pobraniu rankingu.
+            if (name) names.add(name);
         }
         return [...names].sort((a, b) => a.localeCompare(b, 'pl'));
     }
