@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.0.2
+// @version      1.0.3
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -10,7 +10,6 @@
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @connect      api.lootlog.pl
-// @connect      catalog.lootlog.pl
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -18,7 +17,6 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const CATALOG_API = 'https://catalog.lootlog.pl';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -284,13 +282,17 @@
 
     async function loadTitanCatalog() {
         if (refreshing) return;
-        refreshing = true; setStatus('Pobieranie listy tytanów z katalogu Lootlog…');
+        const guildId = String(settings.guildId).trim();
+        if (!/^\d+$/.test(guildId)) { setStatus('Podaj prawidłowe ID grupy Lootlog.', 'error'); return; }
+        refreshing = true; setStatus('Pobieranie tytanów ze statystyk Lootlog…');
         try {
-            const payload = await request('/npcs?type=TITAN&limit=500', CATALOG_API);
+            // Ten endpoint jest używany przez widok statystyk Lootloga. W przeciwieństwie
+            // do katalogu nie zwraca 404 i respektuje uprawnienia bieżącej sesji.
+            const payload = await request(`/guilds/${guildId}/stats/kills/top-npcs${query({ period: 'all', limit: 50, npcType: 'TITAN', world: settings.world })}`);
             const names = titanNamesFromPayload(payload);
-            if (!names.length) throw new Error('Katalog nie zwrócił listy tytanów.');
+            if (!names.length) throw new Error('Brak zapisanych tytanów w statystykach tej grupy Lootlog.');
             saveSettings({ titanCatalog: names }); refreshTitanSelect();
-            setStatus(`Pobrano ${names.length} tytanów. Wybór ręczny jest dostępny jako fallback.`, 'ok');
+            setStatus(`Pobrano ${names.length} tytanów ze statystyk grupy. Wybór ręczny jest dostępny jako fallback.`, 'ok');
         } catch (error) {
             setStatus(`Nie udało się pobrać katalogu: ${error?.message || 'brak odpowiedzi.'}`, 'error');
         } finally { refreshing = false; }
@@ -309,7 +311,7 @@
         button.id = 'lootlog-fair-group-button'; button.type = 'button'; button.textContent = 'LL'; button.title = 'Lootlog Fair Group';
         Object.assign(button.style, { left: `${settings.x}px`, top: `${settings.y}px` });
         panel = document.createElement('section'); panel.id = 'lootlog-fair-group'; panel.hidden = true;
-        panel.innerHTML = '<header><strong>LOOTLOG · FAIR GROUP</strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-picker"><select data-titan-select title="Używane tylko, gdy tytana nie ma na mapie"></select><button type="button" data-load-titans>POBIERZ TYTANY</button></div><div class="llfg-actions"><button type="button" data-test>TEST ODCZYTU</button><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Automatyczny odczyt z mapy ma pierwszeństwo przed wyborem z listy.</p><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>';
+        panel.innerHTML = '<header><strong>LOOTLOG · FAIR GROUP</strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-picker"><select data-titan-select title="Używane tylko, gdy tytana nie ma na mapie"></select><button type="button" data-load-titans>POBIERZ TYTANY</button></div><div class="llfg-actions"><button type="button" data-test>TEST ODCZYTU</button><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Automatyczny odczyt z mapy ma pierwszeństwo przed wyborem z listy ze statystyk grupy.</p><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>';
         const config = panel.querySelector('.llfg-config');
         const guildField = field('ID grupy Lootlog', 'guildId', 'z linku Lootlog');
         const npcField = field('Potwór (z mapy)', 'npcName', 'wykrywany automatycznie');
