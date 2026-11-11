@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.0.5
+// @version      1.0.6
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
+// @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
+// @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
 // @exclude      https://forum.margonem.pl/*
@@ -17,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.0.4';
+    const VERSION = '1.0.6';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
