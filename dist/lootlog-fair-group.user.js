@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.0.4
+// @version      1.0.5
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -114,9 +114,11 @@
         const names = new Set();
         for (const entry of arraysIn(payload).flat()) {
             if (!entry || typeof entry !== 'object') continue;
-            const type = String(entry.npcType ?? entry.type ?? entry.rarity ?? entry.rank ?? '').toUpperCase();
             const name = String(entry.npcName ?? entry.name ?? '').trim();
-            if (name && /TITAN|TYTAN/.test(type)) names.add(name);
+            // Zapytanie ma już npcType=TITAN. Widok top-NPC nie zawsze odsyła
+            // npcType przy każdym rekordzie, więc nie filtrujemy go drugi raz.
+            const id = Number(entry.npcId ?? entry.id);
+            if (name && Number.isFinite(id)) names.add(name);
         }
         return [...names].sort((a, b) => a.localeCompare(b, 'pl'));
     }
