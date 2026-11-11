@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.0.3
+// @version      1.0.4
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -17,6 +17,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
+    const VERSION = '1.0.4';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -67,12 +68,17 @@
                 method: 'GET',
                 url: `${baseUrl}${path}`,
                 responseType: 'json',
+                // Wprost zachowujemy sesję Lootloga użytkownika. Nie odczytujemy
+                // ani nie zapisujemy ciasteczek, tokenów czy danych logowania.
+                anonymous: false,
                 timeout: 15000,
                 onload(response) {
                     if (response.status < 200 || response.status >= 300) {
                         reject(new Error(response.status === 401
                             ? 'Lootlog wymaga zalogowanej sesji. Otwórz lootlog.pl, zaloguj się i odśwież.'
-                            : `Lootlog zwrócił HTTP ${response.status}.`));
+                            : response.status === 404
+                                ? 'Lootlog nie udostępnił tej grupy tej sesji (404). Zaloguj się na lootlog.pl na konto mające dostęp do tej grupy i spróbuj ponownie.'
+                                : `Lootlog zwrócił HTTP ${response.status}.`));
                         return;
                     }
                     try { resolve(response.response ?? JSON.parse(response.responseText)); }
@@ -311,7 +317,7 @@
         button.id = 'lootlog-fair-group-button'; button.type = 'button'; button.textContent = 'LL'; button.title = 'Lootlog Fair Group';
         Object.assign(button.style, { left: `${settings.x}px`, top: `${settings.y}px` });
         panel = document.createElement('section'); panel.id = 'lootlog-fair-group'; panel.hidden = true;
-        panel.innerHTML = '<header><strong>LOOTLOG · FAIR GROUP</strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-picker"><select data-titan-select title="Używane tylko, gdy tytana nie ma na mapie"></select><button type="button" data-load-titans>POBIERZ TYTANY</button></div><div class="llfg-actions"><button type="button" data-test>TEST ODCZYTU</button><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Automatyczny odczyt z mapy ma pierwszeństwo przed wyborem z listy ze statystyk grupy.</p><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>';
+        panel.innerHTML = `<header><strong>LOOTLOG · FAIR GROUP <small>v${VERSION}</small></strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-picker"><select data-titan-select title="Używane tylko, gdy tytana nie ma na mapie"></select><button type="button" data-load-titans>POBIERZ TYTANY</button></div><div class="llfg-actions"><button type="button" data-test>TEST ODCZYTU</button><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Automatyczny odczyt z mapy ma pierwszeństwo przed wyborem z listy ze statystyk grupy.</p><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>`;
         const config = panel.querySelector('.llfg-config');
         const guildField = field('ID grupy Lootlog', 'guildId', 'z linku Lootlog');
         const npcField = field('Potwór (z mapy)', 'npcName', 'wykrywany automatycznie');
