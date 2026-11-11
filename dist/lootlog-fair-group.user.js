@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.0.0
+// @version      1.0.1
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -122,6 +122,48 @@
         return [...players.values()];
     }
 
+    // Margonem wystawia NPC w różnych kolekcjach zależnie od wersji klienta.
+    // Nie zakładamy numerów typów — tytana rozpoznajemy po jawnej informacji o randze.
+    function getTitanOnMap() {
+        const sources = [];
+        try {
+            sources.push(
+                page.Engine?.npcs?.check?.(), page.Engine?.npcs?.getAll?.(), page.Engine?.npcs?.npcs,
+                page.Engine?.mobs?.check?.(), page.Engine?.mobs?.getAll?.(), page.Engine?.mobs?.mobs,
+                page.g?.npc, page.g?.npcs, page.npc
+            );
+        } catch {}
+        const found = new Map();
+        for (const source of sources) {
+            const entries = source instanceof Map ? [...source.entries()] : Array.isArray(source) ? source.map((value, index) => [index, value]) : Object.entries(source || {});
+            for (const [fallbackId, raw] of entries) {
+                const data = raw?.d && typeof raw.d === 'object' ? raw.d : raw;
+                if (!data || typeof data !== 'object' || data.del || raw?.del) continue;
+                const name = String(data.nick ?? data.name ?? raw?.nick ?? raw?.name ?? '').trim();
+                if (!name) continue;
+                const id = String(data.id ?? raw?.id ?? fallbackId);
+                const rankInfo = [data.rank, data.rarity, data.tier, data.elite, data.elita, data.kind, data.classification, data.typeName, raw?.rank, raw?.rarity, raw?.tier]
+                    .filter(value => value != null).join(' ').toLocaleLowerCase('pl-PL');
+                if (/tytan|titan/.test(rankInfo)) found.set(id, { id, name, rankInfo });
+            }
+        }
+        return [...found.values()][0] || null;
+    }
+
+    function syncNpcFromMap({ announce = false } = {}) {
+        const titan = getTitanOnMap();
+        if (!titan) {
+            if (announce) setStatus('Nie wykryto tytana na mapie. Wejdź na mapę z tytanem i spróbuj ponownie.', 'error');
+            return null;
+        }
+        if (settings.npcName !== titan.name) {
+            saveSettings({ npcName: titan.name, npcId: '' });
+            const input = panel?.querySelector('[data-field="npcName"]');
+            if (input) input.value = titan.name;
+        }
+        return titan;
+    }
+
     function killerRows(payload) {
         const direct = Array.isArray(payload?.killers) ? payload.killers : null;
         const entries = (direct || arraysIn(payload).find(items => items.some(item => item?.member?.name)) || []);
@@ -158,8 +200,9 @@
 
     async function refresh() {
         if (refreshing) return;
+        const titan = syncNpcFromMap();
         const guildId = String(settings.guildId).trim();
-        const npcName = String(settings.npcName).trim();
+        const npcName = String(titan?.name || settings.npcName).trim();
         if (!/^\d+$/.test(guildId) || !npcName) {
             setStatus('W konfiguracji podaj ID z linku Lootloga oraz nazwę potwora.', 'error'); return;
         }
@@ -181,9 +224,32 @@
         } finally { refreshing = false; }
     }
 
+    async function testLootlog() {
+        if (refreshing) return;
+        const titan = syncNpcFromMap({ announce: true });
+        if (!titan) return;
+        const guildId = String(settings.guildId).trim();
+        if (!/^\d+$/.test(guildId)) { setStatus('Podaj prawidłowe ID grupy Lootlog.', 'error'); return; }
+        refreshing = true; setStatus(`Test Lootlog: ${titan.name}…`);
+        try {
+            const filters = query({ period: '3d', limit: 50, world: settings.world });
+            const stats = await request(`/guilds/${guildId}/stats/kills/top-npcs${filters}`);
+            const npc = npcFromPayload(stats, titan.name);
+            if (npc) {
+                saveSettings({ npcId: String(npc.npcId ?? npc.id), npcName: titan.name });
+                setStatus(`Test OK — odczytano „${titan.name}” z mapy i znaleziono go w Lootlogu.`, 'ok');
+            } else {
+                setStatus(`Lootlog działa, ale „${titan.name}” nie jest w pierwszych 50 rekordach z 3 dni. Wpisz ID NPC w konfiguracji.`, 'error');
+            }
+        } catch (error) {
+            setStatus(`Test nieudany: ${error?.message || 'brak odpowiedzi Lootlog.'}`, 'error');
+        } finally { refreshing = false; }
+    }
+
     function field(labelText, key, placeholder = '') {
         const label = document.createElement('label'); label.textContent = labelText;
         const input = document.createElement('input'); input.value = settings[key] || ''; input.placeholder = placeholder;
+        input.dataset.field = key;
         input.addEventListener('change', () => saveSettings({ [key]: input.value.trim() }));
         label.append(input); return label;
     }
@@ -193,12 +259,13 @@
         button.id = 'lootlog-fair-group-button'; button.type = 'button'; button.textContent = 'LL'; button.title = 'Lootlog Fair Group';
         Object.assign(button.style, { left: `${settings.x}px`, top: `${settings.y}px` });
         panel = document.createElement('section'); panel.id = 'lootlog-fair-group'; panel.hidden = true;
-        panel.innerHTML = '<header><strong>LOOTLOG · FAIR GROUP</strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-actions"><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Ustaw potwora i odśwież ranking.</p><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>';
+        panel.innerHTML = '<header><strong>LOOTLOG · FAIR GROUP</strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-actions"><button type="button" data-test>TEST ODCZYTU</button><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Po odświeżeniu nazwa tytana jest odczytywana automatycznie z mapy.</p><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>';
         const config = panel.querySelector('.llfg-config');
         config.append(field('ID grupy Lootlog', 'guildId', 'z linku Lootlog'), field('Potwór', 'npcName', 'np. Przyzywacz Demonów'), field('ID NPC Lootlog (opcjonalne)', 'npcId', 'gdy potwora nie ma w top 50'), field('Świat (opcjonalnie)', 'world', 'np. fobos'));
         status = panel.querySelector('[data-status]'); list = panel.querySelector('.llfg-list');
         button.addEventListener('click', () => { panel.hidden = !panel.hidden; if (!panel.hidden) refresh(); });
         panel.querySelector('[data-close]').addEventListener('click', () => { panel.hidden = true; });
+        panel.querySelector('[data-test]').addEventListener('click', testLootlog);
         panel.querySelector('[data-refresh]').addEventListener('click', refresh);
         document.body.append(button, panel);
         injectCss();
@@ -206,7 +273,7 @@
 
     function injectCss() {
         const style = document.createElement('style');
-        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;left:18px;top:245px;width:330px;max-width:calc(100vw - 24px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-actions{padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-list{max-height:280px;overflow:auto}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-row small{grid-column:2 / 4;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}#lootlog-fair-group footer{padding:5px 7px;color:#888;font-size:9px}';
+        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;left:18px;top:245px;width:330px;max-width:calc(100vw - 24px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-list{max-height:280px;overflow:auto}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-row small{grid-column:2 / 4;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}#lootlog-fair-group footer{padding:5px 7px;color:#888;font-size:9px}';
         document.head.append(style);
     }
 
