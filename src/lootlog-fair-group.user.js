@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.0.8
+// @version      1.1.0
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.0.8';
+    const VERSION = '1.1.0';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -155,8 +155,8 @@
         return [...players.values()];
     }
 
-    // Margonem wystawia NPC w różnych kolekcjach zależnie od wersji klienta.
-    // Nie zakładamy numerów typów — tytana rozpoznajemy po jawnej informacji o randze.
+    // Klient Margonem koduje rodzaj potwora w d.wt: 100–109 oznacza Tytana.
+    // Dodatkowo zachowujemy tekstowy fallback dla innych wariantów klienta.
     function getTitanOnMap() {
         const sources = [];
         try {
@@ -175,9 +175,10 @@
                 const name = String(data.nick ?? data.name ?? raw?.nick ?? raw?.name ?? '').trim();
                 if (!name) continue;
                 const id = String(data.id ?? raw?.id ?? fallbackId);
+                const wt = Number(data.wt ?? raw?.wt);
                 const rankInfo = [data.rank, data.rarity, data.tier, data.elite, data.elita, data.kind, data.classification, data.typeName, raw?.rank, raw?.rarity, raw?.tier]
                     .filter(value => value != null).join(' ').toLocaleLowerCase('pl-PL');
-                if (/tytan|titan/.test(rankInfo)) found.set(id, { id, name, rankInfo });
+                if (wt >= 100 && wt <= 109 || /tytan|titan/.test(rankInfo)) found.set(id, { id, name, rankInfo, wt });
             }
         }
         return [...found.values()][0] || null;
@@ -251,13 +252,15 @@
         try {
             let npcId = String(settings.npcId).trim();
             if (!/^\d+$/.test(npcId)) {
-                const filters = query({ period: '3d', limit: 50, world: settings.world });
+                // Nie pobieramy globalnego top 50: target może mieć mniej bić.
+                // Lootlog obsługuje dokładnie ten filtr tekstowy również w widoku statystyk.
+                const filters = query({ period: '3d', limit: 50, search: npcName, world: settings.world });
                 const stats = await request(`/guilds/${guildId}/stats/kills/top-npcs${filters}`);
                 const npc = npcFromPayload(stats, npcName);
                 if (!npc) throw new Error(`Nie znaleziono „${npcName}” w ostatnich statystykach. Wpisz jego ID Lootloga ręcznie w konfiguracji.`);
                 npcId = String(npc.npcId ?? npc.id);
             }
-            const filters = query({ period: '3d', limit: 50, world: settings.world });
+            const filters = query({ period: '3d', limit: 50, search: npcName, world: settings.world });
             const details = await request(`/guilds/${guildId}/stats/kills/npcs/${npcId}/killers${filters}`);
             renderRanking(getMapPlayers(), killerRows(details), npcName);
         } catch (error) {
@@ -274,7 +277,7 @@
         if (!/^\d+$/.test(guildId)) { setStatus('Podaj prawidłowe ID grupy Lootlog.', 'error'); return; }
         refreshing = true; setStatus(`Test Lootlog: ${npcName}…`);
         try {
-            const filters = query({ period: '3d', limit: 50, world: settings.world });
+            const filters = query({ period: '3d', limit: 50, search: npcName, world: settings.world });
             const stats = await request(`/guilds/${guildId}/stats/kills/top-npcs${filters}`);
             const npc = npcFromPayload(stats, npcName);
             if (npc) {
@@ -345,7 +348,37 @@
         config.append(guildField, npcField, field('ID NPC Lootlog (opcjonalne)', 'npcId', 'gdy potwora nie ma w top 50'), field('Świat (opcjonalnie)', 'world', 'np. fobos'));
         refreshTitanSelect();
         status = panel.querySelector('[data-status]'); list = panel.querySelector('.llfg-list'); debug = panel.querySelector('[data-debug]');
-        button.addEventListener('click', () => { panel.hidden = !panel.hidden; if (!panel.hidden) refresh(); });
+        let drag = null;
+        let suppressClick = false;
+        button.addEventListener('pointerdown', event => {
+            if (event.button !== 0) return;
+            const rect = button.getBoundingClientRect();
+            drag = { id: event.pointerId, startX: event.clientX, startY: event.clientY, dx: event.clientX - rect.left, dy: event.clientY - rect.top, moved: false };
+            button.setPointerCapture(event.pointerId);
+        });
+        button.addEventListener('pointermove', event => {
+            if (!drag || event.pointerId !== drag.id) return;
+            if (Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY) > 3) drag.moved = true;
+            if (!drag.moved) return;
+            const x = Math.max(0, Math.min(innerWidth - button.offsetWidth, event.clientX - drag.dx));
+            const y = Math.max(0, Math.min(innerHeight - button.offsetHeight, event.clientY - drag.dy));
+            button.style.left = `${x}px`; button.style.top = `${y}px`;
+        });
+        function endDrag(event) {
+            if (!drag || event.pointerId !== drag.id) return;
+            const finished = drag; drag = null;
+            if (button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
+            if (finished.moved) {
+                suppressClick = true;
+                saveSettings({ x: Math.round(parseFloat(button.style.left)), y: Math.round(parseFloat(button.style.top)) });
+            }
+        }
+        button.addEventListener('pointerup', endDrag);
+        button.addEventListener('pointercancel', endDrag);
+        button.addEventListener('click', () => {
+            if (suppressClick) { suppressClick = false; return; }
+            panel.hidden = !panel.hidden; if (!panel.hidden) refresh();
+        });
         panel.querySelector('[data-close]').addEventListener('click', () => { panel.hidden = true; });
         panel.querySelector('[data-titan-select]').addEventListener('change', event => {
             saveSettings({ selectedNpcName: event.target.value, npcId: '' });
@@ -360,7 +393,7 @@
 
     function injectCss() {
         const style = document.createElement('style');
-        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;left:18px;top:245px;width:330px;max-width:calc(100vw - 24px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input,.llfg-picker select{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-picker{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px;padding:0 6px 6px}.llfg-picker button{border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 8px Arial;cursor:pointer}.llfg-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover,.llfg-picker button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-debug{margin:0 6px 6px;color:#aaa;font-size:9px}.llfg-debug pre{max-height:180px;overflow:auto;margin:4px 0 0;padding:5px;border:1px solid #333;background:#090909;color:#bbb;font:9px/1.25 monospace;white-space:pre-wrap}.llfg-list{max-height:280px;overflow:auto}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-row small{grid-column:2 / 4;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}#lootlog-fair-group footer{padding:5px 7px;color:#888;font-size:9px}';
+        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer;touch-action:none}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;left:18px;top:245px;width:330px;max-width:calc(100vw - 24px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input,.llfg-picker select{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-picker{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px;padding:0 6px 6px}.llfg-picker button{border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 8px Arial;cursor:pointer}.llfg-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover,.llfg-picker button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-debug{margin:0 6px 6px;color:#aaa;font-size:9px}.llfg-debug pre{max-height:180px;overflow:auto;margin:4px 0 0;padding:5px;border:1px solid #333;background:#090909;color:#bbb;font:9px/1.25 monospace;white-space:pre-wrap}.llfg-list{max-height:280px;overflow:auto}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-row small{grid-column:2 / 4;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}#lootlog-fair-group footer{padding:5px 7px;color:#888;font-size:9px}';
         document.head.append(style);
     }
 
