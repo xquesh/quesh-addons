@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.2.0
+// @version      1.2.4
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.2.0';
+    const VERSION = '1.2.4';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -29,15 +29,17 @@
         npcId: '',
         world: '',
         x: 18,
-        y: 210
+        y: 210,
+        panelX: 56,
+        panelY: 245
     });
     const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
     let settings = loadSettings();
     let panel;
     let status;
     let list;
-    let debug;
     let refreshing = false;
+    let latestRanking = null;
 
     function loadSettings() {
         try {
@@ -59,30 +61,6 @@
         if (!status) return;
         status.textContent = text;
         status.dataset.type = type;
-    }
-
-    function showDebug(value) {
-        if (!debug) return;
-        try {
-            const text = JSON.stringify(value, null, 2);
-            debug.textContent = text.length > 12000 ? `${text.slice(0, 12000)}\n…(ucięto)` : text;
-            debug.hidden = false;
-        } catch { debug.textContent = String(value); debug.hidden = false; }
-    }
-
-    async function copyDebug() {
-        const text = debug?.textContent || '';
-        if (!text) { setStatus('Najpierw wykonaj pobieranie, aby pojawiły się dane diagnostyczne.', 'error'); return; }
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch {
-            const area = document.createElement('textarea');
-            area.value = text; area.style.position = 'fixed'; area.style.opacity = '0';
-            document.body.append(area); area.select();
-            const copied = document.execCommand('copy'); area.remove();
-            if (!copied) { setStatus('Nie udało się skopiować danych. Zaznacz je w polu ręcznie.', 'error'); return; }
-        }
-        setStatus('Dane diagnostyczne skopiowano do schowka.', 'ok');
     }
 
     function request(path, baseUrl = API) {
@@ -168,9 +146,13 @@
                 const nick = String(data.nick ?? data.name ?? raw?.nick ?? raw?.name ?? '').trim();
                 const id = Number(data.id ?? raw?.id ?? fallbackId);
                 if (!nick || !Number.isFinite(id)) continue;
-                players.set(id, { id, nick, level: data.lvl ?? data.level ?? raw?.lvl ?? raw?.level ?? '' });
+                players.set(id, { id, nick, level: data.lvl ?? data.level ?? raw?.lvl ?? raw?.level ?? '', isHero: false });
             }
         }
+        const hero = page.Engine?.hero?.d || page.Engine?.hero || page.g?.hero || {};
+        const nick = String(hero.nick ?? hero.name ?? '').trim();
+        const id = Number(hero.id);
+        if (nick && Number.isFinite(id)) players.set(id, { id, nick, level: hero.lvl ?? hero.level ?? '', isHero: true });
         return [...players.values()];
     }
 
@@ -250,6 +232,7 @@
         const since = Date.now() - 72 * 60 * 60 * 1000;
         const wanted = normalize(npcName);
         const counts = new Map();
+        const lastHit = new Map();
         const valid = records.filter(record => {
             const time = Date.parse(record.createdAt ?? record.date ?? '');
             const hasNpc = record.npcs.some(npc => normalize(npc?.name ?? npc?.npcName ?? npc) === wanted);
@@ -257,15 +240,26 @@
         });
         for (const record of valid) for (const player of record.players) {
             const name = String(player?.name ?? player?.nick ?? '').trim();
-            if (name) counts.set(normalize(name), (counts.get(normalize(name)) ?? 0) + 1);
+            const key = normalize(name);
+            const timestamp = Date.parse(record.createdAt ?? record.date ?? '');
+            if (name) {
+                counts.set(key, (counts.get(key) ?? 0) + 1);
+                lastHit.set(key, Math.max(lastHit.get(key) ?? 0, timestamp));
+            }
         }
-        return { counts, records: valid };
+        return { counts, lastHit, records: valid };
     }
 
-    function renderRanking(players, killsByName, npcName) {
+    function formatDate(timestamp) {
+        return timestamp ? new Date(timestamp).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' }) : '';
+    }
+
+    function renderRanking(players, killsByName, lastHitByName, npcName) {
         list.replaceChildren();
-        const ranked = players.map(player => ({ ...player, kills: killsByName.get(normalize(player.nick)) ?? 0, found: killsByName.has(normalize(player.nick)) }))
-            .sort((a, b) => a.kills - b.kills || a.nick.localeCompare(b.nick, 'pl'));
+        const ranked = players.map(player => {
+            const key = normalize(player.nick);
+            return { ...player, kills: killsByName.get(key) ?? 0, lastHit: lastHitByName.get(key) ?? 0, found: killsByName.has(key) };
+        }).sort((a, b) => a.kills - b.kills || a.lastHit - b.lastHit || a.nick.localeCompare(b.nick, 'pl'));
         if (!ranked.length) {
             const empty = document.createElement('p'); empty.className = 'llfg-empty'; empty.textContent = 'Na aktualnej mapie nie znaleziono innych postaci.';
             list.append(empty); return;
@@ -275,8 +269,21 @@
             const rank = document.createElement('b'); rank.textContent = `${index + 1}.`;
             const name = document.createElement('span'); name.className = 'llfg-name'; name.textContent = `${player.nick}${player.level !== '' ? ` (${player.level})` : ''}`;
             const count = document.createElement('span'); count.className = 'llfg-count'; count.textContent = `${player.kills} bić`;
-            const note = document.createElement('small'); note.textContent = player.found ? 'Lootlog · 3 dni' : 'brak wpisu · 0';
-            row.append(rank, name, count, note); list.append(row);
+            const note = document.createElement('small'); note.textContent = player.found ? `Lootlog · ostatnio ${formatDate(player.lastHit)}` : 'brak wpisu · 0';
+            if (player.isHero) {
+                const self = document.createElement('span'); self.className = 'llfg-self'; self.textContent = 'TY';
+                row.append(rank, name, count, self, note);
+            } else {
+                const invite = document.createElement('button'); invite.type = 'button'; invite.className = 'llfg-invite'; invite.textContent = '+';
+                invite.title = `Zaproś ${player.nick} do drużyny`;
+                invite.addEventListener('click', () => {
+                    if (typeof page._g !== 'function') { setStatus('Gra nie jest gotowa do wysłania zaproszenia.', 'error'); return; }
+                    page._g(`party&a=inv&id=${encodeURIComponent(player.id)}`);
+                    setStatus(`Wysłano zaproszenie do: ${player.nick}.`, 'ok');
+                });
+                row.append(rank, name, count, invite, note);
+            }
+            list.append(row);
         });
         setStatus(`Ranking: ${npcName} · ${ranked.length} osób z mapy · ostatnie 3 dni.`, 'ok');
     }
@@ -299,34 +306,13 @@
             const players = getMapPlayers();
             const matched = players.filter(player => killsByName.has(normalize(player.nick)));
             const namesMismatch = killsByName.size && !matched.length;
-            if (namesMismatch) {
-                showDebug({ mapPlayers: players, lootRecords: participation.records, parsedNames: [...killsByName.entries()] });
-            } else debug.hidden = true;
-            renderRanking(players, killsByName, npcName);
+            latestRanking = { killsByName, lastHit: participation.lastHit, npcName };
+            renderRanking(players, killsByName, participation.lastHit, npcName);
             if (!participation.records.length) {
-                showDebug(payload);
-                setStatus(`Nie znaleziono zapisanych walk „${npcName}” z ostatnich 72 godzin. Rozwiń DANE DIAGNOSTYCZNE.`, 'error');
-            } else if (namesMismatch) setStatus('Lootlog zwrócił osoby, ale ich nazwy nie pasują do nicków na mapie. Rozwiń DANE DIAGNOSTYCZNE.', 'error');
+                setStatus(`Nie znaleziono zapisanych walk „${npcName}” z ostatnich 72 godzin.`, 'error');
+            } else if (namesMismatch) setStatus('Lootlog zwrócił osoby, ale ich nazwy nie pasują do nicków na mapie.', 'error');
         } catch (error) {
             setStatus(error?.message || 'Nie udało się pobrać rankingu.', 'error');
-        } finally { refreshing = false; }
-    }
-
-    async function testLootlog() {
-        if (refreshing) return;
-        const titan = syncNpcFromMap({ announce: true });
-        const guildId = String(settings.guildId).trim();
-        const npcName = String(titan?.name || settings.selectedNpcName).trim();
-        if (!npcName) return;
-        if (!/^\d+$/.test(guildId)) { setStatus('Podaj prawidłowe ID grupy Lootlog.', 'error'); return; }
-        refreshing = true; setStatus(`Test Lootlog: ${npcName}…`);
-        try {
-            const payload = await request(`/guilds/${guildId}/loots${query({ npcs: [npcName], limit: 100, world: settings.world })}`);
-            const participation = lootParticipations(lootRecords(payload), npcName);
-            if (!participation.records.length) { showDebug(payload); throw new Error(`Nie znaleziono walk „${npcName}” z ostatnich 72 godzin.`); }
-            setStatus(`Test OK — znaleziono ${participation.records.length} walk ${npcName} z ostatnich 72 godzin.`, 'ok');
-        } catch (error) {
-            setStatus(`Test nieudany: ${error?.message || 'brak odpowiedzi Lootlog.'}`, 'error');
         } finally { refreshing = false; }
     }
 
@@ -353,11 +339,9 @@
             const payload = await request(`/guilds/${guildId}/stats/kills/top-npcs${query({ period: 'all', limit: 50, npcType: 'TITAN', world: settings.world })}`);
             const names = titanNamesFromPayload(payload);
             if (!names.length) {
-                showDebug(payload);
-                throw new Error('Lootlog nie zwrócił rozpoznawalnych rekordów NPC. Otwórz „DANE DIAGNOSTYCZNE” i prześlij ich treść.');
+                throw new Error('Lootlog nie zwrócił rozpoznawalnych rekordów NPC.');
             }
             saveSettings({ titanCatalog: names }); refreshTitanSelect();
-            debug.hidden = true;
             setStatus(`Pobrano ${names.length} tytanów ze statystyk grupy. Wybór ręczny jest dostępny jako fallback.`, 'ok');
         } catch (error) {
             setStatus(`Nie udało się pobrać katalogu: ${error?.message || 'brak odpowiedzi.'}`, 'error');
@@ -377,7 +361,8 @@
         button.id = 'lootlog-fair-group-button'; button.type = 'button'; button.textContent = 'LL'; button.title = 'Lootlog Fair Group';
         Object.assign(button.style, { left: `${settings.x}px`, top: `${settings.y}px` });
         panel = document.createElement('section'); panel.id = 'lootlog-fair-group'; panel.hidden = true;
-        panel.innerHTML = `<header><strong>LOOTLOG · FAIR GROUP <small>v${VERSION}</small></strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-picker"><select data-titan-select title="Używane tylko, gdy tytana nie ma na mapie"></select><button type="button" data-load-titans>POBIERZ TYTANY</button></div><div class="llfg-actions"><button type="button" data-test>TEST ODCZYTU</button><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Automatyczny odczyt z mapy ma pierwszeństwo przed wyborem z listy ze statystyk grupy.</p><details class="llfg-debug"><summary>DANE DIAGNOSTYCZNE</summary><button type="button" data-copy-debug>KOPIUJ DANE</button><pre data-debug></pre></details><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>`;
+        panel.style.left = `${settings.panelX}px`; panel.style.top = `${settings.panelY}px`;
+        panel.innerHTML = `<header><strong>LOOTLOG · FAIR GROUP <small>v${VERSION}</small></strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-picker"><select data-titan-select title="Używane tylko, gdy tytana nie ma na mapie"></select><button type="button" data-load-titans>POBIERZ TYTANY</button></div><div class="llfg-actions"><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Automatyczny odczyt z mapy ma pierwszeństwo przed wyborem z listy ze statystyk grupy.</p><div class="llfg-list"></div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>`;
         const config = panel.querySelector('.llfg-config');
         const guildField = field('ID grupy Lootlog', 'guildId', 'z linku Lootlog');
         const npcField = field('Potwór (z mapy)', 'npcName', 'wykrywany automatycznie');
@@ -386,7 +371,29 @@
         npcInput.title = 'Ta nazwa jest odczytywana automatycznie wyłącznie z tytana na aktualnej mapie.';
         config.append(guildField, npcField, field('Świat (opcjonalnie)', 'world', 'np. fobos'));
         refreshTitanSelect();
-        status = panel.querySelector('[data-status]'); list = panel.querySelector('.llfg-list'); debug = panel.querySelector('[data-debug]');
+        status = panel.querySelector('[data-status]'); list = panel.querySelector('.llfg-list');
+        const header = panel.querySelector('header');
+        let panelDrag = null;
+        header.addEventListener('pointerdown', event => {
+            if (event.button !== 0 || event.target.closest('button')) return;
+            const rect = panel.getBoundingClientRect();
+            panelDrag = { id: event.pointerId, dx: event.clientX - rect.left, dy: event.clientY - rect.top };
+            header.setPointerCapture(event.pointerId); event.preventDefault();
+        });
+        header.addEventListener('pointermove', event => {
+            if (!panelDrag || event.pointerId !== panelDrag.id) return;
+            const x = Math.max(0, Math.min(innerWidth - panel.offsetWidth, event.clientX - panelDrag.dx));
+            const y = Math.max(0, Math.min(innerHeight - 28, event.clientY - panelDrag.dy));
+            panel.style.left = `${x}px`; panel.style.top = `${y}px`;
+        });
+        function endPanelDrag(event) {
+            if (!panelDrag || event.pointerId !== panelDrag.id) return;
+            panelDrag = null;
+            if (header.hasPointerCapture(event.pointerId)) header.releasePointerCapture(event.pointerId);
+            saveSettings({ panelX: Math.round(parseFloat(panel.style.left)), panelY: Math.round(parseFloat(panel.style.top)) });
+        }
+        header.addEventListener('pointerup', endPanelDrag);
+        header.addEventListener('pointercancel', endPanelDrag);
         let drag = null;
         let suppressClick = false;
         button.addEventListener('pointerdown', event => {
@@ -424,16 +431,20 @@
             setStatus(event.target.value ? `Wybrano fallback: ${event.target.value}.` : 'Wybór ręczny wyłączony — używany będzie tylko tytan z mapy.');
         });
         panel.querySelector('[data-load-titans]').addEventListener('click', loadTitanCatalog);
-        panel.querySelector('[data-copy-debug]').addEventListener('click', copyDebug);
-        panel.querySelector('[data-test]').addEventListener('click', testLootlog);
         panel.querySelector('[data-refresh]').addEventListener('click', refresh);
         document.body.append(button, panel);
         injectCss();
+        // Nowe osoby mogą pojawić się po odczycie Lootloga. Odświeżamy tylko
+        // dane mapy — bez cyklicznych dodatkowych zapytań do zewnętrznej usługi.
+        setInterval(() => {
+            if (panel.hidden || !latestRanking) return;
+            renderRanking(getMapPlayers(), latestRanking.killsByName, latestRanking.lastHit, latestRanking.npcName);
+        }, 5000);
     }
 
     function injectCss() {
         const style = document.createElement('style');
-        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer;touch-action:none}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;left:18px;top:245px;width:330px;max-width:calc(100vw - 24px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input,.llfg-picker select{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-picker{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px;padding:0 6px 6px}.llfg-picker button,.llfg-debug button{border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 8px Arial;cursor:pointer}.llfg-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover,.llfg-picker button:hover,.llfg-debug button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-debug{margin:0 6px 6px;color:#aaa;font-size:9px}.llfg-debug button{float:right;height:18px;padding:1px 5px}.llfg-debug pre{clear:both;max-height:180px;overflow:auto;margin:4px 0 0;padding:5px;border:1px solid #333;background:#090909;color:#bbb;font:9px/1.25 monospace;white-space:pre-wrap}.llfg-list{max-height:280px;overflow:auto}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-row small{grid-column:2 / 4;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}#lootlog-fair-group footer{padding:5px 7px;color:#888;font-size:9px}';
+        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer;touch-action:none}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;width:330px;max-width:calc(100vw - 24px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff;cursor:move;touch-action:none}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input,.llfg-picker select{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-picker{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px;padding:0 6px 6px}.llfg-picker button{border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 8px Arial;cursor:pointer}.llfg-actions{padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover,.llfg-picker button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-list{max-height:280px;overflow:auto}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px 20px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-invite{width:19px;height:19px;padding:0;border:1px solid #666;border-radius:0;background:#101010;color:#fff;font:700 14px/16px Arial;cursor:pointer}.llfg-invite:hover{border-color:#fff;box-shadow:0 0 5px #fff8}.llfg-self{color:#888;text-align:center;font:700 8px Arial}.llfg-row small{grid-column:2 / 5;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}#lootlog-fair-group footer{padding:5px 7px;color:#888;font-size:9px}';
         document.head.append(style);
     }
 
