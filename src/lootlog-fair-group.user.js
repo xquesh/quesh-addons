@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.2.4
-// @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
+// @version      1.2.5
+// @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 7 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @match        https://*.margonem.pl/*
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.2.4';
+    const VERSION = '1.2.5';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -229,7 +229,7 @@
     }
 
     function lootParticipations(records, npcName) {
-        const since = Date.now() - 72 * 60 * 60 * 1000;
+        const since = Date.now() - 7 * 24 * 60 * 60 * 1000;
         const wanted = normalize(npcName);
         const counts = new Map();
         const lastHit = new Map();
@@ -285,7 +285,7 @@
             }
             list.append(row);
         });
-        setStatus(`Ranking: ${npcName} · ${ranked.length} osób z mapy · ostatnie 3 dni.`, 'ok');
+        setStatus(`Ranking: ${npcName} · ${ranked.length} osób z mapy · ostatnie 7 dni.`, 'ok');
     }
 
     async function refresh() {
@@ -309,7 +309,7 @@
             latestRanking = { killsByName, lastHit: participation.lastHit, npcName };
             renderRanking(players, killsByName, participation.lastHit, npcName);
             if (!participation.records.length) {
-                setStatus(`Nie znaleziono zapisanych walk „${npcName}” z ostatnich 72 godzin.`, 'error');
+                setStatus(`Nie znaleziono zapisanych walk „${npcName}” z ostatnich 7 dni.`, 'error');
             } else if (namesMismatch) setStatus('Lootlog zwrócił osoby, ale ich nazwy nie pasują do nicków na mapie.', 'error');
         } catch (error) {
             setStatus(error?.message || 'Nie udało się pobrać rankingu.', 'error');
@@ -372,6 +372,13 @@
         config.append(guildField, npcField, field('Świat (opcjonalnie)', 'world', 'np. fobos'));
         refreshTitanSelect();
         status = panel.querySelector('[data-status]'); list = panel.querySelector('.llfg-list');
+        // Margonem przechwytuje kółko myszy na poziomie gry. Przewijamy listę
+        // ręcznie, aby dłuższy ranking zawsze dało się przeczytać bez ruszania mapy.
+        list.addEventListener('wheel', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            list.scrollTop += event.deltaY;
+        }, { passive: false });
         const header = panel.querySelector('header');
         let panelDrag = null;
         header.addEventListener('pointerdown', event => {
