@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.1.0
+// @version      1.1.1
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.1.0';
+    const VERSION = '1.1.1';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -212,7 +212,10 @@
         for (const entry of entries) {
             if (!entry || typeof entry !== 'object') continue;
             const name = String(entry.member?.name ?? entry.name ?? entry.nick ?? '').trim();
-            const kills = Number(entry.kills ?? entry.killCount ?? entry.totalKills ?? entry.count ?? 0);
+            const kills = Number(
+                entry.kills ?? entry.killCount ?? entry.totalKills ?? entry.uniqueKills ?? entry.participations ??
+                entry.count ?? entry.stats?.kills ?? entry.stats?.killCount ?? entry.stats?.totalKills ?? 0
+            );
             if (!name || !Number.isFinite(kills)) continue;
             const key = normalize(name);
             merged.set(key, Math.max(merged.get(key) ?? 0, kills));
@@ -262,7 +265,15 @@
             }
             const filters = query({ period: '3d', limit: 50, search: npcName, world: settings.world });
             const details = await request(`/guilds/${guildId}/stats/kills/npcs/${npcId}/killers${filters}`);
-            renderRanking(getMapPlayers(), killerRows(details), npcName);
+            const killsByName = killerRows(details);
+            const players = getMapPlayers();
+            const matched = players.filter(player => killsByName.has(normalize(player.nick)));
+            const namesMismatch = killsByName.size && !matched.length;
+            if (namesMismatch) {
+                showDebug({ mapPlayers: players, lootlogKillers: details.killers ?? details, parsedNames: [...killsByName.entries()] });
+            } else debug.hidden = true;
+            renderRanking(players, killsByName, npcName);
+            if (namesMismatch) setStatus('Lootlog zwrócił osoby, ale ich nazwy nie pasują do nicków na mapie. Rozwiń DANE DIAGNOSTYCZNE.', 'error');
         } catch (error) {
             setStatus(error?.message || 'Nie udało się pobrać rankingu.', 'error');
         } finally { refreshing = false; }
