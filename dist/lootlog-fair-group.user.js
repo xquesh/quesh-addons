@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.2.7
+// @version      1.2.8
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 7 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.2.7';
+    const VERSION = '1.2.8';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -134,6 +134,7 @@
     }
 
     function getMapPlayers() {
+        const partyIds = getPartyIds();
         const sources = [];
         try {
             sources.push(page.Engine?.others?.check?.(), page.Engine?.others?.getAll?.(), page.Engine?.others?.others, page.g?.other);
@@ -147,14 +148,27 @@
                 const nick = String(data.nick ?? data.name ?? raw?.nick ?? raw?.name ?? '').trim();
                 const id = Number(data.id ?? raw?.id ?? fallbackId);
                 if (!nick || !Number.isFinite(id)) continue;
-                players.set(id, { id, nick, level: data.lvl ?? data.level ?? raw?.lvl ?? raw?.level ?? '', isHero: false });
+                players.set(id, { id, nick, level: data.lvl ?? data.level ?? raw?.lvl ?? raw?.level ?? '', isHero: false, inParty: partyIds.has(String(id)) });
             }
         }
         const hero = page.Engine?.hero?.d || page.Engine?.hero || page.g?.hero || {};
         const nick = String(hero.nick ?? hero.name ?? '').trim();
         const id = Number(hero.id);
-        if (nick && Number.isFinite(id)) players.set(id, { id, nick, level: hero.lvl ?? hero.level ?? '', isHero: true });
+        if (nick && Number.isFinite(id)) players.set(id, { id, nick, level: hero.lvl ?? hero.level ?? '', isHero: true, inParty: partyIds.has(String(id)) });
         return [...players.values()];
+    }
+
+    function getPartyIds() {
+        try {
+            const party = page.Engine?.party?.get?.() || page.Engine?.party?.d || page.Engine?.party || page.g?.party;
+            if (!party || typeof party !== 'object') return new Set();
+            const members = party.getMembers?.();
+            if (members instanceof Map) return new Set([...members.entries()].map(([id, member]) => String(member?.id ?? id)));
+            const source = party.members && typeof party.members === 'object' ? party.members : party;
+            return new Set(Object.entries(source)
+                .filter(([id, member]) => /^\d+$/.test(id) || Number.isFinite(Number(member?.id)))
+                .map(([id, member]) => String(member?.id ?? id)));
+        } catch { return new Set(); }
     }
 
     // Klient Margonem koduje rodzaj potwora w d.wt: 100–109 oznacza Tytana.
@@ -266,7 +280,7 @@
             list.append(empty); return;
         }
         ranked.forEach((player, index) => {
-            const row = document.createElement('div'); row.className = 'llfg-row';
+            const row = document.createElement('div'); row.className = `llfg-row${player.inParty ? ' llfg-in-party' : ''}`;
             const rank = document.createElement('b'); rank.textContent = `${index + 1}.`;
             const name = document.createElement('span'); name.className = 'llfg-name'; name.textContent = `${player.nick}${player.level !== '' ? ` (${player.level})` : ''}`;
             const count = document.createElement('span'); count.className = 'llfg-count'; count.textContent = `${player.kills} bić`;
@@ -274,6 +288,9 @@
             if (player.isHero) {
                 const self = document.createElement('span'); self.className = 'llfg-self'; self.textContent = 'TY';
                 row.append(rank, name, count, self, note);
+            } else if (player.inParty) {
+                const member = document.createElement('span'); member.className = 'llfg-party-member'; member.textContent = '✓'; member.title = 'Już w drużynie';
+                row.append(rank, name, count, member, note);
             } else {
                 const invite = document.createElement('button'); invite.type = 'button'; invite.className = 'llfg-invite'; invite.textContent = '+';
                 invite.title = `Zaproś ${player.nick} do drużyny`;
@@ -473,7 +490,7 @@
 
     function injectCss() {
         const style = document.createElement('style');
-        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer;touch-action:none}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;display:flex;flex-direction:column;width:330px;min-height:250px;max-width:calc(100vw - 24px);max-height:calc(100vh - 12px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial;overflow:hidden}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff;cursor:move;touch-action:none}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input,.llfg-picker select{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-picker{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px;padding:0 6px 6px}.llfg-picker button{border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 8px Arial;cursor:pointer}.llfg-actions{padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover,.llfg-picker button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-list{min-height:36px;flex:1 1 auto;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#858585 #090909}.llfg-list::-webkit-scrollbar{width:8px}.llfg-list::-webkit-scrollbar-track{background:#090909;border-left:1px solid #333}.llfg-list::-webkit-scrollbar-thumb{background:#5c5c5c;border:1px solid #999}.llfg-list::-webkit-scrollbar-thumb:hover{background:#aaa}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px 20px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-invite{width:19px;height:19px;padding:0;border:1px solid #666;border-radius:0;background:#101010;color:#fff;font:700 14px/16px Arial;cursor:pointer}.llfg-invite:hover{border-color:#fff;box-shadow:0 0 5px #fff8}.llfg-self{color:#888;text-align:center;font:700 8px Arial}.llfg-row small{grid-column:2 / 5;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}.llfg-resize{height:18px;flex:0 0 18px;display:flex;align-items:center;justify-content:center;cursor:ns-resize;border-top:1px solid #555;border-bottom:1px solid #333;background:#111;color:#aaa;font:700 8px Arial;letter-spacing:.2px;touch-action:none;user-select:none}.llfg-resize:hover{border-color:#ddd;background:#1c1c1c;color:#fff}#lootlog-fair-group footer{flex:0 0 auto;padding:5px 7px;color:#888;font-size:9px}';
+        style.textContent = '#lootlog-fair-group-button{position:fixed;z-index:34000;width:32px;height:26px;border:1px solid #888;border-radius:0;background:#050505;color:#eee;font:700 9px Arial;cursor:pointer;touch-action:none}#lootlog-fair-group-button:hover{border-color:#fff;box-shadow:0 0 8px #fff9}#lootlog-fair-group{position:fixed;z-index:34001;display:flex;flex-direction:column;width:330px;min-height:250px;max-width:calc(100vw - 24px);max-height:calc(100vh - 12px);border:1px solid #777;background:#050505;color:#ddd;box-shadow:0 6px 22px #000;font:11px Arial;overflow:hidden}#lootlog-fair-group[hidden]{display:none}#lootlog-fair-group *{box-sizing:border-box}#lootlog-fair-group header{height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border-bottom:1px solid #555;color:#fff;cursor:move;touch-action:none}#lootlog-fair-group header button{border:0;background:none;color:#ddd;font-size:16px;cursor:pointer}.llfg-config{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px}.llfg-config label{display:grid;gap:2px;color:#aaa;font-size:9px}.llfg-config input,.llfg-picker select{width:100%;height:22px;border:1px solid #555;border-radius:0;background:#0a0a0a;color:#eee;padding:2px 4px;font:10px Arial}.llfg-picker{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px;padding:0 6px 6px}.llfg-picker button{border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 8px Arial;cursor:pointer}.llfg-actions{padding:0 6px 6px}.llfg-actions button{width:100%;height:23px;border:1px solid #777;border-radius:0;background:#111;color:#eee;font:700 9px Arial;cursor:pointer}.llfg-actions button:hover,.llfg-picker button:hover{border-color:#fff}.llfg-status{min-height:27px;margin:0;padding:5px 7px;border-top:1px solid #333;border-bottom:1px solid #333;color:#aaa}.llfg-status[data-type="error"]{color:#ff8585}.llfg-status[data-type="ok"]{color:#8dff9f}.llfg-list{min-height:36px;flex:1 1 auto;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#858585 #090909}.llfg-list::-webkit-scrollbar{width:8px}.llfg-list::-webkit-scrollbar-track{background:#090909;border-left:1px solid #333}.llfg-list::-webkit-scrollbar-thumb{background:#5c5c5c;border:1px solid #999}.llfg-list::-webkit-scrollbar-thumb:hover{background:#aaa}.llfg-row{display:grid;grid-template-columns:25px minmax(0,1fr) 45px 20px;gap:4px;align-items:center;min-height:28px;padding:3px 7px;border-bottom:1px solid #252525}.llfg-row.llfg-in-party{background:linear-gradient(90deg,#13331d,#0a160d);box-shadow:inset 3px 0 #57db72}.llfg-row.llfg-in-party .llfg-name,.llfg-row.llfg-in-party .llfg-count{color:#b8ffc4}.llfg-row b{color:#aaa}.llfg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}.llfg-count{text-align:right;color:#fff;font-weight:700}.llfg-invite{width:19px;height:19px;padding:0;border:1px solid #666;border-radius:0;background:#101010;color:#fff;font:700 14px/16px Arial;cursor:pointer}.llfg-invite:hover{border-color:#fff;box-shadow:0 0 5px #fff8}.llfg-party-member{color:#7dff95;text-align:center;font:700 15px/19px Arial;text-shadow:0 0 5px #36c957}.llfg-self{color:#888;text-align:center;font:700 8px Arial}.llfg-row small{grid-column:2 / 5;color:#888;font-size:9px}.llfg-empty{padding:12px 7px;color:#999;text-align:center}.llfg-resize{height:18px;flex:0 0 18px;display:flex;align-items:center;justify-content:center;cursor:ns-resize;border-top:1px solid #555;border-bottom:1px solid #333;background:#111;color:#aaa;font:700 8px Arial;letter-spacing:.2px;touch-action:none;user-select:none}.llfg-resize:hover{border-color:#ddd;background:#1c1c1c;color:#fff}#lootlog-fair-group footer{flex:0 0 auto;padding:5px 7px;color:#888;font-size:9px}';
         document.head.append(style);
     }
 
