@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.2.9
+// @version      1.3.0
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 7 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.2.9';
+    const VERSION = '1.3.0';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -32,7 +32,8 @@
         y: 210,
         panelX: 56,
         panelY: 245,
-        panelHeight: 390
+        panelHeight: 390,
+        panelOpen: false
     });
     const page = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
     let settings = loadSettings();
@@ -378,7 +379,7 @@
         const button = document.createElement('button');
         button.id = 'lootlog-fair-group-button'; button.type = 'button'; button.textContent = 'LL'; button.title = 'Lootlog Fair Group';
         Object.assign(button.style, { left: `${settings.x}px`, top: `${settings.y}px` });
-        panel = document.createElement('section'); panel.id = 'lootlog-fair-group'; panel.hidden = true;
+        panel = document.createElement('section'); panel.id = 'lootlog-fair-group'; panel.hidden = !settings.panelOpen;
         panel.style.left = `${settings.panelX}px`; panel.style.top = `${settings.panelY}px`; panel.style.height = `${settings.panelHeight}px`;
         panel.innerHTML = `<header><strong>LOOTLOG · FAIR GROUP <small>v${VERSION}</small></strong><button type="button" data-close aria-label="Zamknij">×</button></header><div class="llfg-config"></div><div class="llfg-picker"><select data-titan-select title="Używane tylko, gdy tytana nie ma na mapie"></select><button type="button" data-load-titans>POBIERZ TYTANY</button></div><div class="llfg-actions"><button type="button" data-refresh>ODŚWIEŻ RANKING</button></div><p class="llfg-status" data-status>Automatyczny odczyt z mapy ma pierwszeństwo przed wyborem z listy ze statystyk grupy.</p><div class="llfg-list"></div><div class="llfg-resize" data-resize title="Przeciągnij pionowo, aby zmienić wysokość okna">↕ PRZECIĄGNIJ, ABY ZMIENIĆ WYSOKOŚĆ</div><footer>Sortowanie rosnąco: najmniej bić = najwyższy priorytet.</footer>`;
         const config = panel.querySelector('.llfg-config');
@@ -471,10 +472,14 @@
             if (suppressClick) { suppressClick = false; return; }
             if (panel.hidden) {
                 panel.hidden = false;
+                saveSettings({ panelOpen: true });
                 refresh();
             }
         });
-        panel.querySelector('[data-close]').addEventListener('click', () => { panel.hidden = true; });
+        panel.querySelector('[data-close]').addEventListener('click', () => {
+            panel.hidden = true;
+            saveSettings({ panelOpen: false });
+        });
         panel.querySelector('[data-titan-select]').addEventListener('change', event => {
             saveSettings({ selectedNpcName: event.target.value, npcId: '' });
             setStatus(event.target.value ? `Wybrano fallback: ${event.target.value}.` : 'Wybór ręczny wyłączony — używany będzie tylko tytan z mapy.');
@@ -483,6 +488,7 @@
         panel.querySelector('[data-refresh]').addEventListener('click', refresh);
         document.body.append(button, panel);
         injectCss();
+        if (!panel.hidden) refresh();
         // Nowe osoby mogą pojawić się po odczycie Lootloga. Odświeżamy tylko
         // dane mapy — bez cyklicznych dodatkowych zapytań do zewnętrznej usługi.
         setInterval(() => {
