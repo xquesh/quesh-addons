@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.1.3
+// @version      1.2.0
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 3 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.1.3';
+    const VERSION = '1.2.0';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -119,7 +119,11 @@
 
     function query(params) {
         const search = new URLSearchParams();
-        for (const [key, value] of Object.entries(params)) if (value !== '' && value != null) search.set(key, String(value));
+        for (const [key, value] of Object.entries(params)) {
+            if (value === '' || value == null) continue;
+            if (Array.isArray(value)) value.filter(item => item !== '' && item != null).forEach(item => search.append(key, String(item)));
+            else search.set(key, String(value));
+        }
         return search.toString() ? `?${search}` : '';
     }
 
@@ -238,6 +242,26 @@
         return merged;
     }
 
+    function lootRecords(payload) {
+        return arraysIn(payload).flat().filter(entry => entry && typeof entry === 'object' && Array.isArray(entry.players) && Array.isArray(entry.npcs));
+    }
+
+    function lootParticipations(records, npcName) {
+        const since = Date.now() - 72 * 60 * 60 * 1000;
+        const wanted = normalize(npcName);
+        const counts = new Map();
+        const valid = records.filter(record => {
+            const time = Date.parse(record.createdAt ?? record.date ?? '');
+            const hasNpc = record.npcs.some(npc => normalize(npc?.name ?? npc?.npcName ?? npc) === wanted);
+            return hasNpc && Number.isFinite(time) && time >= since;
+        });
+        for (const record of valid) for (const player of record.players) {
+            const name = String(player?.name ?? player?.nick ?? '').trim();
+            if (name) counts.set(normalize(name), (counts.get(normalize(name)) ?? 0) + 1);
+        }
+        return { counts, records: valid };
+    }
+
     function renderRanking(players, killsByName, npcName) {
         list.replaceChildren();
         const ranked = players.map(player => ({ ...player, kills: killsByName.get(normalize(player.nick)) ?? 0, found: killsByName.has(normalize(player.nick)) }))
@@ -268,27 +292,21 @@
         }
         refreshing = true; setStatus('Pobieranie statystyk Lootlog…');
         try {
-            let npcId = String(settings.npcId).trim();
-            if (!/^\d+$/.test(npcId)) {
-                // Nie pobieramy globalnego top 50: target może mieć mniej bić.
-                // Lootlog obsługuje dokładnie ten filtr tekstowy również w widoku statystyk.
-                const filters = query({ period: '3d', limit: 50, search: npcName, world: settings.world });
-                const stats = await request(`/guilds/${guildId}/stats/kills/top-npcs${filters}`);
-                const npc = npcFromPayload(stats, npcName);
-                if (!npc) throw new Error(`Nie znaleziono „${npcName}” w ostatnich statystykach. Wpisz jego ID Lootloga ręcznie w konfiguracji.`);
-                npcId = String(npc.npcId ?? npc.id);
-            }
-            const filters = query({ period: '3d', limit: 50, search: npcName, world: settings.world });
-            const details = await request(`/guilds/${guildId}/stats/kills/npcs/${npcId}/killers${filters}`);
-            const killsByName = killerRows(details);
+            const filters = query({ npcs: [npcName], limit: 100, world: settings.world });
+            const payload = await request(`/guilds/${guildId}/loots${filters}`);
+            const participation = lootParticipations(lootRecords(payload), npcName);
+            const killsByName = participation.counts;
             const players = getMapPlayers();
             const matched = players.filter(player => killsByName.has(normalize(player.nick)));
             const namesMismatch = killsByName.size && !matched.length;
             if (namesMismatch) {
-                showDebug({ mapPlayers: players, lootlogKillers: details.killers ?? details, parsedNames: [...killsByName.entries()] });
+                showDebug({ mapPlayers: players, lootRecords: participation.records, parsedNames: [...killsByName.entries()] });
             } else debug.hidden = true;
             renderRanking(players, killsByName, npcName);
-            if (namesMismatch) setStatus('Lootlog zwrócił osoby, ale ich nazwy nie pasują do nicków na mapie. Rozwiń DANE DIAGNOSTYCZNE.', 'error');
+            if (!participation.records.length) {
+                showDebug(payload);
+                setStatus(`Nie znaleziono zapisanych walk „${npcName}” z ostatnich 72 godzin. Rozwiń DANE DIAGNOSTYCZNE.`, 'error');
+            } else if (namesMismatch) setStatus('Lootlog zwrócił osoby, ale ich nazwy nie pasują do nicków na mapie. Rozwiń DANE DIAGNOSTYCZNE.', 'error');
         } catch (error) {
             setStatus(error?.message || 'Nie udało się pobrać rankingu.', 'error');
         } finally { refreshing = false; }
@@ -303,15 +321,10 @@
         if (!/^\d+$/.test(guildId)) { setStatus('Podaj prawidłowe ID grupy Lootlog.', 'error'); return; }
         refreshing = true; setStatus(`Test Lootlog: ${npcName}…`);
         try {
-            const filters = query({ period: '3d', limit: 50, search: npcName, world: settings.world });
-            const stats = await request(`/guilds/${guildId}/stats/kills/top-npcs${filters}`);
-            const npc = npcFromPayload(stats, npcName);
-            if (npc) {
-                saveSettings({ npcId: String(npc.npcId ?? npc.id), npcName: titan?.name || '' });
-                setStatus(`Test OK — znaleziono „${npcName}” w Lootlogu.`, 'ok');
-            } else {
-                setStatus(`Lootlog działa, ale „${npcName}” nie jest w pierwszych 50 rekordach z 3 dni. Wpisz ID NPC w konfiguracji.`, 'error');
-            }
+            const payload = await request(`/guilds/${guildId}/loots${query({ npcs: [npcName], limit: 100, world: settings.world })}`);
+            const participation = lootParticipations(lootRecords(payload), npcName);
+            if (!participation.records.length) { showDebug(payload); throw new Error(`Nie znaleziono walk „${npcName}” z ostatnich 72 godzin.`); }
+            setStatus(`Test OK — znaleziono ${participation.records.length} walk ${npcName} z ostatnich 72 godzin.`, 'ok');
         } catch (error) {
             setStatus(`Test nieudany: ${error?.message || 'brak odpowiedzi Lootlog.'}`, 'error');
         } finally { refreshing = false; }
@@ -371,7 +384,7 @@
         const npcInput = npcField.querySelector('input');
         npcInput.readOnly = true;
         npcInput.title = 'Ta nazwa jest odczytywana automatycznie wyłącznie z tytana na aktualnej mapie.';
-        config.append(guildField, npcField, field('ID NPC Lootlog (opcjonalne)', 'npcId', 'gdy potwora nie ma w top 50'), field('Świat (opcjonalnie)', 'world', 'np. fobos'));
+        config.append(guildField, npcField, field('Świat (opcjonalnie)', 'world', 'np. fobos'));
         refreshTitanSelect();
         status = panel.querySelector('[data-status]'); list = panel.querySelector('.llfg-list'); debug = panel.querySelector('[data-debug]');
         let drag = null;
