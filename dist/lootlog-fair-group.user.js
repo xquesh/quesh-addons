@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lootlog Fair Group
 // @namespace    quesh.addons
-// @version      1.2.8
+// @version      1.2.9
 // @description  Ranking graczy z mapy według liczby bić wybranego potwora w ostatnich 7 dniach.
 // @updateURL     https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
 // @downloadURL   https://xquesh.github.io/quesh-addons/dist/lootlog-fair-group.user.js
@@ -19,7 +19,7 @@
     'use strict';
 
     const API = 'https://api.lootlog.pl';
-    const VERSION = '1.2.8';
+    const VERSION = '1.2.9';
     const STORAGE_KEY = 'lootlog-fair-group-settings-v1';
     const DEFAULTS = Object.freeze({
         guildId: '1447651903222841461',
@@ -469,7 +469,10 @@
         button.addEventListener('pointercancel', endDrag);
         button.addEventListener('click', () => {
             if (suppressClick) { suppressClick = false; return; }
-            panel.hidden = !panel.hidden; if (!panel.hidden) refresh();
+            if (panel.hidden) {
+                panel.hidden = false;
+                refresh();
+            }
         });
         panel.querySelector('[data-close]').addEventListener('click', () => { panel.hidden = true; });
         panel.querySelector('[data-titan-select]').addEventListener('change', event => {
